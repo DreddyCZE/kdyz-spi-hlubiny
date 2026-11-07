@@ -33,6 +33,10 @@ V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Work
 
 Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v3`. Platné uložené hry M1 (`hlubiny-v1`) a M2.1 (`hlubiny-v2`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
 
+## M3.0.2a – vizuální systém a ilustrovaná mapa
+
+Centrální design tokeny, lokální pracovní ilustrace Blackwater, stavové žetony a pergamenové komponenty. Na úzkých obrazovkách mapa používá náhled a čitelný seznam lokací bez překryvů. Pravidla, souřadnice a ukládání se nemění. [UI a motivy](docs/UI.md), [původ assetů](docs/ASSETS.md), [porovnání před/po](docs/test-artifacts/m3-0-2a/README.md).
+
 ## M3.0.1 – digitální herní stůl
 
 Responzivní mapa Blackwater, skutečná příběhová karta a spodní lišta přehledů nahrazují původní tabulkové rozhraní. Pravidla, veřejné API i uložené hry zůstávají kompatibilní. [UI a mapová metadata](docs/UI.md), [desktop](docs/test-artifacts/m3-0-1/desktop.png) a [mobil](docs/test-artifacts/m3-0-1/mobile.png).

@@ -1,10 +1,12 @@
-import { blackwaterMap } from '../data/map.js';
+import { presentation } from '../data/presentation.js';
+import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
-import { locations } from '../data/locations.js';
 import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView } from '../engine/game.js';
 import { rewardNames } from '../engine/content.js';
 import { load,save } from '../engine/storage.js';
 import { createJournal } from './journal.js';
+const { map: blackwaterMap, locations } = presentation;
+applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 let state=load(storage),rolling=false,timer;

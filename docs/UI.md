@@ -1,51 +1,52 @@
-# Digitální herní stůl – M3.0.1
+# Digitální herní stůl – M3.0.2a
 
-UI zachovává všechny přechody a veřejné projekce M2.2. Na desktopu má mapa a příběhová karta poměr 60:40; pod 760 px se skládají pod sebe. Karta na desktopu samostatně posouvá dlouhý obsah, mobil používá přirozený posun stránky. Spodní lišta otevírá nativní modální přehledy vyšetřovatele, inventáře, důkazů, znalostí, dedukcí a herního záznamu. Escape zavře přehled a vrátí focus na jeho otevírací tlačítko.
+Rozhraní zachovává přechody, pravidla, veřejné projekce, ukládání v3 a migrace M1/M2.1/M2.2. Desktop má mapu a skutečnou příběhovou kartu v poměru 60:40, pod 760 px se skládají pod sebe. Mapa, pergamenová karta, žetony stavu a spodní komponenty jsou samostatné HTML/CSS prvky. Referenční obrázek slouží pouze jako vizuální směr.
 
-## Data mapy
+## Design tokeny
 
-[map.js](../src/data/map.js) obsahuje pouze prezentační metadata výchozího scénáře. Názvy, ID a popisy lokací zůstávají v [locations.js](../src/data/locations.js). [renderMap](../src/ui/map.js) přijímá celý aktivní registr lokací, volitelnou mapu, stav, příznak animace a callback přesunu. Nezná pravidla scénáře.
+[tokens.css](../src/ui/tokens.css) je centrální zdroj vzhledu, [styles.css](../src/ui/styles.css) obsahuje rozložení a komponenty. CSS import je relativní a funguje pod adresářem GitHub Pages.
 
-```js
-{
-  name: 'Blackwater',
-  image: './src/assets/blackwater-map.svg',
-  points: { 'location-0': { x: 68, y: 69 } }
-}
-```
+| Skupina | Tokeny / účel |
+| --- | --- |
+| Barvy | `--color-surface`, `--color-surface-raised`, `--color-petrol`, `--color-wine`, `--color-paper*`, `--color-brass*`, `--color-frame`, `--color-ink`, `--color-muted` |
+| Stavy | `--color-current`, `--color-available`, `--color-locked`, `--color-focus`, `--color-health`, `--color-sanity` |
+| Typografie | `--font-story` (lokální Georgia/Times), `--font-label` (systémový sans), `--text-small/body/story/title` |
+| Rozestupy | `--space-1` až `--space-6`: 4, 8, 12, 16, 24, 32 px |
+| Rámy a stíny | `--frame`, `--radius`, `--shadow-piece`, `--shadow-panel` |
+| Materiály | `--texture-wood`, `--texture-paper`, `--texture-leather` |
 
-`x` a `y` jsou konečná čísla 0–100: procenta šířky a výšky plochy mapy od levého horního rohu. Klíčem je stabilní ID lokace, nikoli pořadí. `image` je lokální cesta relativní k HTML stránce, kompatibilní s podadresářem GitHub Pages. Pokud mapa chybí nebo některý bod nemá platné souřadnice, všechny lokace se zobrazí jako čitelný seznam. Pro nový scénář předá hostitelské UI jeho vlastní registr a mapu; nepřidává ID do rendereru. Obrázek je dekorativní, stejné informace poskytují skutečná tlačítka s názvy a aktuálním stavem.
+Textury používají statické CSS gradienty a lokální jemné SVG zrno, bez animace pozadí nebo externích fontů. Stíny a rámy oddělují komponenty od mapové ilustrace. Neprůhledné pergamenové štítky udržují čitelnost názvů na složitém podkladu; aktuální lokace má světlý dvojitý obrys, zamčená přerušovaný rám a explicitní text. Stav je vyjádřen i textem, ne pouze barvou. Horní žetony zobrazují skutečné Kolo, Hrozbu, Rituál, HP, SAN a AP, bez nových zdrojů. Dekorativní symboly ve skutečných elementech mají `aria-hidden`.
 
-Aktuální lokace má `aria-current="location"` a světlý obrys; dostupné mají světlé štítky; zamčené tmavé přerušované rámy a explicitní text. Dostupnost přesunu vychází z AP, `unlockedLocations`, konce hry a animace. Kliknutí pouze předává `transition(move)`. Nová hra Blackwater nadále odemyká všech sedm lokací; test zamčení používá platnou uloženou fixture a nemění balanc.
+## Prezentace scénáře
+
+[presentation.js](../src/data/presentation.js) spojuje mapu, registr lokací a barevný motiv výchozího Blackwater. [applyPresentation](../src/ui/presentation.js) nastavuje `data-theme` a povolené vizuální CSS tokeny na kořenovém elementu; při změně vyčistí staré přepisy. Motiv může měnit barvy a materiály bez úprav komponent. `--texture-paper` a `--texture-wood` dovolují jiné lokální textury; ilustraci mapy dodává `map.image`. Nejde o pravidla ani ukládaná data.
+
+Bootstrap [app.js](../src/ui/app.js) nadále vybírá jedinou výchozí prezentaci a Eleanor Whitmore; podpora více scénářů bude vyžadovat výběr aktivního obsahu a vyšetřovatele. Tato příprava vizuální konfigurace nepřidává přepínač scénářů ani nový engine API.
+
+## Mapová metadata a assety
+
+[map.js](../src/data/map.js) je beze změny: stejná ID, `name`, `image` i procentní souřadnice. Názvy a popisy zůstávají v [locations.js](../src/data/locations.js). Klíčem bodu je stabilní ID; `x/y` jsou konečná čísla 0–100 od levého horního rohu. [renderMap](../src/ui/map.js) přijímá registr lokací, mapu, stav, příznak animace a callback přesunu. Kliknutí pouze předává existující `transition(move)`, dostupnost respektuje AP, odemčení, animaci i konec hry. Blackwater má od začátku stejných sedm odemčených lokací.
+
+[blackwater-map.svg](../src/assets/blackwater-map.svg) nyní obsahuje vloženou rasterovou ilustraci v SVG obalu se stejnou souřadnicovou plochou 1000×800. Je soběstačná, bez odkazů na síť nebo jiné soubory. Zachování původní cesty nevyžaduje změny mapových metadat. Nový podklad zachycuje město, komunikace, pobřeží, přístav, knihovnu, ústav, hřbitov, maják a jeskyni; neobsahuje texty, interaktivní značky ani pravidla. Jde o AI vytvořenou pracovní ilustraci, nikoli finální schválený art. [paper-grain.svg](../src/assets/paper-grain.svg) je vlastní drobná procedurální textura. Původ a prompt jsou v [ASSETS.md](ASSETS.md).
+
+## Mobilní a úzká mapa
+
+Při šířce viewportu **1100 CSS px a méně** se všechny mapové ovladače přepnou pomocí CSS do jednosloupcového seznamu pod dekorativním náhledem mapy. Mezi 761 a 1100 px zůstává hlavní rozložení 60:40, ale úzký mapový sloupec už používá seznam. Pod 760 px jsou hlavní panely pod sebou. Nevznikají duplicitní tlačítka: stejný element mění pouze způsob rozložení. Žádný resize handler, změna souřadnic, složitý kolizní algoritmus ani změna uložené hry.
+
+Štítky v seznamu mají nejméně 44 px, normálně zalamují text a nejsou absolutně umístěné. Aktuální, dostupné i zamčené lokace zůstávají jasně rozlišené. Tím se odstraňují známé mobilní překryvy M3.0.1 (Staré město/Hřbitov, Knihovna/Ústav, Ústav/Maják a přesah Jeskyně). Při chybějící mapě nebo neplatných/neúplných souřadnicích se seznam používá na všech šířkách, bez náhledu. CSS proměnná `--map-art` obsahuje URL vyřešené vůči HTML dokumentu, aby fungovala i z vložených stylů v podadresáři.
+
+Nad 1100 px se používají původní souřadnice; nejde o obecný algoritmus řešení kolizí pro libovolně dlouhé názvy budoucích scénářů. Nový scénář musí otestovat názvy a vlastní mapu, případně zvolit vhodný breakpoint. Testy při 320, 390 a 1440 px procházejí všechny lokace kliknutím a měří nulové překryvy a přesahy pro aktuální Blackwater.
 
 ## Hra a přístupnost
 
-Příběh a volby pocházejí výhradně z `currentCard`, dosažený následek z `visibleResult`, deník z `investigationView`. Šest kategorií výsledků i ochrana revizí zůstávají v enginu. Během hodu se výsledek ani nový herní záznam nevkládají do DOM; akce hry a dedukce jsou zablokované. Výsledek je uložen před kosmetickou animací. `prefers-reduced-motion` vypíná pohyb a zkracuje čekání na odhalení. Reset ruší časovač.
+Příběh a volby pocházejí pouze z `currentCard`, dosažený výsledek z `visibleResult`, deník z `investigationView`. Skrývání během hodu včetně logu, všech šest kategorií, ochrana před dvojím provedením a explicitní akce **Vyhodnotit důkazy** s revizí zůstávají beze změny. `#roll` respektuje i `state.ended`. Reset ruší časovač; přehledy, konec kola, log a automatické ukládání fungují dál.
 
-Deník zachovává explicitní tlačítko **Vyhodnotit důkazy** a revizi akce; samotné otevření nic nevyhodnocuje. HP, SAN, AP, Kolo, Hrozba a Rituál jsou skutečné hodnoty stavu. Nevznikají nové zdroje, balíčky, boj ani vítězná podmínka. Schéma save v3, klíče a migrace M1/M2.1/M2.2 se nemění.
+Reload během animace záměrně **okamžitě odhalí již uložený výsledek**. Přechod, AP, odměna a kostky jsou uložené před kosmetickou animací. `rolling` a časovač žijí pouze v UI a neobnovují se. Neproběhne nový hod, platba ani následek; skrytí v DOM neznamená utajení localStorage. Regresní test zastaví čas, reloaduje před koncem animace a porovná nezměněný save.
 
-Klávesnice: Tab/Shift+Tab mezi ovládacími prvky, Enter/mezerník aktivuje tlačítka. Výběr volby zachovává focus; přesun zaměří nadpis příběhu. Přehledy používají nativní `dialog`, focus trap a Escape. Horní odkaz přeskakuje k příběhu. Texty se zapisují přes `textContent`.
+Tab/Shift+Tab prochází ovládání, Enter/mezerník aktivuje tlačítka. Výběr zachovává focus a přesun zaměří nadpis příběhu. Přehledy jsou nativní `dialog`: Escape zavírá, focus se vrací na otevírací tlačítko. Horní odkaz přeskočí k příběhu. Texty se zapisují přes `textContent`. Dlouhá karta se na desktopu posouvá samostatně, na mobilu přirozeně se stránkou. `prefers-reduced-motion` vypíná pohyb a zkracuje čekání na výsledek; nové dekorace žádné animace nepřidávají.
 
-## Grafika a kontrola
+## Ověření a porovnání
 
-[Lokální SVG mapa](../src/assets/blackwater-map.svg) je původní stylizovaný dočasný podklad: pobřeží, uliční síť, domy, mola, maják a kompas. Materiály stolu a papíru tvoří CSS. Bez externích obrázků, fontů či nových závislostí. Finální ilustrace mohou tento podklad nahradit bez změny enginu.
+`npm test`, `npm run test:e2e`, `npm run build`, `git diff --check`. E2E běží proti produkčnímu buildu pod `/dist/` a pokrývá původní mechaniky, reload během hodu, koncový stav, fallback, dedukce a focus. Mapové testy navíc měří nulové překryvy/přesahy a ověřují klikání na všechny lokace při 320, 390 a 1440 px.
 
-E2E testy běží proti buildu pod `/dist/` a ověřují načtení SVG, mapové přesuny/AP/reload, zamčení, konec hry, fallback jiného scénáře, modální přehledy, dedukce, hody a reset během animace. Screenshoty desktopu 1440 px a mobilu 390 px se ukládají do `test-results/` a příloh Playwright reportu. Vybrané vizuálně zkontrolované snímky jsou v [testovacích artefaktech](../docs/test-artifacts/m3-0-1/).
-
-## Upřesnění po revizi PR #4
-
-### Konec hry a reload během hodu
-
-Tlačítko `#roll` se explicitně zakazuje i při `state.ended`, nezávisle na dostupnosti projektované volby. E2E ověřuje konec sedmého kola s dosud nevyřešenou kartou, deaktivaci před i po reloadu a nezměněný save při syntetickém kliknutí.
-
-Reload během animace **záměrně okamžitě odhalí již uložený výsledek**. Přechod, cena AP, odměna a kostky jsou zapsány před animací; příznak `rolling` a časovač jsou pouze v paměti UI. Po načtení se animace neobnovuje a žádný nový hod ani následek se neprovádí. Skrytí v DOM během animace není utajení výsledku v localStorage. Regresní E2E zastaví čas před hodem, zkontroluje skrytý DOM a uložené 4+4, reloaduje bez posunu času a ověří okamžité odhalení i byte-for-byte shodný save (včetně revize, AP a odměn).
-
-### Mobilní mapa: ověřený rozsah a limity
-
-Chromium E2E při šířkách 320 a 390 CSS px projde kliknutím všechny lokace včetně návratu do Přístavu. Při každé změně aktuální lokace změří obdélníky štítků a uloží seznam překryvů a přesahů jako JSON přílohu `mobile-map-overlaps` v Playwright reportu. Chybějící souřadnice ověří samostatně: celá mapa přejde na seznam sedmi tlačítek, dostupná tlačítka lze zasáhnout a stránka nepřetéká vodorovně.
-
-Absolutně umístěné štítky **nemají automatické řešení kolizí**. S výchozími českými texty a fontem se částečně překrývají Staré město/Hřbitov; Knihovna/Ústav zejména při rozšíření aktuálního štítku. Při 320 px se navíc mohou překrýt Ústav/Maják a aktuální štítek Jeskyně mírně přesahuje pravý okraj mapy. Ověřené běžné kliknutí do každé lokace funguje, není však garantováno zasažení každého místa překrytého štítku. Delší názvy, text „zamčeno“, jiné systémové fonty, větší uživatelský text nebo další zúžení mohou kolize zvětšit. Validní souřadnice se kvůli překryvům samy nepřepínají na seznam. Klávesnicové ovládání tlačítek zůstává dostupné. Případné řešení kolizí nebo přepínač seznamu patří do budoucí úpravy prezentace; tato revize nemění souřadnice ani CSS.
-
-### Budoucí refaktoring
-
-Hlavní [app.js](../src/ui/app.js) v M3.0.1 nadále přímo importuje Blackwater mapu a lokace a zobrazuje Eleanor Whitmore. Obecný mapový renderer tuto vazbu nemá. Před podporou více scénářů bude potřeba bootstrap UI s aktivním scénářem a jeho vyšetřovatelem. Jde o budoucí refaktoring prezentace, nikoli o nové pravidlo nebo změnu enginu.
+Screenshoty před úpravami pocházejí z main `ce14593`, po úpravách ze stejné počáteční hry a stejných viewportů. [Porovnání před/po](test-artifacts/m3-0-2a/README.md): 1440×1000, 390×844 a 320×844. E2E je znovu generuje do `test-results` a příloh reportu. Kontrolované kopie jsou záměrné testovací artefakty v dokumentaci; `dist` a běžné výstupy testů zůstávají ignorované.

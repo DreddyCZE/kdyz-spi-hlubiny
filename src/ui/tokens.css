@@ -1,0 +1,42 @@
+/* Semantic tokens. A scenario may override the theme variables on [data-theme]. */
+:root {
+  color-scheme: dark;
+  --color-ink: #f0e4cc;
+  --color-muted: #c4bfaa;
+  --color-paper: #e6d6b6;
+  --color-paper-light: #f5e9cf;
+  --color-paper-ink: #30291f;
+  --color-paper-muted: #66563f;
+  --color-brass: #bc965a;
+  --color-brass-light: #edd29a;
+  --color-frame: #705332;
+  --color-surface: #142622;
+  --color-surface-raised: #233b33;
+  --color-petrol: #274c4b;
+  --color-wine: #5c302e;
+  --color-current: #ffe3a0;
+  --color-available: #ead6ac;
+  --color-locked: #c6c2b5;
+  --color-health: #e9a290;
+  --color-sanity: #d1bbdf;
+  --color-focus: #e59c32;
+  --font-story: Georgia, 'Times New Roman', serif;
+  --font-label: system-ui, sans-serif;
+  --text-small: .8rem;
+  --text-body: 1rem;
+  --text-story: 1.1rem;
+  --text-title: clamp(1.6rem, 2.1vw, 2.1rem);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --radius: 3px;
+  --frame: 6px double var(--color-brass);
+  --shadow-piece: 0 4px 8px #0008, 0 1px 0 #f4d3a250 inset;
+  --shadow-panel: 0 12px 25px #0009, 0 0 0 1px #100e0a;
+  --texture-wood: radial-gradient(ellipse at 12% 22%, #a9763638, transparent 48%), repeating-linear-gradient(2deg, #ffffff03 0 1px, #0000000a 2px 4px, transparent 5px 10px), repeating-linear-gradient(178deg, #302018 0, #211710 9px, #3d291b 12px, #20150f 17px, #291c14 48px, #100e0b 50px, #443022 52px);
+  --texture-paper: radial-gradient(ellipse at 50% 25%, #fff8e04d, transparent 70%), url('../assets/paper-grain.svg'), linear-gradient(115deg, var(--color-paper), var(--color-paper-light) 45%, var(--color-paper));
+  --texture-leather: radial-gradient(ellipse at top, #ffffff0a, transparent 75%), repeating-linear-gradient(35deg, #00000010 0 1px, transparent 1px 4px), linear-gradient(135deg, var(--color-surface-raised), var(--color-surface));
+}

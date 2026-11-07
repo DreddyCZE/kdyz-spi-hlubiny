@@ -15,18 +15,12 @@
 <h1>KDYŽ SPÍ HLUBINY</h1>
 </div>
 <div class="stats" aria-label="Stav hry">
-<span class="stat">Kolo <b id="round">
-</b>/7</span>
-<span class="stat">Hrozba <b id="threat">
-</b>/10</span>
-<span class="stat">Rituál <b id="ritual">
-</b>/8</span>
-<span class="stat">HP <b id="hp">
-</b>/6</span>
-<span class="stat">SAN <b id="san">
-</b>/8</span>
-<span class="stat">AP <b id="ap">
-</b>/3</span>
+<span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / 7</span></span>
+<span class="stat" data-stat="threat" data-symbol="◈"><span class="token-icon" aria-hidden="true">◈</span><span>Hrozba</span><span class="value"><b id="threat"></b> / 10</span></span>
+<span class="stat" data-stat="ritual" data-symbol="✦"><span class="token-icon" aria-hidden="true">✦</span><span>Rituál</span><span class="value"><b id="ritual"></b> / 8</span></span>
+<span class="stat" data-stat="hp" data-symbol="♥"><span class="token-icon" aria-hidden="true">♥</span><span>Zdraví</span><span class="value"><b id="hp"></b> / 6</span></span>
+<span class="stat" data-stat="san" data-symbol="◉"><span class="token-icon" aria-hidden="true">◉</span><span>Příčetnost</span><span class="value"><b id="san"></b> / 8</span></span>
+<span class="stat" data-stat="ap" data-symbol="◆"><span class="token-icon" aria-hidden="true">◆</span><span>AP</span><span class="value"><b id="ap"></b> / 3</span></span>
 </div>
 </header>
 <div class="layout">
@@ -85,12 +79,12 @@
 </section>
 </div>
 <footer class="investigator-bar">
-<button data-panel="investigator">Vyšetřovatel</button>
-<button data-panel="inventory-panel">Inventář</button>
-<button data-panel="investigation-journal">Deník · důkazy</button>
-<button data-panel="investigation-journal" data-focus="journal-knowledge">Znalosti</button>
-<button data-panel="investigation-journal" data-focus="journal-deductions">Dedukce</button>
-<button data-panel="history">Herní záznam</button>
+<button data-symbol="♙" data-panel="investigator"><span class="component-icon" aria-hidden="true">♙</span>Vyšetřovatel</button>
+<button data-symbol="▱" data-panel="inventory-panel"><span class="component-icon" aria-hidden="true">▱</span>Inventář</button>
+<button data-symbol="⌕" data-panel="investigation-journal"><span class="component-icon" aria-hidden="true">⌕</span>Deník · důkazy</button>
+<button data-symbol="▤" data-panel="investigation-journal" data-focus="journal-knowledge"><span class="component-icon" aria-hidden="true">▤</span>Znalosti</button>
+<button data-symbol="⌘" data-panel="investigation-journal" data-focus="journal-deductions"><span class="component-icon" aria-hidden="true">⌘</span>Dedukce</button>
+<button data-symbol="✎" data-panel="history"><span class="component-icon" aria-hidden="true">✎</span>Herní záznam</button>
 <div class="actions">
 <button id="endRound">Další kolo</button>
 <button id="reset">Nová hra</button>

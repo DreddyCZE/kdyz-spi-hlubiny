@@ -30,7 +30,7 @@ for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
     await page.keyboard.press('Escape');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.evaluate(async()=>{
-      const url=getComputedStyle(document.getElementById('places')).backgroundImage.slice(5,-2);
+      const url=getComputedStyle(document.getElementById('places')).getPropertyValue('--map-art').trim().slice(5,-2);
       const image=new Image();image.src=url;await image.decode();
     });
     await page.screenshot({path:testInfo.outputPath(`table-${viewport.width}.png`),fullPage:true});
@@ -142,8 +142,8 @@ test('reload během animace okamžitě odhalí již uložený hod bez opakován�
   expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
 });
 
-for(const width of [320,390]){
-  test(`mobilní body: ovládání a rozměry při ${width} px`,async({page},testInfo)=>{
+for(const width of [320,390,1440]){
+  test(`mapové body: ovládání a rozměry při ${width} px`,async({page},testInfo)=>{
     await page.setViewportSize({width,height:844});
     await page.goto('./');
     const report=[];
@@ -164,7 +164,8 @@ for(const width of [320,390]){
           pairs:rects.flatMap((a,i)=>rects.slice(i+1).filter(b=>Math.min(a.r.right,b.r.right)>Math.max(a.r.left,b.r.left)&&Math.min(a.r.bottom,b.r.bottom)>Math.max(a.r.top,b.r.top)).map(b=>[a.id,b.id])),
         };
       });
-      // Record edge overflow as a known presentation limit; actual clicks above verify usability.
+      expect(overlaps.outside).toEqual([]);
+      expect(overlaps.pairs).toEqual([]);
       report.push({current:`location-${index}`,...overlaps});
     }
     await page.locator('#endRound').click();

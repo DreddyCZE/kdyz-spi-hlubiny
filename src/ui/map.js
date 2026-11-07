@@ -6,6 +6,7 @@ export function renderMap(anchor, locations, map, state, busy, onMove) {
   });
   anchor.classList.toggle('mapped', mapped);
   anchor.style.backgroundImage = mapped ? `url("${map.image}")` : '';
+  anchor.style.setProperty('--map-art', mapped ? `url("${new URL(map.image, document.baseURI).href}")` : 'none');
   anchor.replaceChildren(...locations.map(location => {
     const current = location.id === state.locationId;
     const locked = !state.unlockedLocations.includes(location.id);

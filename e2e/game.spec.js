@@ -72,6 +72,7 @@ for (const { label, random, reward } of [
     // Explicit deduction action; acquired information alone must not reveal the knowledge.
     await expect(page.locator('#journal-evidence')).toContainText('Deník');
     await expect(page.locator('#journal-knowledge')).not.toContainText('Spojení s majákem');
+    await page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
     await page.getByRole('button', { name: 'Vyhodnotit důkazy', exact: true }).click();
     await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
     await expect(page.locator('#journal-deductions')).toContainText('Kam vedou stopy');

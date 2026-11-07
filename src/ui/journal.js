@@ -1,6 +1,6 @@
 // Render only the public projection. Never evaluate conditions or mutate game state here.
 export function createJournal(anchor, onDeduce) {
-  const section=document.createElement('section'); section.className='panel'; section.id='investigation-journal';
+  const section=document.createElement('section'); section.className='panel detail-panel'; section.hidden=true; section.id='investigation-journal';
   const heading=document.createElement('h2'); heading.textContent='Deník důkazů';
   const evidence=document.createElement('div'); evidence.id='journal-evidence';
   const knowledgeHeading=document.createElement('h3'); knowledgeHeading.textContent='Znalosti';

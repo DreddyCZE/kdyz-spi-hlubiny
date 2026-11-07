@@ -1,6 +1,6 @@
 # Když spí hlubiny
 
-Atmosférická karetní webová hra o vyšetřování u moře. Zachovává Eleanor Whitmore, sedm lokací a osm karet z prototypu 0.3. Bez externích knihoven a instalace závislostí; Node.js 22 nebo novější.
+Atmosférická karetní webová hra o vyšetřování u moře. Zachovává Eleanor Whitmore, sedm lokací a osm karet z prototypu 0.3. Herní aplikace nemá externí runtime knihovny; Node.js 22 nebo novější. Pro E2E testy se instalují vývojové závislosti a samostatné Chromium.
 
 ```sh
 npm run dev
@@ -9,6 +9,16 @@ npm run build
 ```
 
 Hru otevři na http://127.0.0.1:4173. HTML neotvírej přímo přes `file://`, ES moduly vyžadují HTTP. Produkční výstup lze ověřit příkazem `node scripts/serve.mjs dist`.
+
+## Skutečné testy v prohlížeči
+
+```sh
+npm ci --ignore-scripts --no-audit --no-fund
+npm run test:e2e:install
+npm run test:e2e
+```
+
+E2E příkaz sám sestaví hru a spustí vlastní server na portu 4174; nevyžaduje ruční `npm run dev`. Testuje produkční výstup pod `/dist/` v Chromiu, takže ověřuje i relativní cesty pod podadresářem. Vývojový server na 4173 může běžet současně. `npm run test:e2e:headed` zobrazí prohlížeč, `npm run test:e2e:report` otevře lokální report. Podrobnosti, umístění souborů a diagnostika oprávnění: [E2E.md](docs/E2E.md).
 
 - [Engine](src/engine/game.js): čisté přechody stavu a vyhodnocení kostek.
 - [Karty](src/data/cards.js), [lokace](src/data/locations.js) a [registry odměn](src/data/catalog.js): stabilní ID, texty, možnosti a explicitní následky.

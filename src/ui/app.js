@@ -29,6 +29,7 @@ function render(){
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
   $('mapTitle').textContent=blackwaterMap.name;
   renderMap($('places'),locations,blackwaterMap,state,rolling,id=>dispatch({type:'move',locationId:id}));
+  $('cardArt').classList.toggle('empty',!card);
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
   $('cardTitle').textContent=card?.title||'Žádná dostupná karta';
   $('cardStory').textContent=card?.description||'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.';
@@ -37,7 +38,19 @@ function render(){
     const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
   }));
-  $('outcomes').replaceChildren();
+  // Preview communicates the six possible tiers, never their hidden text or effects.
+  const preview=$('outcomes');
+  preview.hidden=!choice?.test||Boolean(result)||rolling;
+  preview.replaceChildren();
+  if(!preview.hidden){
+    const heading=document.createElement('p');heading.className='outcome-heading';heading.textContent='Možné následky · odhalí je až hod';
+    preview.append(heading);
+    for(const tier of ['criticalSuccess','greatSuccess','success','partialSuccess','failure','criticalFailure']){
+      const slot=document.createElement('span');slot.className='outcome-slot';
+      slot.textContent='▒▒▒▒▒▒▒▒▒▒';slot.setAttribute('aria-label','Skrytý následek');
+      preview.append(slot);
+    }
+  }
   $('dicebox').classList.toggle('show',Boolean(result)||rolling);
   // While rolling, do not put the hidden result into the DOM at all.
   $('reveal').classList.toggle('show',Boolean(result)&&!rolling);

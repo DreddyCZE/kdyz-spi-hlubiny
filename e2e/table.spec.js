@@ -97,3 +97,91 @@ test('omezený pohyb odhalí výsledek bez animace a výběr zachová focus',asy
   await expect(page.locator('#reveal')).toBeVisible();
   expect(await page.locator('#die1').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
 });
+
+test('konec hry zakáže hod i po reloadu a nezmění uložený stav',async({page})=>{
+  await page.goto('./');
+  await expect(page.locator('#roll')).toBeEnabled();
+  // Reach the deadline through real actions with an unresolved card still present.
+  for(let i=0;i<7;i++)await page.locator('#endRound').click();
+  await expect(page.locator('#gameStatus')).toContainText('Konec scénáře');
+  await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
+  await expect(page.locator('#roll')).toBeDisabled();
+  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v3'));
+  await page.reload();
+  await expect(page.locator('#roll')).toBeDisabled();
+  // Even a synthetic click cannot perform another action.
+  await page.locator('#roll').dispatchEvent('click');
+  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  await expect(page.locator('#reveal')).toBeEmpty();
+});
+
+test('reload během animace okamžitě odhalí již uložený hod bez opakování',async({page})=>{
+  await page.addInitScript(()=>{Math.random=()=>0.5;});
+  await page.goto('./');
+  await page.clock.install();
+  await page.clock.pauseAt(new Date());
+  await page.locator('#roll').click();
+  await expect(page.locator('#die1')).toHaveText('?');
+  await expect(page.locator('#reveal')).toBeEmpty();
+  await expect(page.locator('#log')).toBeEmpty();
+  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v3'));
+  const state=JSON.parse(saved);
+  expect(state.result.dice).toEqual([4,4]);
+  expect(state.result.key).toBe('success');
+  expect(state.ap).toBe(2);
+  // No fastForward: unload while the cosmetic animation is still pending.
+  await page.reload();
+  await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
+  await expect(page.locator('#die1')).toHaveText('4');
+  await expect(page.locator('#die2')).toHaveText('4');
+  await expect(page.locator('#die1')).not.toHaveClass(/rolling/);
+  await expect(page.locator('#inventory')).toHaveText('Deník');
+  await expect(page.locator('#ap')).toHaveText('2');
+  await expect(page.locator('#roll')).toBeDisabled();
+  await page.locator('#roll').dispatchEvent('click');
+  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
+});
+
+for(const width of [320,390]){
+  test(`mobilní body: ovládání a rozměry při ${width} px`,async({page},testInfo)=>{
+    await page.setViewportSize({width,height:844});
+    await page.goto('./');
+    const report=[];
+    for(let index=0;index<7;index++){
+      if(index>0){
+        const point=page.locator(`#places [data-location-id="location-${index}"]`);
+        if(await page.locator('#ap').textContent()==='0')await page.locator('#endRound').click();
+        // Real pointer interaction, including changing widths of current labels.
+        await point.click();
+        await expect(point).toHaveAttribute('aria-current','location');
+      }
+      const overlaps=await page.locator('#places').evaluate(el=>{
+        const buttons=[...el.querySelectorAll('button')];
+        const box=el.getBoundingClientRect();
+        const rects=buttons.map(b=>({id:b.dataset.locationId,r:b.getBoundingClientRect()}));
+        return {
+          outside:rects.filter(({r})=>r.left<box.left||r.right>box.right||r.top<box.top||r.bottom>box.bottom).map(b=>b.id),
+          pairs:rects.flatMap((a,i)=>rects.slice(i+1).filter(b=>Math.min(a.r.right,b.r.right)>Math.max(a.r.left,b.r.left)&&Math.min(a.r.bottom,b.r.bottom)>Math.max(a.r.top,b.r.top)).map(b=>[a.id,b.id])),
+        };
+      });
+      // Record edge overflow as a known presentation limit; actual clicks above verify usability.
+      report.push({current:`location-${index}`,...overlaps});
+    }
+    await page.locator('#endRound').click();
+    await page.locator('#places [data-location-id="location-0"]').click();
+    await expect(page.locator('#places [data-location-id="location-0"]')).toHaveAttribute('aria-current','location');
+    // Incomplete map metadata must fall back as a whole, even on a narrow screen.
+    await page.evaluate(async()=>{
+      const {renderMap}=await import('./src/ui/map.js');
+      const {locations}=await import('./src/data/locations.js');
+      const {blackwaterMap}=await import('./src/data/map.js');
+      renderMap(document.getElementById('places'),locations,{...blackwaterMap,points:{}},{locationId:'location-0',unlockedLocations:locations.map(l=>l.id),ap:3,ended:false},false,()=>{});
+    });
+    await expect(page.locator('#places')).not.toHaveClass(/mapped/);
+    await expect(page.locator('#places button')).toHaveCount(7);
+    for(const point of await page.locator('#places button:not(:disabled)').all())await point.click({trial:true});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    await testInfo.attach('mobile-map-overlaps',{body:JSON.stringify(report,null,2),contentType:'application/json'});
+
+  });
+}

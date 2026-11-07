@@ -46,7 +46,7 @@ function render(){
     $('sum').textContent=result.test?`${result.dice.join(' + ')} + ${attributes[result.test.attribute]} + ${result.test.modifier||0} = ${result.total} proti obtížnosti ${result.test.difficulty}`:'Rozhodnutí bez hodu kostkami.';
   }else{$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='';}
   $('roll').textContent=choice?.test?'🎲 Hodit kostkami':'Provést rozhodnutí';
-  $('roll').disabled=rolling||!choice?.available;
+  $('roll').disabled=rolling||state.ended||!choice?.available;
   $('next').disabled=rolling||state.ended||!result;
   $('endRound').disabled=rolling||state.ended;
   $('gameStatus').textContent=state.ended?'Konec scénáře: temnota zvítězila. Začni novou hru.':'';

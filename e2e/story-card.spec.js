@@ -28,3 +28,20 @@ test('story art and outcome placeholders never disclose consequence text before 
   await expect(page.locator('#outcomes')).toBeHidden();
   await expect(page.locator('#reveal')).toBeVisible();
 });
+
+for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 320, height: 844 }]) {
+  test(`story card responsive layout ${viewport.width}px`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('./');
+    const art = page.locator('#cardArt');
+    await expect(art).toBeVisible();
+    const bounds = await art.boundingBox();
+    expect(bounds).toBeTruthy();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.locator('#choices button:not([disabled])').first().click();
+    await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(6);
+    await page.screenshot({ path: testInfo.outputPath(`story-card-${viewport.width}.png`), fullPage: true });
+  });
+}

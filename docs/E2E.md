@@ -46,6 +46,8 @@ Každý test používá nový izolovaný browser context; osobní rozehraná hra
 
 ## Diagnostika integrovaného browseru
 
+Po opravě připomínky k deníku a začlenění PR #2 do M2.1 bylo ověření rozšířeno: **21/21 unit testů a 4/4 Chromium E2E testy prošly**. Tři nové browser průchody ověřují dostupnost porovnání poznámky po běžném, velkém i kritickém úspěchu na Ztracené lodi, včetně reloadu před rozhodnutím. Podrobný záznam je v [verification-m21.md](verification-m21.md).
+
 7. listopadu 2026 byly dostupné nástroje `openBrowserPage`, `readPage`, `navigatePage`, `runPlaywrightCode`, `screenshotPage` a ovládání prvků. První dva vracely obecné chyby; inventář Computer Use současně vracel `browsers: []` a `The browser access host is unavailable`. To potvrzuje tehdejší nedostupnost browser hostu, ale nedokazuje konkrétní chybu instalace ani chybějící oprávnění. Copilot session log nebyl na obvyklém místě nalezen, takže z něj nelze odvodit podrobnější příčinu.
 
 Po explicitním spuštění `npm run dev` a zpřístupnění nové browser stránky začaly `navigatePage`, `readPage` i `runPlaywrightCode` fungovat. Na portu 4173 byl ověřen výběr volby, hod, blokace akcí, výsledek, reload, další karta, přesun a beztestové rozhodnutí. Nelze zpětně oddělit vliv obnoveného hostu od předchozí nedostupnosti serveru. Samostatný screenshot nástroj nadále selhával, proto byla vizuální kontrola provedena ze snímku lokálního Playwright Chromia.

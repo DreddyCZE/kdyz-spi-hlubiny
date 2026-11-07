@@ -1,4 +1,5 @@
 import { presentation } from '../data/presentation.js';
+import { imageForCard } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView } from '../engine/game.js';
@@ -30,6 +31,7 @@ function render(){
   $('mapTitle').textContent=blackwaterMap.name;
   renderMap($('places'),locations,blackwaterMap,state,rolling,id=>dispatch({type:'move',locationId:id}));
   $('cardArt').classList.toggle('empty',!card);
+  $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card), document.baseURI).href}")`;
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
   $('cardTitle').textContent=card?.title||'Žádná dostupná karta';
   $('cardStory').textContent=card?.description||'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.';

@@ -14,8 +14,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm test
-      - run: npm run build
+      # System packages are installed only on the disposable GitHub-hosted runner.
+      - run: node scripts/playwright.mjs install --with-deps chromium
+      - name: Build and test in Chromium
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

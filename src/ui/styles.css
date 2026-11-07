@@ -119,3 +119,19 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation: none!important; scroll-behavior: auto!important; }
 }
+
+/* M3.1 story-card presentation: image is a temporary local map crop until
+   card-specific licensed/approved illustrations are committed as assets. */
+.card-art {
+  width: 100%; aspect-ratio: 2.25; margin-bottom: var(--space-4);
+  background: linear-gradient(180deg, #06141322 45%, #061413c9), url('../assets/blackwater-map.webp') center 70%/cover;
+  border: 4px double var(--color-frame);
+  box-shadow: inset 0 0 24px #000a, var(--shadow-piece);
+}
+.card-art.empty { filter: grayscale(1); opacity: .55; }
+.outcome-preview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: var(--space-2); margin-top: var(--space-4); }
+.outcome-heading { grid-column: 1/-1; font: 600 .8rem var(--font-label); color: var(--color-paper-muted); margin: 0; }
+.outcome-slot { display: grid; place-items: center; min-height: 48px; overflow: hidden; border: 1px solid var(--color-frame); background: #6b785a33; color: transparent; text-shadow: 0 0 9px #534c3e; user-select: none; }
+.outcome-slot:nth-of-type(3n+2) { background: #9b713b33; }
+.outcome-slot:nth-of-type(3n) { background: #8b3c3933; }
+@media(max-width:420px) { .outcome-preview { grid-template-columns: repeat(2,minmax(0,1fr)); } }

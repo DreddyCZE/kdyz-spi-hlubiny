@@ -1,5 +1,9 @@
 # Koncept a hranice refaktoringu
 
+Tento dokument popisuje původní milník M1. Aktuální pravidla M2.1 a šest výsledků jsou v [GAME_DESIGN.md](GAME_DESIGN.md), datové definice v [CARD_SCHEMA.md](CARD_SCHEMA.md).
+
+Oprava revize M2.1: složená odměna „Deník a přívěsek“ plní podmínku vlastnictví důkazu deníku prostřednictvím datového pole `evidenceIds`. Lepší hod tím nezablokuje porovnání poznámky. Uložené odměny ani limity partie se nemění.
+
 Autoritativní základ je kořenový prototyp v0.3, přesunutý beze změny do [reference](../public/legacy-prototype.html). [Soubor z Downloads](../public/reference-prototype.html) zachováváme jako druhou referenci; obsahuje odlišný systém více postav, dedukcí a událostí. Tyto mechaniky nejsou součástí v0.3 a nebyly do něj automaticky sloučeny.
 
 ## Pravidla v0.3

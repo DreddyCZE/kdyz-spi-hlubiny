@@ -31,7 +31,13 @@ E2E příkaz sám sestaví hru a spustí vlastní server na portu 4174; nevyžad
 
 V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Workflow při PR spustí testy a build; po pushi do `main` navíc publikuje `dist`. Relativní adresy podporují cestu `/kdyz-spi-hlubiny/` bez zvláštní konfigurace. Samotný build nic nepublikuje. Reference budou dostupné pod `public/`.
 
-Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v2`. Validní uložené hry M1 (`hlubiny-v1`) se při prvním načtení převedou na stabilní ID předmětů, důkazů a voleb; původní klíč se nemění. Neplatný, příliš velký nebo neznámý stav zahájí novou hru. Pokud existuje v2, má přednost i v případě poškození (stará hra se samovolně neobnoví). Ukládání je validované; při odmítnutém přístupu hra pokračuje v paměti a po akci zobrazí upozornění.
+Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v3`. Platné uložené hry M1 (`hlubiny-v1`) a M2.1 (`hlubiny-v2`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
+
+## M2.2 – důkazy a dedukce
+
+Deník odděluje získané důkazy, známé znalosti a provedené dedukce. „Vyhodnotit důkazy“ je bezplatná explicitní akce; před splněním podmínek se skryté dedukce ani budoucí znalosti nezobrazují. Obecný engine nemá pravidla Blackwater, jen datové operace a validátor. Tři existující důkazy ilustrují dvě cesty ke stejné znalosti. Sedm kol, rituál a obtížnosti se nemění.
+
+Datový model a pravidla rozšíření: [DEDUCTION_SCHEMA.md](docs/DEDUCTION_SCHEMA.md). Blackwater definice jsou v [investigation.js](src/data/investigation.js); obecná implementace v [engine/investigation.js](src/engine/investigation.js).
 
 ## M2.1 – karty a rozhodnutí
 

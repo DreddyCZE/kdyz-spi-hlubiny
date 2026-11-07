@@ -27,13 +27,13 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#sum')).toHaveText('4 + 4 + 2 + 0 = 10 proti obtížnosti 8');
   await expect(page.locator('#inventory')).toHaveText('Deník');
-  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v2'));
+  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v3'));
   await page.reload();
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v2'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v3'))).toBe(saved);
   await page.screenshot({ path: testInfo.outputPath('game-after-reload.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Další karta', exact: true }).click();
   await expect(page.locator('#cardTitle')).toHaveText('Muž z mlhy');
@@ -69,5 +69,17 @@ for (const { label, random, reward } of [
     await expect(page.locator('#inventory')).toContainText('Opis poznámky');
     await expect(page.locator('#ap')).toHaveText('0');
     await expect(page.locator('#roll')).toBeDisabled();
+    // Explicit deduction action; acquired information alone must not reveal the knowledge.
+    await expect(page.locator('#journal-evidence')).toContainText('Deník');
+    await expect(page.locator('#journal-knowledge')).not.toContainText('Spojení s majákem');
+    await page.getByRole('button', { name: 'Vyhodnotit důkazy', exact: true }).click();
+    await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
+    await expect(page.locator('#journal-deductions')).toContainText('Kam vedou stopy');
+    await expect(page.locator('#deduce')).toBeDisabled();
+    await page.reload();
+    await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
+    await expect(page.locator('#journal-deductions p')).toHaveCount(1);
+    await expect(page.locator('#ap')).toHaveText('0');
+    await expect(page.locator('#deduce')).toBeDisabled();
   });
 }

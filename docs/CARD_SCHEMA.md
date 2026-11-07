@@ -1,4 +1,6 @@
-# Schéma karet M2.1
+# Schéma karet M2.1 / M2.2
+
+M2.2 doplňuje [registry důkazů a schéma dedukcí](DEDUCTION_SCHEMA.md) a [popis enginu](ENGINE.md). Do podmínek karty či volby lze vkládat stromy `all`, `any`, `not` a odkazy `hasKnowledge`, `deductionCompleted`, `cardUnlocked`, `choiceUnlocked`. Karetní efekty navíc podporují `addKnowledge`, `unlockCard`, `unlockChoice`. Odkazy se validují vůči registrům obsahu.
 
 Zdrojové definice: [cards.js](../src/data/cards.js), [example-card.js](../src/data/example-card.js). Validátor: [schema.js](../src/engine/schema.js). Datové definice neobsahují funkce, kód ani `eval`.
 
@@ -6,7 +8,7 @@ Zdrojové definice: [cards.js](../src/data/cards.js), [example-card.js](../src/d
 
 ID je neprázdný řetězec odpovídající `[a-z0-9][a-z0-9-]*`. ID karty a ID volby jsou každé globálně unikátní ve svém prostoru; nemění se při přejmenování textů nebo přesunu v poli. Původní ID `0-0` až `6-0` a `location-0` až `location-6` zůstávají. Volby mají ID například `0-0-choice-1`. Předměty a důkazy mají stabilní ID `reward-1` atd. v [registru](../src/data/catalog.js); jejich číslování se nesmí přegenerovat. UI převádí ID zpět na české názvy. Složené odměny M1 (například „Deník a přívěsek“) zůstávají jednou položkou, aby migrace neměnila jejich obsah.
 
-Složený předmět může mít v registru volitelné `evidenceIds`: pole unikátních existujících ID důkazů. Například `reward-1` („Deník a přívěsek“) obsahuje `reward-2` („Deník“). Podmínka `hasEvidence` platí pro přímý důkaz i pro důkaz obsažený ve vlastněném předmětu. Obsah se neodvozuje z názvu, nenavyšuje odměny a nevytváří duplicitní položku v UI. Po odebrání složeného předmětu přestane obsah plnit podmínku, pokud důkaz nebyl získán samostatně. Registry se ověřují při načtení obsahu. Uložený stav se nemění, takže stejné pravidlo platí pro existující v2 i migrované M1 hry.
+Složený předmět může mít v registru volitelné `evidenceIds`: pole unikátních existujících ID důkazů. Například `reward-1` („Deník a přívěsek“) obsahuje `reward-2` („Deník“). Obsah se neodvozuje z názvu. V M2.2 se informace zapíše do samostatné sbírky důkazů a zůstane známá i po odebrání předmětu. Registry se ověřují při načtení obsahu; starší uložené hry se bezpečně převádějí na v3. Souhrn inventáře nezobrazuje nesený složený předmět a jeho informace duplicitně, deník známé důkazy uvádí samostatně.
 
 ## Karta
 
@@ -44,8 +46,8 @@ Testovaná volba má právě šest výsledků: `criticalSuccess`, `greatSuccess`
 | `hasItem` | `id` | Předmět je v inventáři |
 | `hasEvidence` | `id` | Důkaz je ve sbírce nebo ve vlastněném složeném předmětu |
 | `flagEquals` | `id`, `value` | Existující příznak přesně odpovídá hodnotě |
-| `minRound` | `round` | Kolo ≥ celé číslo 1–7 |
-| `maxRound` | `round` | Kolo ≤ celé číslo 1–7 |
+| `minRound` | `round` | Kolo ≥ kladné bezpečné celé číslo |
+| `maxRound` | `round` | Kolo ≤ kladné bezpečné celé číslo |
 | `locationUnlocked` | `id` | Lokace je odemčená |
 
 Prázdné pole platí. Chybějící příznak se nerovná `false`. `value` je boolean, řetězec nebo konečné číslo. ID musejí patřit do příslušného registru. Neznámé operace a pole jsou chyby.

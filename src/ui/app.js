@@ -1,7 +1,8 @@
 import { locations } from '../data/locations.js';
-import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice } from '../engine/game.js';
+import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView } from '../engine/game.js';
 import { rewardNames } from '../engine/content.js';
 import { load,save } from '../engine/storage.js';
+import { createJournal } from './journal.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 let state=load(storage),rolling=false,timer;
@@ -13,7 +14,9 @@ function dispatch(action){if(rolling)return;state=transition(state,action);persi
 function render(){
   for(const k of ['round','threat','ritual','ap'])$(k).textContent=state[k];
   $('heroStats').textContent=`Eleanor Whitmore · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
-  $('inventory').textContent=[...state.inventory,...state.evidence].map(id=>rewardNames[id]).join(' · ')||'Zatím nic.';
+  const investigation=investigationView(state);
+  $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
+  journal.render(investigation,rolling||state.ended);
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state),choice=selectedChoice(state,card);
   const result=visibleResult(state);
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
@@ -45,6 +48,7 @@ function render(){
 }
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
 const saveStatus=document.createElement('p');saveStatus.id='saveStatus';saveStatus.setAttribute('role','status');$('inventory').after(saveStatus);
+const journal=createJournal($('inventory').closest('section'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;
   const card=currentCard(state),choice=selectedChoice(state,card);

@@ -1,3 +1,4 @@
+import { validateCondition } from './investigation.js';
 export const outcomeKeys = ['criticalSuccess', 'greatSuccess', 'success', 'partialSuccess', 'failure', 'criticalFailure'];
 export const attributes = Object.freeze({ SÍ: 1, OB: 2, VĚ: 3, VŮ: 2, VN: 2 });
 export const cardTypes = ['encounter', 'event', 'item', 'evidence'];
@@ -9,7 +10,7 @@ const scalar = x => typeof x === 'boolean' || typeof x === 'string' || Number.is
 export function validateCards(cards, catalog, types = cardTypes) {
   const errors = [], ids = new Set(), choices = new Set();
   const fail = (path, message) => errors.push(`${path}: ${message}`);
-  const ref = (collection,id,path) => { if (!collection.includes(id)) fail(path, `neznámé ID ${String(id)}`); };
+  const ref = (collection,id,path) => { if (!idOK(id)||!collection.includes(id)) fail(path, `neplatné nebo neznámé ID ${String(id)}`); };
   const fields = (value,allowed,path) => {
     if (!isRecord(value)) { fail(path,'očekáván objekt'); return false; }
     for (const k of Object.keys(value)) if (!allowed.includes(k)) fail(`${path}.${k}`,'neznámé pole');
@@ -17,20 +18,7 @@ export function validateCards(cards, catalog, types = cardTypes) {
   };
   function conditions(value,path) {
     if (!Array.isArray(value)) { fail(path,'očekáváno pole podmínek'); return; }
-    value.forEach((c,i)=>{
-      const p=`${path}[${i}]`;
-      if(!fields(c,['type','id','value','round'],p))return;
-      switch(c.type){
-        case 'hasItem': ref(catalog.items,c.id,p+'.id'); break;
-        case 'hasEvidence': ref(catalog.evidence,c.id,p+'.id'); break;
-        case 'locationUnlocked': ref(catalog.locations,c.id,p+'.id'); break;
-        case 'flagEquals': ref(catalog.flags,c.id,p+'.id'); if(!scalar(c.value))fail(p+'.value','očekávána skalární hodnota'); break;
-        case 'minRound': case 'maxRound': if(!Number.isInteger(c.round)||c.round<1||c.round>7)fail(p+'.round','očekáváno celé číslo 1–7'); break;
-        default: fail(p+'.type','neznámý typ podmínky');
-      }
-      const allowed = ['type', ...(['minRound','maxRound'].includes(c.type)?['round']:c.type==='flagEquals'?['id','value']:['id'])];
-      for(const k of Object.keys(c))if(!allowed.includes(k))fail(p+'.'+k,'pole nepatří k tomuto typu podmínky');
-    });
+    value.forEach((c,i)=>errors.push(...validateCondition(c,catalog,`${path}[${i}]`)));
   }
   function effects(value,path){
     if(!Array.isArray(value)){fail(path,'očekáváno pole efektů');return;}
@@ -43,6 +31,9 @@ export function validateCards(cards, catalog, types = cardTypes) {
         case 'modifyThreat': case 'modifyRitual': if(!Number.isSafeInteger(e.amount))fail(p+'.amount','očekáváno celé bezpečné číslo'); break;
         case 'addItem': case 'removeItem': ref(catalog.items,e.id,p+'.id'); break;
         case 'addEvidence': ref(catalog.evidence,e.id,p+'.id'); break;
+        case 'addKnowledge': ref(catalog.knowledge||[],e.id,p+'.id'); break;
+        case 'unlockCard': ref(catalog.cards||[],e.id,p+'.id'); break;
+        case 'unlockChoice': ref(catalog.choices||[],e.id,p+'.id'); break;
         case 'unlockLocation': ref(catalog.locations,e.id,p+'.id'); break;
         case 'setFlag': ref(catalog.flags,e.id,p+'.id'); if(!scalar(e.value))fail(p+'.value','očekávána skalární hodnota'); break;
         default: fail(p+'.type','neznámý typ efektu');

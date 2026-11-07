@@ -2,6 +2,8 @@
 
 Tento dokument popisuje původní milník M1. Aktuální pravidla M2.1 a šest výsledků jsou v [GAME_DESIGN.md](GAME_DESIGN.md), datové definice v [CARD_SCHEMA.md](CARD_SCHEMA.md).
 
+M2.2 přidává explicitní vyhodnocení důkazů bez ceny AP a bez změny kol nebo rituálu. Informace získané ze složené odměny se nově pamatují i po odebrání předmětu. Jde o vyžádané pravidlo tohoto milníku, popsané v [DEDUCTION_SCHEMA.md](DEDUCTION_SCHEMA.md); nejde o vedlejší efekt refaktoringu.
+
 Oprava revize M2.1: složená odměna „Deník a přívěsek“ plní podmínku vlastnictví důkazu deníku prostřednictvím datového pole `evidenceIds`. Lepší hod tím nezablokuje porovnání poznámky. Uložené odměny ani limity partie se nemění.
 
 Autoritativní základ je kořenový prototyp v0.3, přesunutý beze změny do [reference](../public/legacy-prototype.html). [Soubor z Downloads](../public/reference-prototype.html) zachováváme jako druhou referenci; obsahuje odlišný systém více postav, dedukcí a událostí. Tyto mechaniky nejsou součástí v0.3 a nebyly do něj automaticky sloučeny.
@@ -28,3 +30,5 @@ Nulové HP/SAN, Hrozba 10, Rituál 8 nebo konec sedmého kola ukončí scénář
 [Engine](../src/engine/game.js) nezná DOM, časovače ani úložiště. `transition` vrací nový stav při platné akci, jinak původní. Náhoda se předává jako hotové kostky. [Data](../src/data/locations.js) používají pojmenovaná pole a explicitní efekty. [UI](../src/ui/app.js) zajišťuje ovládání a persistenci.
 
 Automatické testy: prahy hodů, kritické výsledky, ceny akcí, neměnnost vstupu, souběžné poškození, vyčerpání karet, konce hry, serializace a neplatné úložiště. Ručně kontroluj desktop i mobil: pohyb, výběr postupu, blokaci během hodu, reset během hodu, obnovu stránky, prázdnou lokaci, sedmé kolo a odmítnuté ukládání.
+
+Revize PR #3 odděluje rozsah obecných podmínek kol od délky prvního scénáře a předává názvy lokací přes metadata aktivního obsahu. Nemění sedmikolová pravidla, rituál, UI ani formát uložených her.

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Když spí hlubiny – webový prototyp</title>
+<style>
+:root{--bg:#0b1013;--panel:#141d21;--panel2:#1b282d;--line:#34454a;--text:#e7e2d4;--muted:#9da9a5;--gold:#c5a66b;--red:#b65c52;--green:#71977d;--blue:#6d9eaa}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b2a2d 0,#0b1013 60%);color:var(--text);font:15px/1.45 Georgia,serif;min-height:100vh}
+button,select{font:inherit}button{background:#26373b;color:var(--text);border:1px solid #53666a;border-radius:7px;padding:9px 12px;cursor:pointer;transition:.15s}button:hover{background:#35494e;border-color:var(--gold)}button:disabled{opacity:.35;cursor:not-allowed}
+header{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:15px;background:#0b1113e8;position:sticky;top:0;z-index:5}
+h1{font-size:clamp(21px,3vw,30px);letter-spacing:.06em;margin:0;color:#d8c49a}header small{color:var(--muted);display:block;letter-spacing:.12em;text-transform:uppercase;font:10px Arial}
+#status{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.pill{border:1px solid var(--line);background:#172226;padding:6px 10px;border-radius:20px;font:12px Arial;color:var(--muted)}.pill b{color:var(--text)}
+main{max-width:1440px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(300px,1fr) minmax(280px,.9fr);gap:15px}
+.panel{background:linear-gradient(145deg,#182327,#11191c);border:1px solid var(--line);border-radius:11px;padding:15px;box-shadow:0 10px 30px #0004;min-width:0}
+.panel h2{font-size:16px;color:var(--gold);margin:0 0 12px;text-transform:uppercase;letter-spacing:.09em}
+.map{position:relative;min-height:470px;background:radial-gradient(ellipse at 58% 58%,#25383a,#142125 65%,#101719);border:1px solid #405257;border-radius:9px;overflow:hidden}
+.map:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 31px,#ffffff08 32px),repeating-linear-gradient(90deg,transparent 0 31px,#ffffff08 32px);opacity:.45}
+.sea{position:absolute;right:-25%;top:-15%;width:62%;height:130%;border-left:2px solid #54717a;border-radius:50%;background:linear-gradient(90deg,#142b32aa,#0c2029)}
+.location{position:absolute;z-index:1;transform:translate(-50%,-50%);min-width:95px;max-width:125px;text-align:center;padding:9px 7px;border-radius:8px;background:#26383c;border:1px solid #708080;box-shadow:0 4px 12px #0008;font:12px Arial;cursor:pointer}
+.location strong{display:block;font-size:12px}.location small{display:block;color:#bdc8c1;font-size:10px;margin-top:3px}
+.location.active{border:2px solid var(--gold);background:#4a4030;box-shadow:0 0 0 3px #c5a66b33,0 4px 12px #0008}
+.location.locked{opacity:.42;filter:grayscale(1);cursor:not-allowed}.location .marker{font-size:17px;display:block;margin-bottom:3px}
+.maplabel{position:absolute;z-index:2;bottom:10px;left:12px;color:#91a5a2;font:10px Arial;letter-spacing:.15em;text-transform:uppercase}
+#party{display:grid;gap:8px}.char{border:1px solid var(--line);border-radius:8px;padding:10px;background:#111a1d}.char.active{border-color:var(--gold)}.charhead{display:flex;justify-content:space-between;gap:8px}.charname{font-weight:bold;color:#e2d4b5}.stats{font:11px Arial;color:var(--muted);margin-top:5px}.bar{height:6px;background:#354145;border-radius:8px;margin-top:5px;overflow:hidden}.bar span{display:block;height:100%;background:var(--green)}.bar.san span{background:var(--blue)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions button{text-align:left;min-height:54px}.actions button span{display:block;font-size:10px;color:#b7c1b9;margin-top:3px}
+#log{height:235px;overflow:auto;display:flex;flex-direction:column;gap:8px;font-size:13px}.logentry{border-left:2px solid #8e7950;padding:4px 8px;background:#10181a}.muted{color:var(--muted)}.clue{border:1px solid #5a5947;background:#24251f;padding:9px;border-radius:7px;margin:7px 0}.clue b{color:#d8c49a}.clue small{display:block;color:var(--muted);margin-top:3px}
+#clues{max-height:230px;overflow:auto}.progress{display:flex;gap:10px;margin:8px 0}.track{flex:1;background:#263337;border-radius:6px;height:12px;overflow:hidden}.track span{display:block;height:100%;background:var(--red)}.track.ritual span{background:#9e754c}
+#overlay{position:fixed;inset:0;background:#05090beF;z-index:10;display:flex;align-items:center;justify-content:center;padding:20px}.modal{max-width:650px;width:100%;background:#172327;border:1px solid #65716b;border-radius:13px;padding:25px;box-shadow:0 20px 80px #000}.modal h2{color:var(--gold);margin-top:0}.modal p{color:#c1cbc3}.choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}.choice{text-align:left}.choice.selected{border-color:var(--gold);background:#51452f}.hidden{display:none!important}.wide{width:100%;margin-top:9px}.notice{padding:10px;border:1px solid #776447;background:#29251b;border-radius:7px;color:#ddc99e;margin:8px 0;font-size:13px}
+footer{max-width:1440px;margin:0 auto;padding:0 18px 20px;color:#71817d;font:11px Arial}
+@media(max-width:1000px){main{grid-template-columns:1fr 1fr}main .right{grid-column:1/-1}}
+@media(max-width:650px){header{align-items:flex-start;flex-direction:column}#status{justify-content:flex-start}main{display:flex;flex-direction:column;padding:10px}.map{min-height:410px}.location{min-width:82px;padding:7px 4px}.location strong{font-size:10px}.actions{grid-template-columns:1fr 1fr}}
+
+body.modal-open:after{content:"";position:fixed;inset:0;background:#05090beF;z-index:19}.card-modal,#eventModal,#endModal{position:fixed;z-index:20;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 30px)}.card-modal{max-width:760px;max-height:92vh;overflow:auto;background:linear-gradient(145deg,#202d30,#11191c);border:1px solid #817453}.card-kicker{font:11px Arial;letter-spacing:.16em;text-transform:uppercase;color:#c5a66b}.card-art{height:155px;border-radius:8px;background:radial-gradient(ellipse at 50% 35%,#526166,#1a282c 55%,#0b1215);display:flex;align-items:end;padding:14px;color:#e6d6b4;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.card-story{font-size:16px;line-height:1.65;color:#d7d5c9}.card-choices{display:grid;gap:8px;margin:14px 0}.card-choice{text-align:left;background:#263438;padding:12px}.card-choice strong{display:block;color:#e1c994}.card-choice small{display:block;color:#b1beb8;margin-top:4px}.outcomes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.outcome-preview{padding:10px;border:1px solid #39494b;border-radius:7px;background:#11191c;min-height:65px}.outcome-preview b{font:11px Arial;letter-spacing:.08em;color:#c5a66b}.outcome-preview p{font-size:12px;margin:6px 0 0;color:#c7cfca;filter:blur(5px);user-select:none}.outcome-preview.revealed{grid-column:1/-1;border-color:#9c875c;background:#29271f}.outcome-preview.revealed p{filter:none;font-size:15px;line-height:1.5;user-select:text;color:#f0e7d3}.dice-stage{display:flex;justify-content:center;gap:18px;padding:18px}.die{width:76px;height:76px;border-radius:14px;background:linear-gradient(145deg,#f3ead5,#b8a98c);color:#182023;display:grid;place-items:center;font:bold 38px Arial;box-shadow:0 8px 20px #0008,inset 0 2px 4px #fff}.die.rolling{animation:dieRoll .15s linear infinite}@keyframes dieRoll{0%{transform:translate(-4px,-3px) rotate(-18deg)}25%{transform:translate(3px,2px) rotate(25deg)}50%{transform:translate(4px,-2px) rotate(80deg)}75%{transform:translate(-2px,4px) rotate(145deg)}100%{transform:translate(-4px,-3px) rotate(220deg)}}.roll-total{text-align:center;font-size:14px;color:#c7cfc9}.roll-total strong{font-size:28px;color:#e7d4a9;display:block}.result-stamp{text-align:center;font:bold 18px Arial;letter-spacing:.12em;padding:8px;color:#d8c49a}.result-stamp.good{color:#9bc29f}.result-stamp.bad{color:#d58a7c}@media(max-width:600px){.outcomes{grid-template-columns:1fr}.card-art{height:120px}.die{width:62px;height:62px;font-size:30px}}
+
+</style>
+</head>
+<body>
+<header>
+  <div><small>Kooperativní investigativní horor · webový prototyp</small><h1>KDYŽ SPÍ HLUBINY</h1></div>
+  <div id="status"><span class="pill">Kolo <b id="round">1 / 7</b></span><span class="pill">Akce <b id="ap">3</b></span><span class="pill">Zásoby <b id="supplies">4</b></span><span class="pill">Hrozba <b id="threat">2 / 10</b></span><span class="pill">Rituál <b id="ritual">1 / 8</b></span></div>
+</header>
+<main>
+<section class="panel">
+  <h2>Mapa Blackwater</h2>
+  <div class="map" id="map">
+    <div class="sea"></div>
+    <button class="location active" data-loc="harbor" style="left:19%;top:58%"><span class="marker">⚓</span><strong>Přístav</strong><small>První stopy</small></button>
+    <button class="location" data-loc="town" style="left:47%;top:52%"><span class="marker">⌂</span><strong>Staré město</strong><small>Kontakty</small></button>
+    <button class="location" data-loc="library" style="left:43%;top:23%"><span class="marker">▤</span><strong>Knihovna</strong><small>Dokumenty</small></button>
+    <button class="location" data-loc="asylum" style="left:72%;top:24%"><span class="marker">✚</span><strong>Blázinec</strong><small>Svědci</small></button>
+    <button class="location locked" data-loc="cemetery" style="left:79%;top:51%"><span class="marker">✝</span><strong>Hřbitov</strong><small>Uzamčeno</small></button>
+    <button class="location locked" data-loc="mansion" style="left:48%;top:78%"><span class="marker">♜</span><strong>Sídlo</strong><small>Uzamčeno</small></button>
+    <button class="location" data-loc="lighthouse" style="left:15%;top:19%"><span class="marker">灯</span><strong>Maják</strong><small>Pobřeží</small></button>
+    <button class="location locked" data-loc="caves" style="left:88%;top:82%"><span class="marker">⌁</span><strong>Jeskyně</strong><small>Uzamčeno</small></button>
+    <div class="maplabel">BLACKWATER · MASSACHUSETTS · 1927</div>
+  </div>
+  <div class="notice" id="locationInfo">Přístav – ve vzduchu je cítit sůl a na molu leží opuštěná rybářská loď.</div>
+  <p class="muted" style="font-size:12px">Kliknutím na lokaci ji vybereš. Přesun do sousední lokace stojí 1 AP.</p>
+</section>
+<section class="panel">
+  <h2>Vyšetřovatelé</h2>
+  <div id="party"></div>
+  <h2 style="margin-top:18px">Akce</h2>
+  <div class="actions">
+    <button id="moveBtn">➜ Přesun<span>1 AP · sousední lokace</span></button>
+    <button id="investigateBtn">⌕ Průzkum<span>1 AP · hledání stopy</span></button>
+    <button id="deduceBtn">✧ Vyhodnotit dedukci<span>1 AP · propojit stopy</span></button>
+    <button id="restBtn">☾ Odpočinek<span>1 AP · obnovit 1 SAN</span></button>
+    <button id="healBtn">✚ Ošetřit<span>1 AP · obnovit 1 HP</span></button>
+    <button id="endBtn">◷ Ukončit tah<span>Vyhodnotit nepřátele a událost</span></button>
+  </div>
+  <div class="notice" id="actionHint">Vyber akci. Každý vyšetřovatel má v kole 3 akční body.</div>
+  <h2 style="margin-top:16px">Stav města</h2>
+  <div class="progress"><span class="muted" style="width:66px">Hrozba</span><div class="track"><span id="threatbar" style="width:20%"></span></div></div>
+  <div class="progress"><span class="muted" style="width:66px">Rituál</span><div class="track ritual"><span id="ritualbar" style="width:12.5%"></span></div></div>
+</section>
+<section class="panel right">
+  <h2>Deník vyšetřování</h2>
+  <div id="clues"><p class="muted">Zatím nemáš žádné stopy. Prozkoumej okolí.</p></div>
+  <h2 style="margin-top:18px">Události a záznamy</h2>
+  <div id="log"><div class="logentry">1927 – Blackwater. Tři rybáři zmizeli. Jejich loď se vrátila prázdná.</div></div>
+  <button class="wide" id="saveBtn">Uložit hru</button>
+  <button class="wide" id="resetBtn">Začít novou hru</button>
+</section>
+</main>
+<footer>Prototyp 0.2 · Karty průzkumu, skryté následky a animované kostky. Pravidla, obtížnost, obsah i grafika se budou dále vyvíjet.</footer>
+
+<div id="overlay">
+ <div class="modal" id="setup">
+  <small style="color:#a6b1a9;letter-spacing:.15em">PŘÍBĚH ZAČÍNÁ</small>
+  <h2>Světlo z hlubin</h2>
+  <p>Blackwater, Massachusetts. Podzim 1927. Tři rybáři zmizeli beze stopy. Každou noc se od opuštěného majáku ozývá zvon, přestože je už deset let uzavřený.</p>
+  <p>Vyber vyšetřovatele, se kterými se vydáš po stopách záhadného zmizení.</p>
+  <div class="choices" id="charChoices"></div>
+  <p class="muted" style="font-size:12px">Pro první prototyp doporučujeme 2 vyšetřovatele. Zatím je ovládáš lokálně oba.</p>
+  <button class="wide" id="startBtn" disabled>Začít vyšetřování</button>
+ </div>
+</div>
+ <div class="modal hidden" id="eventModal"><h2 id="eventTitle">Událost</h2><p id="eventText"></p><button class="wide" id="eventClose">Pokračovat</button></div>
+ <div class="modal hidden" id="endModal"><h2 id="endTitle"></h2><p id="endText"></p><button class="wide" id="restartAfter">Nová hra</button></div>
+<div class="modal card-modal hidden" id="cardModal"><div class="card-kicker" id="cardLocation"></div><div class="card-art" id="cardArt"></div><h2 id="cardTitle"></h2><p class="card-story" id="cardStory"></p><div id="cardChoiceArea"><h3 style="color:#c5a66b;font-size:14px">Jak budeš postupovat?</h3><div class="card-choices" id="cardChoices"></div></div><div id="rollArea" class="hidden"><div class="notice" id="testInfo"></div><div class="dice-stage"><div class="die" id="die1">?</div><div class="die" id="die2">?</div></div><div class="roll-total" id="rollTotal">Kostky se kutálejí…</div></div><div id="outcomeArea"><h3 style="color:#c5a66b;font-size:14px">Možné následky – zatím skryté</h3><div class="outcomes" id="outcomePreviews"></div></div><div id="revealedArea" class="hidden"><div class="result-stamp" id="resultStamp"></div><div class="outcome-preview revealed"><p id="resultText"></p></div><button class="wide" id="cardContinue">Pokračovat</button></div><button class="wide" id="cardClose" style="margin-top:12px">Zavřít kartu</button></div>
+<script>
+const investigators={
+ eleanor:{name:"Eleanor Whitmore",role:"Badatelka",hp:6,maxHp:6,san:8,maxSan:8,attrs:{SÍ:0,OB:1,VĚ:3,VŮ:2,VN:2},ability:"Jednou za kolo +2 k výzkumu (VĚ).",skill:"research"},
+ thomas:{name:"Thomas Miller",role:"Detektiv",hp:7,maxHp:7,san:7,maxSan:7,attrs:{SÍ:1,OB:3,VĚ:1,VŮ:1,VN:3},ability:"Jednou za kolo může přehodit jednu kostku při VN.",skill:"perception"},
+ arthur:{name:"Arthur Hayes",role:"Veterán",hp:10,maxHp:10,san:6,maxSan:6,attrs:{SÍ:3,OB:2,VĚ:0,VŮ:1,VN:1},ability:"Jednou za kolo ochrání spojence ve stejné lokaci.",skill:"combat"},
+ margaret:{name:"Margaret Morgan",role:"Lékařka",hp:7,maxHp:7,san:9,maxSan:9,attrs:{SÍ:0,OB:1,VĚ:2,VŮ:3,VN:2},ability:"Léčení jiné postavy obnoví +1 HP.",skill:"heal"}
+};
+const locs={
+ harbor:{name:"Přístav",desc:"Ve vzduchu je cítit sůl a na molu leží opuštěná rybářská loď.",neighbors:["town","lighthouse"],clues:["D01"]},
+ town:{name:"Staré město",desc:"Za zataženými okny se obyvatelé bojí mluvit o zmizelých rybářích.",neighbors:["harbor","library","asylum","mansion"],clues:[]},
+ library:{name:"Knihovna",desc:"Zaprášené záznamy města skrývají staré plány pobřeží.",neighbors:["town","cemetery"],clues:["D02"]},
+ asylum:{name:"Blázinec",desc:"Jeden z přeživších rybářů zde opakuje stále stejnou větu: zvonění přichází zespodu.",neighbors:["town","cemetery"],clues:["D03","D06"]},
+ cemetery:{name:"Hřbitov",desc:"Na několika náhrobcích je vyrytý stejný spirálový symbol.",neighbors:["library","asylum","caves"],clues:["D04"]},
+ mansion:{name:"Opuštěné sídlo",desc:"Uvnitř někdo nedávno zapálil svíčky. Na podlaze jsou mokré stopy.",neighbors:["town","caves"],clues:["D07"]},
+ lighthouse:{name:"Maják",desc:"Maják je opuštěný, ale z jeho vrcholu se ozývá tlumené kovové zvonění.",neighbors:["harbor","caves"],clues:["D05"]},
+ caves:{name:"Jeskyně",desc:"Příliv odhalil úzký vstup do jeskyní pod útesem.",neighbors:["lighthouse","cemetery","mansion"],clues:["D08"]}
+};
+const clueData={
+ D01:["Deník rybáře","„Každou noc slyším zvon. Ale v majáku přece nikdo není.“","První stopa k majáku."],
+ D02:["Plán starého majáku","Na plánu je zakresleno schodiště pod základy majáku.","D01 + D02 odhalí skrytý vstup."],
+ D03:["Výpověď přeživšího","„Chodí tam každou noc. Muži v černých kabátech. Potom se z vody ozývá něco, co nemá hlas.“","D03 + D07 odhalí kult."],
+ D04:["Okultní symbol","Symbol představuje otevření brány mezi naším světem a místem hluboko pod mořem.","D04 + D08 odhalí způsob uzavření brány."],
+ D05:["Fotografická deska","Postava na fotografii nevrhá žádný stín.","Bonus: +2 k prvnímu testu proti stínové bytosti."],
+ D06:["Analýza krve","Ve vzorcích pohřešovaných rybářů byly nalezeny neznámé organismy.","Jednou lze ignorovat efekt nákazy."],
+ D07:["Záznam kultu","Rituál vyžaduje tři oběti a předmět přinesený z hlubin. Záznam je podepsán E. V.","D03 + D07 odhalí kultovníka."],
+ D08:["Artefakt z hlubin","Předmět pulzuje v rytmu zvonu. Dokáže přerušit spojení mezi světy.","Spolu s D04 umožní uzavřít bránu."]
+};
+const events=[
+ ["Noční zvon","Z dálky se ozve zvon. Všichni vyšetřovatelé ztratí 1 SAN.","san"],
+ ["Nemoc ve městě","Můžeš zaplatit 1 zásobu a snížit Hrozbu o 1. Pokud nemáš zásobu, Hrozba vzroste o 1.","threat"],
+ ["Šepot ve tmě","Nejzkušenější vyšetřovatel musí uspět v testu VŮ 9, jinak ztratí 2 SAN.","will"],
+ ["Přepadení","V uličce se objeví kultista. Skupina musí ztratit 1 AP, nebo Hrozba vzroste o 1.","ambush"],
+ ["Světlo pod vodou","Všichni v Přístavu ztrácí 1 SAN. Pokud tam nikdo není, nic se nestane.","water"],
+ ["Ztracená loď","Pokud ještě nemáš D01, získáš možnost prozkoumat Přístav bez testu.","diary"],
+ ["Podivný návštěvník","Zaplať 1 zásobu a získej 1 SAN, nebo odmítni a Hrozba vzroste o 1.","visitor"]
+];
+const cardDeck={
+ harbor:{id:"boat",title:"Zvuk z podpalubí",art:"Opuštěná rybářská loď",story:"Z opuštěné rybářské lodi se ozývá podivné klepání. Dveře do podpalubí jsou pootevřené. Na jejich vnitřní straně jsou čerstvé škrábance.",clue:"D01",options:[{label:"Prohledat podpalubí",desc:"Pozorně prozkoumat stopy",attr:"VN",diff:8},{label:"Vypáčit zamčenou schránku",desc:"Riskantnější postup, ale může přinést odměnu",attr:"SÍ",diff:9}],texts:{critical:"V podpalubí najdeš lodní deník i mosazný přívěsek. Získáváš stopu a předmět Mosazný přívěsek.",great:"Najdeš lodní deník, mapu poslední plavby a skrytou schránku. Získáváš stopu a 1 zásobu.",success:"V deníku objevíš zápis o zvonění od majáku. Získáváš stopu.",partial:"Najdeš několik čitelných řádků deníku – získáváš stopu. Při otevírání schránky se ale pořezáš: ztrácíš 1 HP.",fail:"Zpod podlahy se vynoří bledá ruka a sevře ti zápěstí. Vytrhneš se, ale ztrácíš 1 SAN.",fumble:"Dveře se zabouchnou a něco tě stáhne do temnoty. Ztrácíš 2 SAN a Hrozba vzroste o 1."}},
+ town:{id:"blackout",title:"Zhaslá okna",art:"Ulička starého města",story:"V celé ulici zhasnou lampy. Za jedním oknem se mihne postava, která má tvůj obličej. Na dveřích domu je křídou nakreslená spirála.",clue:"D04",options:[{label:"Prohlédnout podivný symbol",desc:"Rozpoznat jeho původ",attr:"VĚ",diff:8},{label:"Zaklepat na dveře",desc:"Zjistit, kdo je uvnitř",attr:"VŮ",diff:9}],texts:{critical:"Rozpoznáš starší variantu znaku a jeho význam. Získáváš stopu a 1 SAN.",great:"Odhalíš, že symbol ukazuje směr k místu pod majákem. Získáváš stopu.",success:"Podaří se ti symbol přesně načrtnout do zápisníku. Získáváš stopu.",partial:"Získáš stopu, ale pohled na symbol tě poznamená. Ztrácíš 1 SAN.",fail:"Za dveřmi se ozve tvůj vlastní hlas. Ztrácíš 1 SAN.",fumble:"Okna se jedno po druhém rozsvítí. Za každým stojí stejná postava. Hrozba +1 a ztrácíš 1 SAN."}},
+ library:{id:"plans",title:"Plán, který neměl existovat",art:"Archivní místnost",story:"V městském archivu najdeš stavební plány majáku. Jedna stránka je novější než ostatní, přesto je zažloutlá a popsaná rukou, která se podivně podobá tvému písmu.",clue:"D02",options:[{label:"Porovnat plány a záznamy",desc:"Trpělivý výzkum",attr:"VĚ",diff:9},{label:"Prohledat uzamčený archiv",desc:"Riskovat odhalení",attr:"OB",diff:10}],texts:{critical:"Odhalíš tajné schodiště a poznámku o vstupu pod základy. Získáváš stopu a 1 zásobu.",great:"Najdeš přesný plán podzemní chodby. Získáváš stopu.",success:"Plán potvrzuje, že pod majákem existuje skrytá konstrukce. Získáváš stopu.",partial:"Získáš kopii plánu, ale přistihne tě knihovník. Stopa je tvoje, Hrozba +1.",fail:"Stránky se při doteku rozpadnou v prach. Ztrácíš 1 SAN.",fumble:"V knize najdeš vlastní nekrolog s dnešním datem. Ztrácíš 2 SAN."}},
+ asylum:{id:"witness",title:"Muž, který se vrátil",art:"Oddělení pro neklidné pacienty",story:"Přeživší rybář sedí připoutaný k posteli. Jeho oči jsou zakalené a na krku má drobné ranky. Když vstoupíš, zašeptá: ‚Zvon není nahoře. Zvoní to pod námi.‘",clue:"D03",options:[{label:"Vyslechnout svědka",desc:"Získat jeho důvěru",attr:"VN",diff:8},{label:"Prohlédnout jeho zranění",desc:"Najít fyzické důkazy",attr:"VĚ",diff:9}],texts:{critical:"Svědek si vzpomene na tvář vůdce kultu. Získáváš stopu a 1 SAN.",great:"Získáš celý popis rituálu a jméno sídla, kde se scházejí. Získáváš stopu.",success:"Svědek potvrdí, že muži v černých kabátech odnášeli oběti do starého sídla. Získáváš stopu.",partial:"Získáš důležitou část výpovědi, ale svědek začne křičet. Stopa je tvoje, ztrácíš 1 SAN.",fail:"Svědek tě nepoznává a začne se bránit. Ztrácíš 1 HP.",fumble:"Svědek vykřikne tvoje jméno hlasem, který není lidský. Ztrácíš 2 SAN."}},
+ lighthouse:{id:"lens",title:"Světlo za čočkou",art:"Vrchol opuštěného majáku",story:"Uvnitř čočky majáku se zachytil fotografický negativ. Na snímku stojí několik postav na útesech. Jedna z nich nemá tvář – a přesto se dívá přímo na tebe.",clue:"D05",options:[{label:"Prozkoumat fotografickou desku",desc:"Odhalit detaily snímku",attr:"VN",diff:9},{label:"Zkontrolovat mechanismus světla",desc:"Zjistit, kdo maják spustil",attr:"VĚ",diff:10}],texts:{critical:"Na desce objevíš postavu na místě budoucího rituálu. Získáváš stopu a 1 SAN.",great:"Získáš fotografii a přesné souřadnice vstupu do jeskyní. Získáváš stopu.",success:"Odhalíš, že jedna postava na snímku nevrhá stín. Získáváš stopu.",partial:"Negativ je poškozený, ale část obrazu zachráníš. Stopa je tvoje, ztrácíš 1 SAN.",fail:"Ve skle čočky zahlédneš tvář za svým ramenem. Ztrácíš 1 SAN.",fumble:"Světlo majáku se rozsvítí a zamíří přímo na tebe. Hrozba +1."}},
+ cemetery:{id:"grave",title:"Hrob bez jména",art:"Starý hřbitov",story:"Čerstvě otevřený hrob je prázdný. Na vnitřní straně víka rakve je vyrytý symbol, který se objevuje i na dveřích opuštěných domů.",clue:"D04",options:[{label:"Prozkoumat rakev",desc:"Rozluštit nápis",attr:"VŮ",diff:9},{label:"Sledovat čerstvé stopy",desc:"Zjistit, kdo hrob otevřel",attr:"VN",diff:8}],texts:{critical:"Pod rakví najdeš starý rituální zápis. Získáváš stopu a 1 zásobu.",great:"Rozluštíš celý nápis a zjistíš, co kult připravuje. Získáváš stopu.",success:"Opíšeš symbol a jeho umístění. Získáváš stopu.",partial:"Získáš stopu, ale cosi tě chytí za ruku. Ztrácíš 1 HP.",fail:"Z hlíny se ozve zaklepání. Ztrácíš 1 SAN.",fumble:"Země se propadne a zahlédneš něco, co mělo zůstat pohřbené. Ztrácíš 2 HP."}},
+ mansion:{id:"dinner",title:"Večeře pro mrtvé",art:"Opuštěné sídlo",story:"Na dlouhém stole stojí šest talířů. Jídlo je čerstvé, ale židle jsou prázdné. Na konci stolu leží účetní kniha se jmény pohřešovaných.",clue:"D07",options:[{label:"Prostudovat účetní knihu",desc:"Odhalit spojení se zmizelými",attr:"VĚ",diff:10},{label:"Prohledat jídelnu",desc:"Najít skryté předměty",attr:"VN",diff:9}],texts:{critical:"Najdeš úplný seznam členů kultu i jejich plán. Získáváš stopu a 1 zásobu.",great:"Odhalíš jméno vůdce kultu a místo schůzek. Získáváš stopu.",success:"Záznam potvrzuje spojení sídla s únosy rybářů. Získáváš stopu.",partial:"Získáš část seznamu, ale někdo zamkne hlavní dveře. Stopa je tvoje, Hrozba +1.",fail:"Z knihy se ozve šepot. Ztrácíš 1 SAN.",fumble:"Jeden z prázdných talířů se naplní čerstvou krví. Ztrácíš 2 SAN."}},
+ caves:{id:"artifact",title:"Dar z hlubin",art:"Jeskyně pod útesem",story:"Voda ustoupila a odhalila kamenný oltář. Na něm leží předmět připomínající lidské srdce, které pomalu pulzuje. Každý úder doprovází vzdálené zvonění.",clue:"D08",options:[{label:"Vzít artefakt",desc:"Odolat jeho vlivu",attr:"VŮ",diff:10},{label:"Prozkoumat oltář",desc:"Najít způsob, jak jej bezpečně odnést",attr:"VĚ",diff:9}],texts:{critical:"Artefakt přijme tvůj dotek. Získáváš stopu, Amulet z hlubin a 1 SAN.",great:"Bezpečně získáš artefakt. Získáváš stopu a Amulet z hlubin.",success:"Artefakt se podaří uvolnit z oltáře. Získáváš stopu.",partial:"Artefakt získáš, ale jeho hlas ti pronikne do mysli. Ztrácíš 2 SAN.",fail:"Oltář vyšlehne studeným světlem. Ztrácíš 1 SAN.",fumble:"Artefakt se přisaje k dlani. Ztrácíš 2 HP a 2 SAN."}}
+};
+let state={started:false,round:1,ap:3,supplies:4,threat:2,ritual:1,selected:null,activeChar:0,party:[],clues:[],deductions:[],unlocked:["harbor","town","library","asylum","lighthouse"],eventIndex:0,enemy:0,ended:false,log:[],usedCards:{},pendingCard:null};
+const $=id=>document.getElementById(id);
+function log(msg){state.log.unshift(msg);renderLog()}
+function renderLog(){$("log").innerHTML=state.log.slice(0,18).map(x=>`<div class="logentry">${x}</div>`).join("")}
+function renderParty(){
+ $("party").innerHTML=state.party.map((p,i)=>`<div class="char ${i===state.activeChar?'active':''}" data-char="${i}"><div class="charhead"><span class="charname">${p.name}</span><button onclick="activateChar(${i})" style="padding:3px 7px;font-size:10px">Aktivovat</button></div><div class="stats">${p.role} · SÍ ${p.attrs.SÍ} / OB ${p.attrs.OB} / VĚ ${p.attrs.VĚ} / VŮ ${p.attrs.VŮ} / VN ${p.attrs.VN}</div><div class="stats">HP ${p.hp}/${p.maxHp}</div><div class="bar"><span style="width:${100*p.hp/p.maxHp}%"></span></div><div class="stats">SAN ${p.san}/${p.maxSan}</div><div class="bar san"><span style="width:${100*p.san/p.maxSan}%"></span></div><div class="stats">${p.ability}</div><div class="stats">Předměty: ${(p.items||[]).join(", ")||"žádné"}</div></div>`).join("");
+}
+function activateChar(i){state.activeChar=i;render()}
+function renderMap(){
+ document.querySelectorAll(".location").forEach(el=>{let id=el.dataset.loc;el.classList.toggle("active",id===state.selected);el.classList.toggle("locked",!state.unlocked.includes(id));let sm=el.querySelector("small");sm.textContent=state.unlocked.includes(id)?(locs[id].clues.some(c=>!state.clues.includes(c))?"Stopa možná":"Prozkoumáno"):"Uzamčeno"});
+}
+function renderClues(){$("clues").innerHTML=state.clues.length?state.clues.map(id=>`<div class="clue"><b>${id} · ${clueData[id][0]}</b><div>${clueData[id][1]}</div><small>${clueData[id][2]}</small></div>`).join(""):'<p class="muted">Zatím nemáš žádné stopy. Prozkoumej okolí.</p>'}
+function render(){
+ $("round").textContent=state.round+" / 7";$("ap").textContent=state.party[state.activeChar]?.ap ?? 3;$("supplies").textContent=state.supplies;$("threat").textContent=state.threat+" / 10";$("ritual").textContent=state.ritual+" / 8";
+ $("threatbar").style.width=(state.threat*10)+"%";$("ritualbar").style.width=(state.ritual/8*100)+"%";
+ renderParty();renderMap();renderClues();renderLog();
+ $("locationInfo").textContent=locs[state.selected]?.name+" – "+(locs[state.selected]?.desc||"");
+ $("moveBtn").disabled=(state.party[state.activeChar]?.ap ?? 0)<1;$("investigateBtn").disabled=(state.party[state.activeChar]?.ap ?? 0)<1;$("deduceBtn").disabled=(state.party[state.activeChar]?.ap ?? 0)<1;$("restBtn").disabled=(state.party[state.activeChar]?.ap ?? 0)<1;$("healBtn").disabled=(state.party[state.activeChar]?.ap ?? 0)<1;
+}
+function roll(){return [1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]}
+function spend(n=1){state.party[state.activeChar].ap-=n}
+function addClue(id){if(!id||state.clues.includes(id))return false;state.clues.push(id);log(`<b>Nalezena stopa:</b> ${clueData[id][0]}.`);return true}
+function unlock(id){if(!state.unlocked.includes(id)){state.unlocked.push(id);log(`Odemčena lokace: <b>${locs[id].name}</b>.`)}}
+const outcomeLabels={critical:"KRITICKÝ ÚSPĚCH",great:"VELKÝ ÚSPĚCH",success:"ÚSPĚCH",partial:"ČÁSTEČNÝ ÚSPĚCH",fail:"NEÚSPĚCH",fumble:"KRITICKÉ SELHÁNÍ"};
+function investigate(){
+ const p=state.party[state.activeChar];if(state.ended||!p||p.ap<1)return;
+ const card=cardDeck[p.location];if(!card){$('actionHint').textContent='V této lokaci není připravena karta průzkumu.';return;}
+ state.usedCards=state.usedCards||{};if((state.usedCards[p.location]||[]).includes(card.id)){$('actionHint').textContent='Tuto kartu jste už vyřešili. Pro další obsah je potřeba rozšířit balíček této lokace.';return;}
+ state.pendingCard=card;
+ $('cardLocation').textContent='PRŮZKUM · '+locs[p.location].name.toUpperCase();$('cardArt').textContent=card.art;
+ $('cardTitle').textContent=card.title;$('cardStory').textContent=card.story;
+ $('cardChoices').innerHTML=card.options.map((o,i)=>`<button class="card-choice" onclick="beginCardTest(${i})"><strong>${o.label}</strong><small>${o.desc} · Test ${o.attr}, obtížnost ${o.diff}</small></button>`).join('');
+ $('cardChoiceArea').classList.remove('hidden');$('rollArea').classList.add('hidden');$('revealedArea').classList.add('hidden');$('outcomeArea').classList.remove('hidden');$('cardClose').classList.remove('hidden');
+ const labels=[['critical','KRITICKÝ ÚSPĚCH'],['great','VELKÝ ÚSPĚCH'],['success','ÚSPĚCH'],['partial','ČÁSTEČNÝ ÚSPĚCH'],['fail','NEÚSPĚCH'],['fumble','KRITICKÉ SELHÁNÍ']];
+ $('outcomePreviews').innerHTML=labels.map(([k,l])=>`<div class="outcome-preview"><b>${l}</b><p>${card.texts[k]}</p></div>`).join('');
+ $('cardModal').classList.remove('hidden');document.body.classList.add('modal-open');
+}
+function beginCardTest(index){
+ const p=state.party[state.activeChar],card=state.pendingCard,o=card.options[index];if(!p||p.ap<1)return;
+ spend();$('cardChoiceArea').classList.add('hidden');$('outcomeArea').classList.add('hidden');$('rollArea').classList.remove('hidden');$('cardClose').classList.add('hidden');
+ $('testInfo').textContent=`${o.label} · ${o.attr} ${p.attrs[o.attr]>=0?'+':''}${p.attrs[o.attr]} · obtížnost ${o.diff}`;
+ const a=$('die1'),b=$('die2');a.textContent='?';b.textContent='?';a.classList.add('rolling');b.classList.add('rolling');$('rollTotal').textContent='Kostky se kutálejí…';
+ setTimeout(()=>{
+  const d=roll(),sum=d[0]+d[1]+p.attrs[o.attr],margin=sum-o.diff;
+  let key=d[0]===6&&d[1]===6?'critical':d[0]===1&&d[1]===1?'fumble':margin>=3?'great':margin>=0?'success':margin>=-2?'partial':'fail';
+  a.classList.remove('rolling');b.classList.remove('rolling');a.textContent=d[0];b.textContent=d[1];
+  $('rollTotal').innerHTML=`<strong>${sum}</strong>${d[0]} + ${d[1]} + ${o.attr} ${p.attrs[o.attr]>=0?'+':''}${p.attrs[o.attr]} = ${sum} · obtížnost ${o.diff}`;
+  revealCardOutcome(key,card,p);
+ },1450);
+}
+function revealCardOutcome(key,card,p){
+ let msg=card.texts[key];
+ const getsClue=['critical','great','success','partial'].includes(key);if(getsClue&&card.clue)addClue(card.clue);
+ if(key==='critical'&&card.id==='boat'){msg+=' Získáváš předmět: Mosazný přívěsek.';p.items=p.items||[];p.items.push('Mosazný přívěsek');}
+ if(key==='critical'&&card.id==='artifact'||key==='great'&&card.id==='artifact'){msg+=' Získáváš předmět: Amulet z hlubin.';p.items=p.items||[];p.items.push('Amulet z hlubin');}
+ if(key==='critical'&&['boat','plans','grave','dinner'].includes(card.id)){state.supplies++;}
+ if(key==='great'&&card.id==='boat')state.supplies++;
+ if(key==='critical'&&['witness','lens'].includes(card.id))p.san=Math.min(p.maxSan,p.san+1);
+ if(key==='partial'&&['boat','grave'].includes(card.id))p.hp=Math.max(0,p.hp-1);
+ if(key==='partial'&&['blackout','witness','lens'].includes(card.id))p.san=Math.max(0,p.san-1);
+ if(key==='partial'&&card.id==='dinner'||key==='partial'&&card.id==='plans')state.threat=Math.min(10,state.threat+1);
+ if(key==='fail'&&['boat','blackout','plans','witness','lens','grave','dinner','artifact'].includes(card.id))p.san=Math.max(0,p.san-1);
+ if(key==='fail'&&card.id==='witness')p.hp=Math.max(0,p.hp-1);
+ if(key==='fumble'){p.san=Math.max(0,p.san-(card.id==='boat'||card.id==='artifact'?2:1));if(['blackout','lens'].includes(card.id)||card.id==='boat')state.threat=Math.min(10,state.threat+1);if(card.id==='grave')p.hp=Math.max(0,p.hp-2);}
+ if(key==='critical'&&card.id==='blackout')p.san=Math.min(p.maxSan,p.san+1);
+ if(key==='great'&&card.id==='town')state.supplies++;
+ state.usedCards=state.usedCards||{};state.usedCards[p.location]=state.usedCards[p.location]||[];state.usedCards[p.location].push(card.id);
+ $('resultStamp').textContent=outcomeLabels[key];$('resultStamp').className='result-stamp '+(['critical','great','success'].includes(key)?'good':['fail','fumble'].includes(key)?'bad':'');$('resultText').textContent=msg;
+ $('revealedArea').classList.remove('hidden');$('cardContinue').onclick=()=>{$('cardModal').classList.add('hidden');document.body.classList.remove('modal-open');state.pendingCard=null;log(`${p.name}: ${card.title} – ${outcomeLabels[key]}.`);$('actionHint').textContent=msg;render();checkEnd();};
+}
+
+function deduce(){
+ if((state.party[state.activeChar]?.ap ?? 0)<1)return;let made=[];
+ if(state.clues.includes("D01")&&state.clues.includes("D02")&&!state.deductions.includes("entrance")){made.push("entrance");unlock("caves")}
+ if(state.clues.includes("D03")&&state.clues.includes("D07")&&!state.deductions.includes("cult")){made.push("cult");unlock("mansion")}
+ if(state.clues.includes("D04")&&state.clues.includes("D08")&&!state.deductions.includes("gate")){made.push("gate")}
+ if(!made.length){$("actionHint").textContent="Zatím nemáš žádnou novou kombinaci stop k vyhodnocení.";return}
+ spend();made.forEach(x=>{state.deductions.push(x);log("Dedukce odhalena: <b>"+({entrance:"Skrytý vstup pod majákem",cult:"Identita kultu",gate:"Způsob uzavření brány"}[x])+"</b>.")});render()
+}
+function rest(){let p=state.party[state.activeChar];if((p.ap ?? 0)<1||p.san>=p.maxSan)return;spend();p.san=Math.min(p.maxSan,p.san+1);log(`${p.name} si odpočine a obnoví 1 SAN.`);render()}
+function heal(){let p=state.party[state.activeChar];if((p.ap ?? 0)<1||p.hp>=p.maxHp)return;spend();p.hp=Math.min(p.maxHp,p.hp+(p.role==="Lékařka"?2:1));log(`${p.name} ošetřuje zranění a obnovuje zdraví.`);render()}
+function endTurn(){
+ if(state.ended)return;
+ // simple enemy pressure
+ if(state.enemy>0){let p=state.party.find(x=>x.location==="harbor")||state.party[0];p.hp=Math.max(0,p.hp-1);log("Kultista útočí ve stínech. "+p.name+" ztrácí 1 HP.");}
+ let ev=events[state.eventIndex%events.length];state.eventIndex++;
+ $("eventTitle").textContent=ev[0];$("eventText").textContent=ev[1];
+ if(ev[2]==="san")state.party.forEach(p=>p.san=Math.max(0,p.san-1));
+ if(ev[2]==="threat"){if(state.supplies>0){state.supplies--;state.threat=Math.max(0,state.threat-1)}else state.threat++}
+ if(ev[2]==="will"){let p=state.party[0],r=roll(),sum=r[0]+r[1]+p.attrs.VŮ; if(sum<9)p.san=Math.max(0,p.san-2);$("eventText").textContent+=` Hod: ${r[0]} + ${r[1]} + VŮ ${p.attrs.VŮ} = ${sum}.`}
+ if(ev[2]==="ambush"){state.enemy++;state.threat=Math.min(10,state.threat+1)}
+ if(ev[2]==="diary"&&!state.clues.includes("D01"))$("eventText").textContent+=" Deník můžeš stále najít v Přístavu.";
+ if(ev[2]==="visitor"){if(state.supplies>0){state.supplies--;state.party[0].san=Math.min(state.party[0].maxSan,state.party[0].san+1)}else state.threat++}
+ if(ev[2]==="water"){state.party.filter(p=>p.location==="harbor").forEach(p=>p.san=Math.max(0,p.san-1))}
+ state.ritual++;log(`Událost: <b>${ev[0]}</b>. Rituál postupuje na ${state.ritual}.`);
+ $("eventModal").classList.remove("hidden");document.body.classList.add("modal-open");$("setup").classList.add("hidden");render();checkEnd();
+}
+function nextRound(){if(state.ended)return;state.round++;if(state.round===2)unlock("cemetery");if(state.round===3)unlock("mansion");state.party.forEach(p=>p.ap=3);state.activeChar=0;log(`Začíná ${state.round}. kolo.`);render();if(state.round>7){finish(false,"Čas vypršel. Zvonění se mění v hluboké dunění. Brána se otevřela.");}}
+function checkEnd(){if(state.threat>=10)finish(false,"Hrozba města dosáhla 10. Blackwater padá do chaosu.");else if(state.ritual>=8)finish(false,"Rituál dosáhl svého vrcholu. Něco z hlubin odpovědělo.");}
+function finish(win,msg){state.ended=true;document.body.classList.add("modal-open");$("eventModal").classList.add("hidden");$("endTitle").textContent=win?"Brána je uzavřena":"Hlubiny se otevřely";$("endText").textContent=msg;$("endModal").classList.remove("hidden");}
+function setupChoices(){
+ let box=$("charChoices");box.innerHTML="";
+ Object.entries(investigators).forEach(([id,p])=>{let b=document.createElement("button");b.className="choice";b.innerHTML=`<b>${p.name}</b><br><small>${p.role} · ${p.maxHp} HP · ${p.maxSan} SAN</small>`;b.onclick=()=>{b.classList.toggle("selected");let ids=[...box.querySelectorAll(".selected")];if(ids.length>4)b.classList.remove("selected");$("startBtn").disabled=box.querySelectorAll(".selected").length===0};b.dataset.id=id;box.appendChild(b)})
+}
+function start(){
+ let ids=[...$("charChoices").querySelectorAll(".selected")].map(b=>b.dataset.id);if(!ids.length)return;
+ state.party=ids.map(id=>({...investigators[id],attrs:{...investigators[id].attrs},location:"harbor",ap:3}));state.selected="harbor";state.started=true;$("overlay").classList.add("hidden");log("Vyšetřování začíná. Skupina dorazila do Přístavu.");render()
+}
+function save(){localStorage.setItem("hlubinySave",JSON.stringify(state));$("actionHint").textContent="Hra byla uložena v tomto prohlížeči."}
+function load(){let raw=localStorage.getItem("hlubinySave");if(!raw)return false;try{state=JSON.parse(raw);state.usedCards=state.usedCards||{};state.pendingCard=null;$("overlay").classList.add("hidden");render();log("Načtena uložená hra.");return true}catch(e){return false}}
+function reset(){localStorage.removeItem("hlubinySave");location.reload()}
+document.querySelectorAll(".location").forEach(el=>el.addEventListener("click",()=>{let id=el.dataset.loc;if(!state.unlocked.includes(id))return;state.selected=id;render()}));
+$("moveBtn").onclick=move;$("investigateBtn").onclick=investigate;$("deduceBtn").onclick=deduce;$("restBtn").onclick=rest;$("healBtn").onclick=heal;
+$("endBtn").onclick=()=>{if(state.party.some(p=>p.ap>0)){$("actionHint").textContent="Kolo ukončíš i s nevyužitými akcemi. Každý vyšetřovatel má vlastní 3 AP."}endTurn();nextRound()};
+$("eventClose").onclick=()=>{$("eventModal").classList.add("hidden");document.body.classList.remove("modal-open");if(state.ended)return;render()};
+$("cardClose").onclick=()=>{$("cardModal").classList.add("hidden");document.body.classList.remove("modal-open")};
+$("startBtn").onclick=start;$("saveBtn").onclick=save;$("resetBtn").onclick=reset;$("restartAfter").onclick=reset;
+setupChoices();if(!load())$("overlay").classList.remove("hidden");
+</script>
+</body>
+</html>

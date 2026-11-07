@@ -25,7 +25,7 @@ function render(){
   $('heroStats').textContent=`Eleanor Whitmore · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
-  journal.render(investigation,rolling||state.ended);
+  journal.render(investigation,rolling||state.ended,rolling?[]:state.log);
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state),choice=selectedChoice(state,card);
   const result=visibleResult(state),deck=explorationView(state);
   $('deckName').textContent=deck.name;
@@ -102,6 +102,7 @@ for(const opener of document.querySelectorAll('[data-panel]')){
   opener.setAttribute('aria-haspopup','dialog');opener.setAttribute('aria-controls','details');
   opener.onclick=()=>{
     for(const panel of details.querySelectorAll('.detail-panel'))panel.hidden=panel.id!==opener.dataset.panel;
+    if(opener.dataset.panel==='investigation-journal')journal.select(({ 'journal-knowledge':'knowledge', 'journal-deductions':'deductions' })[opener.dataset.focus]||'evidence');
     details.showModal();
     if(opener.dataset.focus){const target=$(opener.dataset.focus);target.tabIndex=-1;target.focus();}
   };

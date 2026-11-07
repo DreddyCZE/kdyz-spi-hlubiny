@@ -25,9 +25,9 @@ Bootstrap [app.js](../src/ui/app.js) nadále vybírá jedinou výchozí prezenta
 
 ## Mapová metadata a assety
 
-[map.js](../src/data/map.js) je beze změny: stejná ID, `name`, `image` i procentní souřadnice. Názvy a popisy zůstávají v [locations.js](../src/data/locations.js). Klíčem bodu je stabilní ID; `x/y` jsou konečná čísla 0–100 od levého horního rohu. [renderMap](../src/ui/map.js) přijímá registr lokací, mapu, stav, příznak animace a callback přesunu. Kliknutí pouze předává existující `transition(move)`, dostupnost respektuje AP, odemčení, animaci i konec hry. Blackwater má od začátku stejných sedm odemčených lokací.
+[map.js](../src/data/map.js) zachovává stejná ID, `name` a procentní souřadnice; pouze `image` nyní odkazuje na optimalizovaný WebP. Názvy a popisy zůstávají v [locations.js](../src/data/locations.js). Klíčem bodu je stabilní ID; `x/y` jsou konečná čísla 0–100 od levého horního rohu. [renderMap](../src/ui/map.js) přijímá registr lokací, mapu, stav, příznak animace a callback přesunu. Kliknutí pouze předává existující `transition(move)`, dostupnost respektuje AP, odemčení, animaci i konec hry. Blackwater má od začátku stejných sedm odemčených lokací.
 
-[blackwater-map.svg](../src/assets/blackwater-map.svg) nyní obsahuje vloženou rasterovou ilustraci v SVG obalu se stejnou souřadnicovou plochou 1000×800. Je soběstačná, bez odkazů na síť nebo jiné soubory. Zachování původní cesty nevyžaduje změny mapových metadat. Nový podklad zachycuje město, komunikace, pobřeží, přístav, knihovnu, ústav, hřbitov, maják a jeskyni; neobsahuje texty, interaktivní značky ani pravidla. Jde o AI vytvořenou pracovní ilustraci, nikoli finální schválený art. [paper-grain.svg](../src/assets/paper-grain.svg) je vlastní drobná procedurální textura. Původ a prompt jsou v [ASSETS.md](ASSETS.md).
+[blackwater-map.webp](../src/assets/blackwater-map.webp) je přímo kódovaná rasterová ilustrace 1402×1122 px, 868 818 B (úspora 85,52 % proti SVG/base64). Bez resamplingu či ořezu; původní SVG odstraněno. Kompozice, procentní souřadnice a mobilní seznam se nemění. Mobilní náhled explicitně používá background-size 100% 100%, aby WebP zachovalo původní roztažení SVG bez ořezu. Jde o pracovní AI art, nikoli finální schválenou ilustraci. Původ, prompt a měření WebP/AVIF v [ASSETS.md](ASSETS.md). [paper-grain.svg](../src/assets/paper-grain.svg) zůstává původní drobnou texturou.
 
 ## Mobilní a úzká mapa
 
@@ -50,3 +50,5 @@ Tab/Shift+Tab prochází ovládání, Enter/mezerník aktivuje tlačítka. Výb�
 `npm test`, `npm run test:e2e`, `npm run build`, `git diff --check`. E2E běží proti produkčnímu buildu pod `/dist/` a pokrývá původní mechaniky, reload během hodu, koncový stav, fallback, dedukce a focus. Mapové testy navíc měří nulové překryvy/přesahy a ověřují klikání na všechny lokace při 320, 390 a 1440 px.
 
 Screenshoty před úpravami pocházejí z main `ce14593`, po úpravách ze stejné počáteční hry a stejných viewportů. [Porovnání před/po](test-artifacts/m3-0-2a/README.md): 1440×1000, 390×844 a 320×844. E2E je znovu generuje do `test-results` a příloh reportu. Kontrolované kopie jsou záměrné testovací artefakty v dokumentaci; `dist` a běžné výstupy testů zůstávají ignorované.
+
+Při budoucím načítání externích prezentačních definic bude nutné omezit také hodnoty CSS tokenů. Nynější allow-list kontroluje jen názvy a konfigurace je lokální a důvěryhodná; tato optimalizace mechanismus motivů nemění.

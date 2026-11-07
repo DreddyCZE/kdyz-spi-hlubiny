@@ -1,7 +1,7 @@
 // Presentation metadata only: coordinates are percentages of the map surface.
 export const blackwaterMap = Object.freeze({
   name: 'Blackwater',
-  image: './src/assets/blackwater-map.svg',
+  image: './src/assets/blackwater-map.webp',
   points: Object.freeze({
     'location-0': { x: 68, y: 69 },
     'location-1': { x: 42, y: 52 },

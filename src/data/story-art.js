@@ -1,9 +1,10 @@
 // Presentation-only art registry. Never consumed by rules or persisted game state.
-// Add optimized WebP paths here when approved illustrations are available.
+// Original generated illustrations; see docs/STORY-CARDS.md for provenance.
 export const storyArt = Object.freeze({
   fallback: './src/assets/blackwater-map.webp',
   byCardId: Object.freeze({
-    // '0-0': './src/assets/cards/lost-ship.webp',
+    '0-0': './src/assets/cards/lost-ship.webp',
+    '0-1': './src/assets/cards/man-in-fog.webp',
   }),
   byLocationId: Object.freeze({}),
 });

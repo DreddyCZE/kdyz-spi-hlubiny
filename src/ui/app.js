@@ -1,4 +1,5 @@
 import { presentation } from '../data/presentation.js';
+import { reachableOutcomeKeys } from './story-card.js';
 import { imageForCard } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
@@ -40,16 +41,16 @@ function render(){
     const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
   }));
-  // Preview communicates the six possible tiers, never their hidden text or effects.
+  // Only public test parameters determine the reachable tiers; no hidden definitions.
   const preview=$('outcomes');
   preview.hidden=!choice?.test||Boolean(result)||rolling;
   preview.replaceChildren();
   if(!preview.hidden){
     const heading=document.createElement('p');heading.className='outcome-heading';heading.textContent='Možné následky · odhalí je až hod';
     preview.append(heading);
-    for(const tier of ['criticalSuccess','greatSuccess','success','partialSuccess','failure','criticalFailure']){
+    for(const tier of reachableOutcomeKeys(choice)){
       const slot=document.createElement('span');slot.className='outcome-slot';
-      slot.textContent='▒▒▒▒▒▒▒▒▒▒';slot.setAttribute('aria-label','Skrytý následek');
+      slot.textContent=labels[tier];slot.setAttribute('aria-label',labels[tier]+' · následek je skrytý');
       preview.append(slot);
     }
   }

@@ -8,5 +8,6 @@ test('art registry prefers stable card ID, then location, then fallback', () => 
   assert.equal(imageForCard({ id: 'unknown', locationId: 'location-0' }, registry), 'location.webp');
   assert.equal(imageForCard({ id: 'unknown', locationId: 'unknown' }, registry), 'fallback.webp');
   assert.equal(imageForCard(null, registry), 'fallback.webp');
-  assert.equal(imageForCard({ id: '0-0', locationId: 'location-0' }), storyArt.fallback);
+  assert.equal(imageForCard({ id: '0-0', locationId: 'location-0' }), './src/assets/cards/lost-ship.webp');
+  assert.equal(imageForCard({ id: '0-1' }), './src/assets/cards/man-in-fog.webp');
 });

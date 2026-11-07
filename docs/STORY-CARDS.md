@@ -8,3 +8,8 @@
 
 ## Kontroly
 CI se spustí po vytvoření PR. Před schválením je třeba potvrdit unit, E2E, build a vizuální kontrolu mobilu/desktopu.
+
+## Mapování ilustrací
+`src/data/story-art.js` obsahuje registr `byCardId`, volitelný `byLocationId` a `fallback`. Přednost má stabilní ID karty, potom lokace a nakonec existující WebP mapa. Všechna URL jsou relativní vůči kořeni aplikace a v UI se řeší přes `document.baseURI`, aby fungoval i deploy pod `/dist/`. Registr neovlivňuje pravidla ani save.
+
+**Pozor:** finální ilustrace z chatu dosud nebyly nahrány jako soubory do GitHubu. Před přidáním cest musí být odpovídající optimalizované WebP skutečně commitnuté.

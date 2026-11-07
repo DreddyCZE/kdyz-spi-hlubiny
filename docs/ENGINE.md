@@ -37,3 +37,5 @@ Vadná přítomná novější verze se nenahrazuje starší rozehranou hrou. Nep
 ## Ověření
 
 `npm test`, `npm run test:e2e`, `npm run build`, `git diff --check`. Unit testy používají i jiné ID než Blackwater. Chromium průchody pokrývají získání důkazů, explicitní dedukci, znalost, zákaz opakování a reload po obyčejném, velkém i kritickém výsledku. Sedm kol a dosavadní rituál pokrývají původní regresní testy; v M2.2 se nepřelaďují.
+
+Metadata přesunu: `createContent(cards, definitions, { locations, locationMetadata })` přijímá ID lokací a volitelné pole `{ id, name }`. Název musí být neprázdný a ID unikátní a existující. Obsah vystavuje neměnnou mapu `locationsById`, kterou používá přechod `move` pro deník. Při chybějícím názvu používá ID; při explicitním registru lokací nikdy nepřebírá názvy výchozího scénáře. Výchozí adaptér nadále dodává původní názvy Blackwater. Formát uloženého stavu se nemění.

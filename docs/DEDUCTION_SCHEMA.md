@@ -76,3 +76,7 @@ Graf závislostí má hrany od dedukce ke všem dedukcím, které mohou vytvoři
 ## Minimální Blackwater příklad
 
 Tři stávající důkazy: `reward-2` (Deník), `reward-5` (Svědectví rybáře), `harbor-note-copy` (Opis poznámky). Cesty jsou `(Deník AND Svědectví)` nebo `(Deník AND Opis)`. Dedukce `blackwater-follow-the-route` odemkne jedinou znalost `blackwater-lighthouse-connection`. Nepřidává karty, neuzamyká původní lokace ani nemění tempo hry. Další registry pouze doplňují metadata všech dosavadních důkazů.
+
+## Opravy revize PR #3
+
+Obecné podmínky `minRound` a `maxRound` přijímají kladná bezpečná celá čísla včetně 12. Neurčují délku partie. Sedmikolový průběh prvního scénáře a validace jeho uloženého stavu zůstávají beze změny.

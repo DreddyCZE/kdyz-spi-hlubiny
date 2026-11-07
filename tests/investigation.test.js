@@ -36,6 +36,40 @@ test('another scenario runs and persists through the same game and storage APIs'
   const storage=memory();assert.ok(save(storage,n,data));assert.deepEqual(load(storage,data),n);
   assert.equal(validState(n),false); // Registries from another scenario must not be silently accepted.
 });
+
+test('generic round conditions accept round 12 and safe positive integers independently of game length',()=>{
+  for(const type of ['minRound','maxRound']){
+    for(const round of [1,12,Number.MAX_SAFE_INTEGER])assert.deepEqual(validateCondition({type,round},refs),[]);
+    for(const round of [0,-1,1.5,'12',NaN,Infinity,Number.MAX_SAFE_INTEGER+1])assert.ok(validateCondition({type,round},refs).length);
+  }
+  const min={type:'minRound',round:12},max={type:'maxRound',round:12};
+  assert.equal(conditionMet({...newState(),round:11},min),false);
+  assert.equal(conditionMet({...newState(),round:12},min),true);
+  assert.equal(conditionMet({...newState(),round:12},max),true);
+  assert.equal(conditionMet({...newState(),round:13},max),false);
+ const card=structuredClone(content.cards[0]);card.conditions=[min,max];
+ assert.doesNotThrow(()=>createContent([card]));
+ const def=fixture();def.deductions[0].conditions=min;
+  assert.deepEqual(validateInvestigation(def,refs),[]);
+});
+
+test('move uses the active scenario location metadata, pays once and persists its log',()=>{
+  const locationMetadata=[{id:'room-a',name:'Badatelna'},{id:'room-b',name:'Archiv svědectví'}];
+  const data=createContent([],fixture(),{...refs,itemEvidence:{},locationMetadata});
+ for(const invalid of [null,[{id:'unknown',name:'Archiv'}],[{id:'room-a',name:''}],[locationMetadata[0],locationMetadata[0]]])
+  assert.throws(()=>createContent([],fixture(),{...refs,itemEvidence:{},locationMetadata:invalid}),/locationMetadata/);
+ assert.ok(Object.isFrozen(data.locationsById['room-b']));
+ const s=newState(data),action={type:'move',locationId:'room-b'},n=transition(s,action,data);
+  assert.equal(n.locationId,'room-b');assert.equal(n.log[0],'Přesun: Archiv svědectví');assert.equal(n.ap,2);assert.equal(s.ap,3);
+  assert.equal(transition(n,action,data),n);
+  const storage=memory();assert.ok(save(storage,n,data));assert.deepEqual(load(storage,data),n);
+  // A different scenario may reuse old IDs; it must never inherit Blackwater names.
+  const reused=createContent([],fixture(),{...refs,locations:['location-0','location-1'],itemEvidence:{},locationMetadata:[{id:'location-1',name:'Cizí archiv'}]});
+  assert.equal(transition(newState(reused),{type:'move',locationId:'location-1'},reused).log[0],'Přesun: Cizí archiv');
+  const metadataFree=createContent([],fixture(),{...refs,itemEvidence:{}});
+  assert.equal(transition(newState(metadataFree),action,metadataFree).log[0],'Přesun: room-b');
+  assert.equal(transition(newState(),{type:'move',locationId:'location-1'}).log[0],'Přesun: Staré město');
+});
 test('all, any, not, knowledge, world flags and deduction references compose without eval',()=>{
   const s={...withEvidence(['e-a']),knowledge:['k-a'],deductions:{'d-a':1},flags:{'world-a':false}};
   const c={type:'all',conditions:[{type:'hasKnowledge',id:'k-a'},{type:'deductionCompleted',id:'d-a'},{type:'flagEquals',id:'world-a',value:false},{type:'not',condition:{type:'hasEvidence',id:'e-b'}}]};

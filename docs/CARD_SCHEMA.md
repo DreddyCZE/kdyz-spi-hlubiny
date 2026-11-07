@@ -46,8 +46,8 @@ Testovaná volba má právě šest výsledků: `criticalSuccess`, `greatSuccess`
 | `hasItem` | `id` | Předmět je v inventáři |
 | `hasEvidence` | `id` | Důkaz je ve sbírce nebo ve vlastněném složeném předmětu |
 | `flagEquals` | `id`, `value` | Existující příznak přesně odpovídá hodnotě |
-| `minRound` | `round` | Kolo ≥ celé číslo 1–7 |
-| `maxRound` | `round` | Kolo ≤ celé číslo 1–7 |
+| `minRound` | `round` | Kolo ≥ kladné bezpečné celé číslo |
+| `maxRound` | `round` | Kolo ≤ kladné bezpečné celé číslo |
 | `locationUnlocked` | `id` | Lokace je odemčená |
 
 Prázdné pole platí. Chybějící příznak se nerovná `false`. `value` je boolean, řetězec nebo konečné číslo. ID musejí patřit do příslušného registru. Neznámé operace a pole jsou chyby.

@@ -16,11 +16,17 @@ export const itemEvidence=Object.freeze(Object.fromEntries(rewards.filter(r=>r.k
 export const rewardNames=Object.fromEntries([...rewards,{id:'harbor-note-copy',name:'Opis poznámky'}].map(r=>[r.id,r.name]));
 const freeze=x=>{Object.freeze(x);for(const v of Object.values(x))if(v&&typeof v==='object'&&!Object.isFrozen(v))freeze(v);return x;};
 export function createContent(cards, investigation = investigationDefinitions, overrides = {}){
-  const {itemEvidence:composites=itemEvidence,...externalRefs}=overrides;
+  const {itemEvidence:composites=itemEvidence,locationMetadata=Object.hasOwn(overrides,'locations')?[]:locations,...externalRefs}=overrides;
   const refs={...catalog,...externalRefs,evidence:investigation.evidence?.map(e=>e.id)||[],knowledge:investigation.knowledge?.map(k=>k.id)||[],deductions:investigation.deductions?.map(d=>d.id)||[],cards:cards.map(c=>c.id),choices:cards.flatMap(c=>c.choices.map(o=>o.id))};
   const model=createInvestigation(investigation,refs,composites);
   assertCards(cards,refs);
+  if(!Array.isArray(locationMetadata))throw new Error('locationMetadata: očekáváno pole lokací');
+  const locationsById=Object.fromEntries(refs.locations.map(id=>[id,{id,name:id}])),seen=new Set();
+  locationMetadata.forEach((location,i)=>{
+    if(!location||!refs.locations.includes(location.id)||seen.has(location.id)||typeof location.name!=='string'||!location.name.trim())throw new Error(`locationMetadata[${i}]: očekáváno unikátní existující ID lokace a neprázdný název`);
+    seen.add(location.id);locationsById[location.id]={id:location.id,name:location.name};
+  });
   const definitions=freeze(structuredClone(cards));
-  return Object.freeze({cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs))});
+  return Object.freeze({cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
 }
 export const content=createContent([...migrated,exampleCard]);

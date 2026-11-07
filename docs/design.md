@@ -30,3 +30,5 @@ Nulové HP/SAN, Hrozba 10, Rituál 8 nebo konec sedmého kola ukončí scénář
 [Engine](../src/engine/game.js) nezná DOM, časovače ani úložiště. `transition` vrací nový stav při platné akci, jinak původní. Náhoda se předává jako hotové kostky. [Data](../src/data/locations.js) používají pojmenovaná pole a explicitní efekty. [UI](../src/ui/app.js) zajišťuje ovládání a persistenci.
 
 Automatické testy: prahy hodů, kritické výsledky, ceny akcí, neměnnost vstupu, souběžné poškození, vyčerpání karet, konce hry, serializace a neplatné úložiště. Ručně kontroluj desktop i mobil: pohyb, výběr postupu, blokaci během hodu, reset během hodu, obnovu stránky, prázdnou lokaci, sedmé kolo a odmítnuté ukládání.
+
+Revize PR #3 odděluje rozsah obecných podmínek kol od délky prvního scénáře a předává názvy lokací přes metadata aktivního obsahu. Nemění sedmikolová pravidla, rituál, UI ani formát uložených her.

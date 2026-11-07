@@ -27,7 +27,7 @@ export function validateCondition(condition, refs, path = 'condition') {
       if (c.type === 'flagEquals') { allowed.push('value'); if (!scalar(c.value)) fail(p+'.value', 'očekávána skalární hodnota'); }
     } else if (c.type === 'minRound' || c.type === 'maxRound') {
       allowed.push('round');
-      if (!Number.isInteger(c.round) || c.round < 1 || c.round > 7) fail(p+'.round','očekáváno celé číslo 1–7');
+      if (!Number.isSafeInteger(c.round) || c.round < 1) fail(p+'.round','očekáváno kladné bezpečné celé číslo');
     } else fail(p+'.type', 'neznámý typ podmínky');
     for (const key of Object.keys(c)) if (!allowed.includes(key)) fail(p+'.'+key, 'neznámé pole');
     stack.delete(c);

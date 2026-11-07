@@ -11,3 +11,9 @@ Základ větve `feature/m2-2-deductions`: aktuální `origin/main` na commitu `9
 - Desktopový snímek celého okna po E2E vizuálně zkontrolován: nový deník používá stávající panely, obsah a ovládání jsou čitelné bez překryvů. Herní styl nebyl předělán.
 
 Omezení: konzervativní graf odmítá i cyklus v některé alternativní či záporné větvi. Nesimuluje se dosažitelnost přes sekvence budoucích karetních akcí. Dedukce se provádějí hromadně explicitním tlačítkem, nikoli výběrem jednotlivé dedukce. Metadata jsou JSON bez vykonatelného kódu. Statické zdroje nejsou utajené před DevTools a synchronizace více záložek není implementovaná. Vyvážení, délka hry a tempo příběhu nebyly předmětem kontroly ani změny.
+
+## Ověření oprav revize PR #3
+
+- Unit testy: 40/40, včetně 12. kola, neplatných čísel a přesunu v cizím scénáři (vlastní názvy i kolidující ID), ceny AP, duplicitního přesunu a uložení/načtení deníku.
+- Původní test sedmi kol a migrace uložených her nadále procházejí.
+- Chromium E2E: 4/4 prošlo; `npm run build` úspěšný; `git diff --check` bez chyb. UI a referenční prototypy nebyly upraveny.

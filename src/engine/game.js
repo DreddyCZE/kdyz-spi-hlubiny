@@ -1,4 +1,3 @@
-import { locations } from '../data/locations.js';
 import { content } from './content.js';
 import { attributes } from './schema.js';
 import { conditionMet, deduce, publicInvestigation, rememberEvidence } from './investigation.js';
@@ -67,7 +66,7 @@ export function transition(state,action,data=content){
     }
     case 'move':
       if(!data.refs.locations.includes(action.locationId)||!s.unlockedLocations.includes(action.locationId)||action.locationId===s.locationId||s.ap<1)return state;
-      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=null;s.log.unshift('Přesun: '+(locations.find(l=>l.id===s.locationId)?.name||s.locationId));break;
+      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=null;s.log.unshift('Přesun: '+data.locationsById[s.locationId].name);break;
     case 'choose':
       if(!c||!c.choices.some(o=>o.id===action.choiceId&&canChoose(s,c,o,data)))return state;
       s.choiceId=action.choiceId;break;

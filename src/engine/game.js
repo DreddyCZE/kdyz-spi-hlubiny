@@ -1,5 +1,5 @@
 import { locations } from '../data/locations.js';
-import { content, catalog } from './content.js';
+import { content, catalog, itemEvidence } from './content.js';
 import { attributes } from './schema.js';
 export { attributes } from './schema.js';
 export const labels={criticalSuccess:'Kritický úspěch',greatSuccess:'Velký úspěch',success:'Úspěch',partialSuccess:'Částečný úspěch',failure:'Neúspěch',criticalFailure:'Kritické selhání'};
@@ -7,7 +7,7 @@ export function newState(){return {version:2,revision:0,locationId:'location-0',
 export function meetsConditions(s,conditions=[]){return conditions.every(c=>{
   switch(c.type){
     case 'hasItem':return s.inventory.includes(c.id);
-    case 'hasEvidence':return s.evidence.includes(c.id);
+    case 'hasEvidence':return s.evidence.includes(c.id)||s.inventory.some(id=>Object.hasOwn(itemEvidence,id)&&itemEvidence[id].includes(c.id));
     case 'flagEquals':return Object.hasOwn(s.flags,c.id)&&s.flags[c.id]===c.value;
     case 'minRound':return s.round>=c.round;
     case 'maxRound':return s.round<=c.round;

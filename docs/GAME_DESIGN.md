@@ -24,6 +24,8 @@ Verze 2 používá klíč `hlubiny-v2`. Načítání ověřuje schéma, rozsahy,
 
 ## Ověření a další milník
 
+Oprava připomínky PR #1: „Deník a přívěsek“ datově obsahuje důkaz „Deník“. Porovnání poznámky je proto dostupné po běžném, velkém i kritickém úspěchu na Ztracené lodi a po načtení starších her. Žádný předmět ani důkaz se při načtení nepřidává; stav a jeho verze zůstávají kompatibilní.
+
 Testy pokrývají regresi M1, šest výsledků, všechny podmínky a efekty, různé volby, postup bez hodu, nedostatek AP, atomický rollback, duplicity, opakovatelnost, validátor, veřejnou projekci a save/migraci. Texty migrace se automaticky porovnávají s nezměněným prototypem.
 
 Pro M2.2 lze navrhnout bohatší vysvětlení podmínek v UI, explicitní balíčky s návratem k dříve nepřístupným kartám a automatické prohlížečové testy v CI. Případná délka 12 kol nebo jiné rituální pravidlo vyžaduje samostatné schválení návrhu; v M2.1 se neuplatňuje.

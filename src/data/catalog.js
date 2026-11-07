@@ -2,7 +2,8 @@ export const rewards = [
   {
     "id": "reward-1",
     "name": "Deník a přívěsek",
-    "kind": "item"
+    "kind": "item",
+    "evidenceIds": ["reward-2"]
   },
   {
     "id": "reward-2",

@@ -137,3 +137,29 @@ test('M1 saves migrate to stable IDs without mutating their source key',()=>{
   assert.equal(s.version,2);assert.equal(s.result.key,'criticalSuccess');assert.equal(s.inventory[0],'reward-1');assert.equal(resolve(s),s);assert.equal(storage.getItem('hlubiny-v1'),raw);assert.ok(save(storage,s));
   old.result.total=999;assert.equal(migrateV1(old),null);
 });
+
+test('diary comparison accepts ordinary, great and critical boat rewards after save/load',()=>{
+  for(const [dice,key] of [[[3,3],'success'],[[4,5],'greatSuccess'],[[6,6],'criticalSuccess']]){
+    let s=resolve(newState(),dice);assert.equal(s.result.key,key);
+    const storage=memory();assert.ok(save(storage,s));s=load(storage);
+    // Inspect the example using only its cursor; keep the actual earned rewards.
+    s={...s,cursors:{'location-0':2},choiceId:null,result:null};
+    const choice=currentCard(s).choices.find(o=>o.id==='harbor-note-copy');
+    assert.equal(choice.available,true,key);
+    const copied=resolve(s,undefined,choice.id);assert.ok(copied.evidence.includes('harbor-note-copy'));assert.equal(copied.ap,s.ap-1);
+  }
+  for(const evidence of [[],['reward-3']]){
+    const s={...exampleState(),evidence};assert.equal(currentCard(s).choices.find(o=>o.id==='harbor-note-copy').available,false);
+    assert.equal(resolve(s,undefined,'harbor-note-copy'),s);
+  }
+});
+
+test('M1 diary and composite saves both retain diary comparison without rewriting their rewards',()=>{
+  for(const name of ['Deník','Deník a přívěsek']){
+    const old={version:1,place:0,round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[name],indices:{0:2},choice:0,resolved:{},result:null,ended:false,log:['M1']};
+    const s=migrateV1(old);assert.ok(s);
+    assert.equal(currentCard(s).choices.find(o=>o.id==='harbor-note-copy').available,true,name);
+    assert.deepEqual([...s.inventory,...s.evidence].map(id=>rewardNames[id]),[name]);
+    assert.ok(resolve(s,undefined,'harbor-note-copy').evidence.includes('harbor-note-copy'));
+  }
+});

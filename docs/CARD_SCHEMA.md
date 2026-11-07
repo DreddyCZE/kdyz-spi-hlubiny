@@ -6,6 +6,8 @@ Zdrojové definice: [cards.js](../src/data/cards.js), [example-card.js](../src/d
 
 ID je neprázdný řetězec odpovídající `[a-z0-9][a-z0-9-]*`. ID karty a ID volby jsou každé globálně unikátní ve svém prostoru; nemění se při přejmenování textů nebo přesunu v poli. Původní ID `0-0` až `6-0` a `location-0` až `location-6` zůstávají. Volby mají ID například `0-0-choice-1`. Předměty a důkazy mají stabilní ID `reward-1` atd. v [registru](../src/data/catalog.js); jejich číslování se nesmí přegenerovat. UI převádí ID zpět na české názvy. Složené odměny M1 (například „Deník a přívěsek“) zůstávají jednou položkou, aby migrace neměnila jejich obsah.
 
+Složený předmět může mít v registru volitelné `evidenceIds`: pole unikátních existujících ID důkazů. Například `reward-1` („Deník a přívěsek“) obsahuje `reward-2` („Deník“). Podmínka `hasEvidence` platí pro přímý důkaz i pro důkaz obsažený ve vlastněném předmětu. Obsah se neodvozuje z názvu, nenavyšuje odměny a nevytváří duplicitní položku v UI. Po odebrání složeného předmětu přestane obsah plnit podmínku, pokud důkaz nebyl získán samostatně. Registry se ověřují při načtení obsahu. Uložený stav se nemění, takže stejné pravidlo platí pro existující v2 i migrované M1 hry.
+
 ## Karta
 
 | Pole | Význam |
@@ -40,7 +42,7 @@ Testovaná volba má právě šest výsledků: `criticalSuccess`, `greatSuccess`
 | `type` | Další pole | Podmínka |
 | --- | --- | --- |
 | `hasItem` | `id` | Předmět je v inventáři |
-| `hasEvidence` | `id` | Důkaz je ve sbírce |
+| `hasEvidence` | `id` | Důkaz je ve sbírce nebo ve vlastněném složeném předmětu |
 | `flagEquals` | `id`, `value` | Existující příznak přesně odpovídá hodnotě |
 | `minRound` | `round` | Kolo ≥ celé číslo 1–7 |
 | `maxRound` | `round` | Kolo ≤ celé číslo 1–7 |

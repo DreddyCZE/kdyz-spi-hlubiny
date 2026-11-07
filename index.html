@@ -1,1 +1,123 @@
-<!doctype html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Když spí hlubiny</title><link rel="stylesheet" href="./src/ui/styles.css"></head><body><main><header class="top"><div><h1>KDYŽ SPÍ HLUBINY</h1><div class="muted">Světlo z hlubin · karetní vyšetřování</div></div><div class="stats"><span class="stat">Kolo <b id="round"></b>/7</span><span class="stat">Hrozba <b id="threat"></b>/10</span><span class="stat">Rituál <b id="ritual"></b>/8</span><span class="stat">AP <b id="ap"></b>/3</span></div></header><div class="layout"><aside><section class="panel"><h2>Lokace</h2><div class="places" id="places"></div><p class="muted">Přesun do jiné lokace stojí 1 AP.</p></section><section class="panel"><h2>Vyšetřovatel</h2><div id="heroStats"></div><div class="actions"><button id="endRound">Další kolo</button><button id="reset">Nová hra</button></div></section><section class="panel"><h2>Deník</h2><div class="log" id="log" role="log" aria-live="polite"></div></section></aside><div><div class="hero"><h2 id="placeTitle"></h2><div class="muted" id="placeDesc"></div></div><section class="card"><div class="tag" id="cardTag"></div><h2 id="cardTitle"></h2><p class="story" id="cardStory"></p><div class="choices"><b id="challenge"></b><div class="muted" style="color:#625c50">Vyber postup. Obtížnost je známá, následky zůstávají skryté.</div><div id="choices"></div></div><div class="outcomes" id="outcomes"></div><div class="actions"><button class="primary" id="roll">🎲 Hodit kostkami</button><button id="next">Další karta</button></div><div class="dicebox" id="dicebox"><div>HOD KOSTKAMI</div><div><span class="die" id="die1">?</span><span class="die" id="die2">?</span></div><div id="sum" aria-live="polite"></div><div class="reveal" id="reveal" role="status"></div></div></section><section class="panel" style="margin-top:15px"><h2>Inventář a důkazy</h2><div class="inventory" id="inventory"></div></section></div></div></main><script type="module" src="./src/ui/app.js"></script></body></html>
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Když spí hlubiny</title>
+<link rel="stylesheet" href="./src/ui/styles.css">
+</head>
+<body>
+<a class="skip" href="#cardTitle">Přejít na příběh</a>
+<main>
+<header class="top">
+<div>
+<div class="eyebrow">Světlo z hlubin · karetní vyšetřování</div>
+<h1>KDYŽ SPÍ HLUBINY</h1>
+</div>
+<div class="stats" aria-label="Stav hry">
+<span class="stat">Kolo <b id="round">
+</b>/7</span>
+<span class="stat">Hrozba <b id="threat">
+</b>/10</span>
+<span class="stat">Rituál <b id="ritual">
+</b>/8</span>
+<span class="stat">HP <b id="hp">
+</b>/6</span>
+<span class="stat">SAN <b id="san">
+</b>/8</span>
+<span class="stat">AP <b id="ap">
+</b>/3</span>
+</div>
+</header>
+<div class="layout">
+<section class="map-panel" aria-label="Mapa scénáře">
+<div class="map-heading">
+<div class="eyebrow">Pobřežní vyšetřování</div>
+<h2 id="mapTitle">
+</h2>
+<p>Přesun do jiné lokace stojí 1 AP.</p>
+</div>
+<div class="places" id="places">
+</div>
+<div class="map-caption">
+<span>◉ Aktuální</span>
+<span>◇ Dostupná</span>
+<span>▣ Zamčená</span>
+</div>
+<div class="hero">
+<h2 id="placeTitle">
+</h2>
+<p id="placeDesc">
+</p>
+</div>
+</section>
+<section class="card" aria-labelledby="cardTitle">
+<div class="tag" id="cardTag">
+</div>
+<h2 id="cardTitle" tabindex="-1">
+</h2>
+<p class="story" id="cardStory">
+</p>
+<div class="choices">
+<b id="challenge">
+</b>
+<p class="hint">Vyber postup. Obtížnost je známá, následky zůstávají skryté.</p>
+<div id="choices">
+</div>
+</div>
+<div id="outcomes">
+</div>
+<div class="actions">
+<button class="primary" id="roll">🎲 Hodit kostkami</button>
+<button id="next">Další karta</button>
+</div>
+<div class="dicebox" id="dicebox">
+<div>HOD KOSTKAMI</div>
+<div>
+<span class="die" id="die1">?</span>
+<span class="die" id="die2">?</span>
+</div>
+<div id="sum" aria-live="polite">
+</div>
+<div class="reveal" id="reveal" role="status">
+</div>
+</div>
+</section>
+</div>
+<footer class="investigator-bar">
+<button data-panel="investigator">Vyšetřovatel</button>
+<button data-panel="inventory-panel">Inventář</button>
+<button data-panel="investigation-journal">Deník · důkazy</button>
+<button data-panel="investigation-journal" data-focus="journal-knowledge">Znalosti</button>
+<button data-panel="investigation-journal" data-focus="journal-deductions">Dedukce</button>
+<button data-panel="history">Herní záznam</button>
+<div class="actions">
+<button id="endRound">Další kolo</button>
+<button id="reset">Nová hra</button>
+</div>
+</footer>
+<p id="saveStatus" role="status">
+</p>
+<dialog id="details" aria-label="Přehled vyšetřování">
+<button id="closeDetails" class="close">Zavřít přehled</button>
+<section id="investigator" class="detail-panel" hidden>
+<h2>Vyšetřovatel</h2>
+<div id="heroStats">
+</div>
+</section>
+<section id="inventory-panel" class="detail-panel" hidden>
+<h2>Inventář a důkazy</h2>
+<div id="inventory">
+</div>
+</section>
+<section id="history" class="detail-panel" hidden>
+<h2>Herní záznam</h2>
+<div id="log" role="log" aria-live="polite">
+</div>
+</section>
+</dialog>
+</main>
+<script type="module" src="./src/ui/app.js">
+</script>
+</body>
+</html>

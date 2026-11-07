@@ -33,3 +33,7 @@ Testy pokrývají regresi M1, šest výsledků, všechny podmínky a efekty, rů
 Dedukování je explicitní bezplatná akce v deníku, nikdy skrytý důsledek renderování. Datové podmínky kombinují `all`, `any`, `not`, důkazy, znalosti a příznaky světa. Výsledkem může být znalost, odemčení volby/karty/lokace nebo příznak. Cyklické definice jsou odmítnuté. Jednorázové dedukce se neopakují; další výslovná akce může zopakovat jen definici s `repeatable: true`.
 
 Testovací Blackwater obsah používá Deník + Svědectví rybáře nebo Deník + Opis poznámky pro odvození „Spojení s majákem“. Tato znalost nemění obtížnost, lokace ani postup rituálu. Podrobnosti: [DEDUCTION_SCHEMA.md](DEDUCTION_SCHEMA.md). Dvanáct kol, tempo příběhu a jiné rituální pravidlo zůstávají mimo tento milník.
+
+## Digitální herní stůl M3.0.1
+
+Nové responzivní UI s mapou, příběhovou kartou a modálními přehledy popisuje [UI.md](UI.md). Jde o prezentační změnu bez úprav pravidel a balancu.

@@ -33,6 +33,10 @@ V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Work
 
 Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v3`. Platné uložené hry M1 (`hlubiny-v1`) a M2.1 (`hlubiny-v2`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
 
+## M3.0.1 – digitální herní stůl
+
+Responzivní mapa Blackwater, skutečná příběhová karta a spodní lišta přehledů nahrazují původní tabulkové rozhraní. Pravidla, veřejné API i uložené hry zůstávají kompatibilní. [UI a mapová metadata](docs/UI.md), [desktop](docs/test-artifacts/m3-0-1/desktop.png) a [mobil](docs/test-artifacts/m3-0-1/mobile.png).
+
 ## M2.2 – důkazy a dedukce
 
 Deník odděluje získané důkazy, známé znalosti a provedené dedukce. „Vyhodnotit důkazy“ je bezplatná explicitní akce; před splněním podmínek se skryté dedukce ani budoucí znalosti nezobrazují. Obecný engine nemá pravidla Blackwater, jen datové operace a validátor. Tři existující důkazy ilustrují dvě cesty ke stejné znalosti. Sedm kol, rituál a obtížnosti se nemění.

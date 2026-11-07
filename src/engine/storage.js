@@ -1,22 +1,32 @@
 import { newState, evaluate, attributes, isEnded, currentCard, deck } from './game.js';
-import { content, catalog } from './content.js';
+import { content } from './content.js';
 import { rewards } from '../data/catalog.js';
 import { isRecord } from './schema.js';
-export const SAVE_KEY='hlubiny-v2';
+import { rememberEvidence } from './investigation.js';
+export const SAVE_KEY='hlubiny-v3';
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const uniqueIDs=(a,allowed)=>Array.isArray(a)&&a.length<=allowed.length&&new Set(a).size===a.length&&a.every(id=>allowed.includes(id));
-export function validState(s){
-  if(!isRecord(s)||s.version!==2||Object.keys(s).sort().join()!==Object.keys(newState()).sort().join())return false;
+export function validState(s,data=content){
+  const catalog=data.refs;
+  if(!isRecord(s)||s.version!==3||Object.keys(s).sort().join()!==Object.keys(newState(data)).sort().join())return false;
   if(!Number.isSafeInteger(s.revision)||s.revision<0||!catalog.locations.includes(s.locationId))return false;
   for(const [k,max] of Object.entries({round:7,ap:3,hp:6,san:8,threat:10,ritual:8}))if(!Number.isInteger(s[k])||s[k]<(k==='round'?1:0)||s[k]>max)return false;
   if(typeof s.ended!=='boolean'||s.ended!==isEnded(s))return false;
   if(!uniqueIDs(s.inventory,catalog.items)||!uniqueIDs(s.evidence,catalog.evidence)||!uniqueIDs(s.unlockedLocations,catalog.locations)||!s.unlockedLocations.includes(s.locationId))return false;
+  if(!uniqueIDs(s.knowledge,catalog.knowledge)||!uniqueIDs(s.unlockedCards,data.refs.cards)||!uniqueIDs(s.unlockedChoices,data.refs.choices))return false;
+  if(!isRecord(s.deductions)||!Object.entries(s.deductions).every(([id,count])=>{
+    const d=data.investigation.deductions.find(d=>d.id===id);
+    const grants={addKnowledge:'knowledge',unlockCard:'unlockedCards',unlockChoice:'unlockedChoices',unlockLocation:'unlockedLocations'};
+    return d&&Number.isSafeInteger(count)&&count>=1&&count<=s.revision&&(d.repeatable||count===1)&&d.effects.every(e=>!grants[e.type]||s[grants[e.type]].includes(e.id));
+  }))return false;
+  // A composite's information is durable in v3, not inferred only while carried.
+  if(s.inventory.some(id=>(data.investigation.itemEvidence[id]||[]).some(e=>!s.evidence.includes(e))))return false;
   if(!isRecord(s.flags)||!Object.entries(s.flags).every(([id,v])=>catalog.flags.includes(id)&&(typeof v==='boolean'||typeof v==='string'&&v.length<1000||Number.isFinite(v))))return false;
   if(!Array.isArray(s.log)||s.log.length>100||!s.log.every(t=>typeof t==='string'&&t.length<2000))return false;
-  if(!isRecord(s.cursors)||!Object.entries(s.cursors).every(([id,n])=>catalog.locations.includes(id)&&Number.isInteger(n)&&n>=0&&n<=deck({...s,locationId:id}).length))return false;
+  if(!isRecord(s.cursors)||!Object.entries(s.cursors).every(([id,n])=>catalog.locations.includes(id)&&Number.isInteger(n)&&n>=0&&n<=deck({...s,locationId:id},data).length))return false;
   if(!isRecord(s.resolved))return false;
   for(const [id,r] of Object.entries(s.resolved)){
-    const c=Object.hasOwn(content.byId,id)?content.byId[id]:null;
+    const c=Object.hasOwn(data.byId,id)?data.byId[id]:null;
     if(!c||!isRecord(r)||Object.keys(r).sort().join()!=='cardId,choiceId,dice,key,revision,total'||r.cardId!==id||!Number.isSafeInteger(r.revision)||r.revision<1||r.revision>s.revision)return false;
     const o=c.choices.find(o=>o.id===r.choiceId);if(!o)return false;
     if(o.test){
@@ -24,8 +34,8 @@ export function validState(s){
       try{const expected=evaluate(...r.dice,attributes[o.test.attribute]+(o.test.modifier||0),o.test.difficulty);if(r.key!==expected.key||r.total!==expected.total)return false;}catch{return false;}
     }else if(r.key!=='success'||r.dice!==null||r.total!==null)return false;
   }
-  const card=currentCard(s);
-  if(s.choiceId!==null&&!card?.choices.some(o=>o.id===s.choiceId))return false;
+  const card=currentCard(s,data);
+  if(s.choiceId!==null&&(!card||!data.byId[card.id].choices.some(o=>o.id===s.choiceId)))return false;
   return s.result===null||Boolean(card&&same(s.result,s.resolved[card.id]));
 }
 // M1 keys remain untouched. Validate all converted values before using a migrated state.
@@ -50,14 +60,24 @@ export function migrateV1(old){
   const c=currentCard(s);if(old.choice<0||old.choice>1)return null;
   s.choiceId=c?.choices[old.choice]?.id||null;
   if(old.result!==null){if(!c||!same(old.result,old.resolved[c.id]))return null;s.result=s.resolved[c.id];}
+  rememberEvidence(s,content.investigation.itemEvidence);
   return validState(s)?s:null;
 }
-export function load(storage){
+export function migrateV2(old,data=content){
+  const added=['knowledge','deductions','unlockedCards','unlockedChoices'];
+  if(!isRecord(old)||old.version!==2||!Array.isArray(old.inventory)||!Array.isArray(old.evidence)||Object.keys(old).sort().join()!==Object.keys(newState(data)).filter(k=>!added.includes(k)).sort().join())return null;
+  const s=rememberEvidence({...newState(data),...structuredClone(old),version:3},data.investigation.itemEvidence);
+  return validState(s,data)?s:null;
+}
+export function load(storage,data=content){
   try{
     const raw=storage.getItem(SAVE_KEY);
-    if(raw!==null){if(raw.length>100000)return newState();const s=JSON.parse(raw);return validState(s)?s:newState();}
+    if(raw!==null){if(raw.length>100000)return newState(data);const s=JSON.parse(raw);return validState(s,data)?s:newState(data);}
+    const previous=storage.getItem('hlubiny-v2');
+    if(previous!==null)return previous.length<=100000?migrateV2(JSON.parse(previous),data)||newState(data):newState(data);
     const legacy=storage.getItem('hlubiny-v1');
-    return legacy&&legacy.length<=100000?migrateV1(JSON.parse(legacy))||newState():newState();
-  }catch{return newState();}
+    const migrated=legacy&&legacy.length<=100000?migrateV1(JSON.parse(legacy)):null;
+    return validState(migrated,data)?migrated:newState(data);
+  }catch{return newState(data);}
 }
-export function save(storage,s){try{if(!validState(s))return false;storage.setItem(SAVE_KEY,JSON.stringify(s));return true;}catch{return false;}}
+export function save(storage,s,data=content){try{if(!validState(s,data))return false;storage.setItem(SAVE_KEY,JSON.stringify(s));return true;}catch{return false;}}

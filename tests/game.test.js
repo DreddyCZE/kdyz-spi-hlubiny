@@ -116,7 +116,7 @@ test('each migrated outcome retains damage, tracks and the named reward',()=>{
     for(const e of r.effects.filter(e=>['addItem','addEvidence'].includes(e.type)))assert.ok(rewardNames[e.id]);
   }
 });
-test('v2 save round trip includes result, flags, evidence and spent AP',()=>{
+test('current save round trip includes result, flags, evidence and spent AP',()=>{
   for(const s of [newState(),resolve(newState()),resolve(exampleState(),undefined,'harbor-note-leave'),resolve({...exampleState(),evidence:['reward-2']},undefined,'harbor-note-copy')]){
     const storage=memory();assert.ok(validState(s));assert.ok(save(storage,s));assert.deepEqual(load(storage),s);
     if(s.result){const loaded=load(storage);assert.equal(resolve(loaded),loaded);}
@@ -134,7 +134,7 @@ test('M1 saves migrate to stable IDs without mutating their source key',()=>{
   const old={version:1,place:0,round:1,ap:2,threat:2,ritual:1,hp:6,san:8,inventory:['Deník a přívěsek'],indices:{},choice:0,resolved:{},result:null,ended:false,log:['M1']};
   const r={dice:[6,6],total:14,index:0,cardId:'0-0',choice:0};old.resolved['0-0']=r;old.result=r;
   const storage=memory(),raw=JSON.stringify(old);storage.setItem('hlubiny-v1',raw);const s=load(storage);
-  assert.equal(s.version,2);assert.equal(s.result.key,'criticalSuccess');assert.equal(s.inventory[0],'reward-1');assert.equal(resolve(s),s);assert.equal(storage.getItem('hlubiny-v1'),raw);assert.ok(save(storage,s));
+  assert.equal(s.version,3);assert.equal(s.result.key,'criticalSuccess');assert.equal(s.inventory[0],'reward-1');assert.equal(resolve(s),s);assert.equal(storage.getItem('hlubiny-v1'),raw);assert.ok(save(storage,s));
   old.result.total=999;assert.equal(migrateV1(old),null);
 });
 
@@ -159,7 +159,8 @@ test('M1 diary and composite saves both retain diary comparison without rewritin
     const old={version:1,place:0,round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[name],indices:{0:2},choice:0,resolved:{},result:null,ended:false,log:['M1']};
     const s=migrateV1(old);assert.ok(s);
     assert.equal(currentCard(s).choices.find(o=>o.id==='harbor-note-copy').available,true,name);
-    assert.deepEqual([...s.inventory,...s.evidence].map(id=>rewardNames[id]),[name]);
+    assert.ok([...s.inventory,...s.evidence].map(id=>rewardNames[id]).includes(name));
+    assert.ok(s.evidence.includes('reward-2')); // Information remains known independently of the physical reward.
     assert.ok(resolve(s,undefined,'harbor-note-copy').evidence.includes('harbor-note-copy'));
   }
 });

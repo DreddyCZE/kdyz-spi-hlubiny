@@ -1,32 +1,32 @@
 import { locations } from '../data/locations.js';
-import { content, catalog, itemEvidence } from './content.js';
+import { content } from './content.js';
 import { attributes } from './schema.js';
+import { conditionMet, deduce, publicInvestigation, rememberEvidence } from './investigation.js';
 export { attributes } from './schema.js';
 export const labels={criticalSuccess:'Kritický úspěch',greatSuccess:'Velký úspěch',success:'Úspěch',partialSuccess:'Částečný úspěch',failure:'Neúspěch',criticalFailure:'Kritické selhání'};
-export function newState(){return {version:2,revision:0,locationId:'location-0',round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[],evidence:[],flags:{},unlockedLocations:locations.map(l=>l.id),cursors:{},choiceId:null,resolved:{},result:null,ended:false,log:['Vyšetřování začíná. Rozhodni, co uděláš.']};}
-export function meetsConditions(s,conditions=[]){return conditions.every(c=>{
-  switch(c.type){
-    case 'hasItem':return s.inventory.includes(c.id);
-    case 'hasEvidence':return s.evidence.includes(c.id)||s.inventory.some(id=>Object.hasOwn(itemEvidence,id)&&itemEvidence[id].includes(c.id));
-    case 'flagEquals':return Object.hasOwn(s.flags,c.id)&&s.flags[c.id]===c.value;
-    case 'minRound':return s.round>=c.round;
-    case 'maxRound':return s.round<=c.round;
-    case 'locationUnlocked':return s.unlockedLocations.includes(c.id);
-    default:return false;
-  }
-});}
+export function newState(data=content){return {version:3,revision:0,locationId:data.refs.locations[0],round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[],evidence:[],knowledge:[],deductions:{},unlockedCards:[],unlockedChoices:[],flags:{},unlockedLocations:[...data.refs.locations],cursors:{},choiceId:null,resolved:{},result:null,ended:false,log:['Vyšetřování začíná. Rozhodni, co uděláš.']};}
+export function meetsConditions(s,conditions=[],data=content){return conditions.every(c=>conditionMet(s,c,data.investigation.itemEvidence));}
+export function investigationView(s,data=content){return publicInvestigation(s,data.investigation);}
 export function deck(s,data=content){return data.cards.filter(c=>c.locationId===s.locationId);}
 function activeDefinition(s,data=content){
   const pinned=s.result&&data.byId[s.result.cardId];
   if(pinned?.locationId===s.locationId)return pinned;
-  return deck(s,data).slice(s.cursors[s.locationId]||0).find(c=>meetsConditions(s,c.conditions))||null;
+  const cards=deck(s,data),cursor=s.cursors[s.locationId]||0;
+  // An explicit unlock can make a previously skipped card reachable without rewinding the deck.
+  return cards.slice(0,cursor).find(c=>s.unlockedCards.includes(c.id)&&!Object.hasOwn(s.resolved,c.id)&&meetsConditions(s,c.conditions,data))
+    ||cards.slice(cursor).find(c=>meetsConditions(s,c.conditions,data))||null;
 }
-export function canChoose(s,c,o){return !s.ended&&!s.result&&(c.repeatable||!s.resolved[c.id])&&meetsConditions(s,c.conditions)&&meetsConditions(s,o.conditions)&&s.ap>=o.apCost;}
+export function canChoose(s,c,o,data=content){return !s.ended&&!s.result&&(c.repeatable||!s.resolved[c.id])&&meetsConditions(s,c.conditions,data)&&meetsConditions(s,o.conditions,data)&&s.ap>=o.apCost;}
 export function currentCard(s,data=content){
   const c=activeDefinition(s,data);if(!c)return null;
   // Allow-list projection: hidden text and effects never enter the public view.
   return {id:c.id,type:c.type,locationId:c.locationId,title:c.title,description:c.description,repeatable:c.repeatable,
-    choices:c.choices.map(o=>({id:o.id,label:o.label,apCost:o.apCost,...(o.test?{test:{...o.test}}:{}),available:canChoose(s,c,o),unavailableReason:!meetsConditions(s,o.conditions)?'Nesplněné podmínky':s.ap<o.apCost?'Nedostatek AP':''}))};
+    choices:c.choices.filter(o=>s.resolved[c.id]?.choiceId===o.id||!containsLockedChoice(s,o.conditions||[],data)).map(o=>({id:o.id,label:o.label,apCost:o.apCost,...(o.test?{test:{...o.test}}:{}),available:canChoose(s,c,o,data),unavailableReason:!meetsConditions(s,o.conditions,data)?'Nesplněné podmínky':s.ap<o.apCost?'Nedostatek AP':''}))};
+}
+// Explicit unlock gates hide future choice labels, not just the outcome text.
+function containsLockedChoice(s,conditions,data){
+  const gated=c=>c.type==='choiceUnlocked'||c.type==='hasKnowledge'||c.type==='deductionCompleted'||(c.conditions||[]).some(gated)||c.condition&&gated(c.condition);
+  return conditions.some(c=>gated(c)&&!conditionMet(s,c,data.investigation.itemEvidence));
 }
 export function selectedChoice(s,c=currentCard(s)){return c?.choices.find(o=>o.id===s.choiceId)||c?.choices.find(o=>o.available)||c?.choices[0]||null;}
 export function visibleResult(s,data=content){const c=activeDefinition(s,data),r=c&&s.resolved[c.id];if(!r||(c.repeatable&&!s.result))return null;const o=c.choices.find(o=>o.id===r.choiceId);return {...r,text:o.outcomes[r.key].text,test:o.test?{...o.test}:null};}
@@ -38,42 +38,50 @@ export function evaluate(a,b,bonus,difficulty){
 }
 export function rollDice(random=Math.random){return [1+Math.floor(random()*6),1+Math.floor(random()*6)];}
 const clamp=(n,max)=>Math.max(0,Math.min(max,n));
-export function applyEffects(state,effects){
-  const s=structuredClone(state);
+export function applyEffects(state,effects,data=content){
+  const s=rememberEvidence(structuredClone(state),data.investigation.itemEvidence);
   for(const e of effects){switch(e.type){
     case 'modifyStat':s[e.stat]=clamp(s[e.stat]+e.amount,e.stat==='hp'?6:8);break;
     case 'modifyThreat':s.threat=clamp(s.threat+e.amount,10);break;
     case 'modifyRitual':s.ritual=clamp(s.ritual+e.amount,8);break;
-    case 'addItem':if(!s.inventory.includes(e.id))s.inventory.push(e.id);break;
+    case 'addItem':if(!s.inventory.includes(e.id))s.inventory.push(e.id);rememberEvidence(s,data.investigation.itemEvidence);break;
     case 'removeItem':if(!s.inventory.includes(e.id))return null;s.inventory=s.inventory.filter(id=>id!==e.id);break;
     case 'addEvidence':if(!s.evidence.includes(e.id))s.evidence.push(e.id);break;
+    case 'addKnowledge':if(!s.knowledge.includes(e.id))s.knowledge.push(e.id);break;
+    case 'unlockCard':if(!s.unlockedCards.includes(e.id))s.unlockedCards.push(e.id);break;
+    case 'unlockChoice':if(!s.unlockedChoices.includes(e.id))s.unlockedChoices.push(e.id);break;
     case 'setFlag':s.flags[e.id]=e.value;break;
     case 'unlockLocation':if(!s.unlockedLocations.includes(e.id))s.unlockedLocations.push(e.id);break;
     default:return null;
-  }}return s;
+  }}return rememberEvidence(s,data.investigation.itemEvidence);
 }
 export function isEnded(s){return s.hp===0||s.san===0||s.threat===10||s.ritual===8;}
 export function transition(state,action,data=content){
   if(state.ended)return state;
   let s=structuredClone(state);const c=activeDefinition(s,data);
   switch(action.type){
+    case 'deduce':{
+      if(action.revision!==s.revision)return state;
+      const next=deduce(s,data.investigation);if(next===s)return state;
+      s=next;if(!s.result&&activeDefinition(s,data)?.id!==c?.id)s.choiceId=null;break;
+    }
     case 'move':
-      if(!catalog.locations.includes(action.locationId)||!s.unlockedLocations.includes(action.locationId)||action.locationId===s.locationId||s.ap<1)return state;
-      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=null;s.log.unshift('Přesun: '+locations.find(l=>l.id===s.locationId).name);break;
+      if(!data.refs.locations.includes(action.locationId)||!s.unlockedLocations.includes(action.locationId)||action.locationId===s.locationId||s.ap<1)return state;
+      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=null;s.log.unshift('Přesun: '+(locations.find(l=>l.id===s.locationId)?.name||s.locationId));break;
     case 'choose':
-      if(!c||!c.choices.some(o=>o.id===action.choiceId&&canChoose(s,c,o)))return state;
+      if(!c||!c.choices.some(o=>o.id===action.choiceId&&canChoose(s,c,o,data)))return state;
       s.choiceId=action.choiceId;break;
     case 'resolve':{
       if(action.revision!==s.revision||!c||action.cardId!==c.id)return state;
-      const o=c.choices.find(o=>o.id===action.choiceId);if(!o||!canChoose(s,c,o))return state;
+      const o=c.choices.find(o=>o.id===action.choiceId);if(!o||!canChoose(s,c,o,data))return state;
       let r={dice:null,total:null,key:'success'};
       if(o.test){if(!Array.isArray(action.dice)||action.dice.length!==2)return state;try{r=evaluate(...action.dice,attributes[o.test.attribute]+(o.test.modifier||0),o.test.difficulty);}catch{return state;}}
-      s=applyEffects(s,o.outcomes[r.key].effects);if(!s)return state;
+      s=applyEffects(s,o.outcomes[r.key].effects,data);if(!s)return state;
       s.ap-=o.apCost;s.choiceId=o.id;s.result={...r,cardId:c.id,choiceId:o.id,revision:state.revision+1};s.resolved[c.id]=s.result;s.log.unshift(c.title+': '+labels[r.key]);break;
     }
     case 'next':{
       if(!c||!s.resolved[c.id])return state;
-      const index=deck(s,data).findIndex(card=>card.id===c.id);s.cursors[s.locationId]=c.repeatable?index:index+1;s.choiceId=null;s.result=null;break;
+      const index=deck(s,data).findIndex(card=>card.id===c.id);s.cursors[s.locationId]=c.repeatable?index:Math.max(s.cursors[s.locationId]||0,index+1);s.choiceId=null;s.result=null;break;
     }
     case 'endRound':
       if(s.round<7){s.round++;s.ap=3;}else s.ap=0;

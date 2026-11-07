@@ -1,4 +1,6 @@
 import { presentation } from '../data/presentation.js';
+import { reachableOutcomeKeys } from './story-card.js';
+import { imageForCard } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView } from '../engine/game.js';
@@ -29,6 +31,8 @@ function render(){
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
   $('mapTitle').textContent=blackwaterMap.name;
   renderMap($('places'),locations,blackwaterMap,state,rolling,id=>dispatch({type:'move',locationId:id}));
+  $('cardArt').classList.toggle('empty',!card);
+  $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card), document.baseURI).href}")`;
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
   $('cardTitle').textContent=card?.title||'Žádná dostupná karta';
   $('cardStory').textContent=card?.description||'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.';
@@ -37,7 +41,19 @@ function render(){
     const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
   }));
-  $('outcomes').replaceChildren();
+  // Only public test parameters determine the reachable tiers; no hidden definitions.
+  const preview=$('outcomes');
+  preview.hidden=!choice?.test||Boolean(result)||rolling;
+  preview.replaceChildren();
+  if(!preview.hidden){
+    const heading=document.createElement('p');heading.className='outcome-heading';heading.textContent='Možné následky · odhalí je až hod';
+    preview.append(heading);
+    for(const tier of reachableOutcomeKeys(choice)){
+      const slot=document.createElement('span');slot.className='outcome-slot';
+      slot.textContent=labels[tier];slot.setAttribute('aria-label',labels[tier]+' · následek je skrytý');
+      preview.append(slot);
+    }
+  }
   $('dicebox').classList.toggle('show',Boolean(result)||rolling);
   // While rolling, do not put the hidden result into the DOM at all.
   $('reveal').classList.toggle('show',Boolean(result)&&!rolling);

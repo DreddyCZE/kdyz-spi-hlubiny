@@ -124,7 +124,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
    card-specific licensed/approved illustrations are committed as assets. */
 .card-art {
   width: 100%; aspect-ratio: 2.25; margin-bottom: var(--space-4);
-  background: linear-gradient(180deg, #06141322 45%, #061413c9), url('../assets/blackwater-map.webp') center 70%/cover;
+  background-color: var(--color-surface); background-position: center 70%; background-size: cover;
   border: 4px double var(--color-frame);
   box-shadow: inset 0 0 24px #000a, var(--shadow-piece);
 }

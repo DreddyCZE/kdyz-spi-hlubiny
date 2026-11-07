@@ -1,4 +1,6 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
+// Validate definitions before publishing any build output.
+import '../src/engine/content.js';
 // Fixed output directory inside this repository; never derive deletion paths from input.
 await rm(new URL('../dist/', import.meta.url), { recursive: true, force: true });
 await mkdir('dist', { recursive: true });

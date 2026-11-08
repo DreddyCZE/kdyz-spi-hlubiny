@@ -5,36 +5,42 @@ import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView,explorationView } from '../engine/game.js';
 import { rewardNames } from '../engine/content.js';
-import { load,save } from '../engine/storage.js';
+import { blackwaterScenario } from '../data/blackwater-scenario.js';
+import { content } from '../engine/content.js';
+import { newScenarioSession,scenarioSessionTransition,scenarioSessionView } from '../engine/scenario-session.js';
+import { loadScenarioSession,saveScenarioSession } from '../engine/scenario-storage.js';
 import { createJournal } from './journal.js';
 const { map: blackwaterMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
-let state=load(storage),rolling=false,timer;
+let session=loadScenarioSession(storage,blackwaterScenario,content),state=session.game,rolling=false,timer;
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
-function persist(){ $('saveStatus').textContent=save(storage,state)?'':'Ukládání není dostupné. Hra pokračuje pouze v této záložce.'; }
-function dispatch(action){if(rolling)return;state=transition(state,action);persist();render();}
+function persist(){ $('saveStatus').textContent=saveScenarioSession(storage,session,blackwaterScenario,content)?'':'Ukládání není dostupné. Hra pokračuje pouze v této záložce.'; }
+function dispatch(action){if(rolling)return;session=scenarioSessionTransition(session,action,blackwaterScenario,content);state=session.game;persist();render();}
 function render(){
   const focused=document.activeElement;
   const choiceFocus=focused?.dataset.choiceId;
   const mapFocus=focused?.dataset.locationId;
-  for(const k of ['round','threat','ritual','ap','hp','san'])$(k).textContent=state[k];
+  for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
+  const scene=scenarioSessionView(session,blackwaterScenario);
+  $('ritual').textContent=scene.clocks[0].current+' / '+scene.clocks[0].max;
+  $('ritual').title=scene.clocks[0].label;
   $('heroStats').textContent=`Eleanor Whitmore · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
-  journal.render(investigation,rolling||state.ended,rolling?[]:state.log);
+  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log);
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state),choice=selectedChoice(state,card);
   const result=visibleResult(state),deck=explorationView(state);
   $('deckName').textContent=deck.name;
   $('deckDescription').textContent=deck.description;
   $('deckCounts').textContent=`Dostupné: ${deck.available} · Odložené: ${deck.deferred} · Vyřešené: ${deck.consumed}`;
-  $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!deck.canDraw;
+  $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!scene.canAct||!deck.canDraw;
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
   $('mapTitle').textContent=blackwaterMap.name;
-  renderMap($('places'),locations,blackwaterMap,state,rolling,id=>dispatch({type:'move',locationId:id}));
+  renderMap($('places'),locations,blackwaterMap,state,rolling||!scene.canAct,id=>dispatch({type:'move',locationId:id}));
   $('cardArt').classList.toggle('empty',!card);
   $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card), document.baseURI).href}")`;
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
@@ -42,7 +48,7 @@ function render(){
   $('cardStory').textContent=card?.description||(deck.canDraw?'Dobrat kartu je zdarma. AP zaplatíš až za zvolený postup.':'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.');
   $('challenge').textContent=choice?`${choice.apCost} AP · `+(choice.test?`Test ${choice.test.attribute} · obtížnost ${choice.test.difficulty} · modifikátor ${choice.test.modifier||0}`:'Rozhodnutí bez testu'):'';
   $('choices').replaceChildren(...(card?.choices||[]).map(o=>{
-    const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!o.available,'choice'+(o.id===choice?.id?' active':''));
+    const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!scene.canAct||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
   }));
   // Only public test parameters determine the reachable tiers; no hidden definitions.
@@ -68,10 +74,10 @@ function render(){
     $('sum').textContent=result.test?`${result.dice.join(' + ')} + ${attributes[result.test.attribute]} + ${result.test.modifier||0} = ${result.total} proti obtížnosti ${result.test.difficulty}`:'Rozhodnutí bez hodu kostkami.';
   }else{$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='';}
   $('roll').textContent=choice?.test?'🎲 Hodit kostkami':'Provést rozhodnutí';
-  $('roll').disabled=rolling||state.ended||!choice?.available;
-  $('next').disabled=rolling||state.ended||!result;
-  $('endRound').disabled=rolling||state.ended;
-  $('gameStatus').textContent=state.ended?'Konec scénáře: temnota zvítězila. Začni novou hru.':'';
+  $('roll').disabled=rolling||!scene.canAct||!choice?.available;
+  $('next').disabled=rolling||!scene.canAct||!result;
+  $('endRound').disabled=rolling||!scene.canAct;
+  $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
   if(mapFocus){$('cardTitle').focus({preventScroll:true});}
@@ -81,8 +87,8 @@ const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:st
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;
   const card=currentCard(state),choice=selectedChoice(state,card);
-  const next=transition(state,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(choice.test?{dice:rollDice()}:{})});
-  if(next===state)return;state=next;persist();
+  const next=scenarioSessionTransition(session,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(choice.test?{dice:rollDice()}:{})},blackwaterScenario,content);
+  if(next===session)return;session=next;state=session.game;persist();
   if(!choice.test){render();return;}
   rolling=true;for(const id of ['die1','die2'])$(id).classList.add('rolling');render();
   timer=setTimeout(()=>{rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');render();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:900);
@@ -93,7 +99,7 @@ $('endRound').onclick=()=>dispatch({type:'endRound'});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');
-  state=newState();persist();render();
+  session=newScenarioSession(blackwaterScenario,content);state=session.game;persist();render();
 };
 render();
 

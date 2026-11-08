@@ -3,11 +3,12 @@ import {newState,transition as legacyTransition,currentCard,selectedChoice,evalu
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
 import {deduce} from './investigation.js';
 import {initialPuzzleState,puzzleView,attemptPuzzle,revealPuzzleHint,validatePuzzle} from './puzzle.js';
+import {defaultScenarioInvestigatorId,selectScenarioInvestigator} from './scenario-investigator.js';
 import {initialCompanionState,validateCompanion,companionAvailable,recruitCompanion,dismissCompanion,useCompanionAbility,companionView} from './companion.js';
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
-  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{},companion:initialCompanionState()}};
+  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{},companion:initialCompanionState(),investigatorId:defaultScenarioInvestigatorId}};
 }
 const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
 const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
@@ -21,6 +22,7 @@ function autoDeductions(game,def,data){
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
+  if(action.type==='selectInvestigator')return selectScenarioInvestigator(session,action.investigatorId);
   const game=session.game,sc=session.scenario;
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;

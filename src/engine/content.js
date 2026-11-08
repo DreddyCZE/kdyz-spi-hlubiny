@@ -1,5 +1,7 @@
 import { cards as migrated } from '../data/cards.js';
 import { exampleCard } from '../data/example-card.js';
+import { blackwaterM4Cards } from '../data/blackwater-m4.js';
+import { additionalBlackwaterCards } from '../data/blackwater-extra.js';
 import { explorationDecks } from '../data/decks.js';
 import { locations } from '../data/locations.js';
 import { rewards, flags } from '../data/catalog.js';
@@ -32,4 +34,4 @@ export function createContent(cards, investigation = investigationDefinitions, o
   const definitions=freeze(structuredClone(cards));
   return Object.freeze({decksByLocation:freeze(decksByLocation),cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
 }
-export const content=createContent([...migrated,exampleCard]);
+export const content=createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards]);

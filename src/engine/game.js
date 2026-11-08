@@ -65,8 +65,8 @@ export function applyEffects(state,effects,data=content){
     default:return null;
   }}return rememberEvidence(s,data.investigation.itemEvidence);
 }
-export function isEnded(s){return s.hp===0||s.san===0||s.threat===10||s.ritual===8;}
-export function transition(state,action,data=content){
+export function isEnded(s,rules={}){return s.hp===0||s.san===0||s.threat===10||(!rules.scenarioClock&&s.ritual===8);}
+export function transition(state,action,data=content,rules={}){
   if(state.ended)return state;
   let s=structuredClone(state);const c=activeDefinition(s,data);
   switch(action.type){
@@ -100,9 +100,10 @@ export function transition(state,action,data=content){
       const index=deck(s,data).findIndex(card=>card.id===c.id);s.cursors[s.locationId]=c.repeatable?index+1:Math.max(s.cursors[s.locationId]||0,index+1);delete s.drawnCards[s.locationId];s.choiceId=null;s.result=null;break;
     }
     case 'endRound':
-      if(s.round<7){s.round++;s.ap=3;}else s.ap=0;
-      s.ritual=clamp(s.ritual+1,8);s.log.unshift('Nové kolo. Rituál postupuje.');break;
+      if(s.round<(rules.maxRounds||7)){s.round++;s.ap=rules.apPerRound||3;}else s.ap=0;
+      if(!rules.scenarioClock)s.ritual=clamp(s.ritual+1,8);
+      s.log.unshift(rules.scenarioClock?'Nové kolo.':'Nové kolo. Rituál postupuje.');break;
     default:return state;
   }
-  s.revision++;s.ended=isEnded(s);if(s.ended)s.log.unshift('Konec scénáře: temnota zvítězila.');s.log=s.log.slice(0,100);return s;
+  s.revision++;s.ended=isEnded(s,rules);if(s.ended)s.log.unshift('Konec scénáře: temnota zvítězila.');s.log=s.log.slice(0,100);return s;
 }

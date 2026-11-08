@@ -12,7 +12,11 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
  const dispatch=action=>{
   const before=session;
   session=scenarioSessionTransition(session,{...action,revision:session.game.revision},def,data);
-  if(session!==before)trace.push({type:action.type,round:session.game.round,ap:session.game.ap,locationId:session.game.locationId,endingId:session.scenario.endingId});
+  if(session!==before){
+   const gainedKnowledge=session.game.knowledge.filter(id=>!before.game.knowledge.includes(id));
+   const gainedEvidence=session.game.evidence.filter(id=>!before.game.evidence.includes(id));
+   trace.push({type:action.type,round:session.game.round,ap:session.game.ap,locationId:session.game.locationId,endingId:session.scenario.endingId,...(gainedKnowledge.length?{gainedKnowledge}:{}),...(gainedEvidence.length?{gainedEvidence}:{})});
+  }
   return session!==before;
  };
  for(;attempts<maxActions;attempts++){
@@ -63,13 +67,20 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
 export function simulateBatch(def,data,{runs=100,seed=1,...options}={}){
  if(!Number.isSafeInteger(runs)||runs<1||runs>10000)throw new RangeError('runs');
  const outcomes={},samples=[];let exhausted=0;
- const knowledgeCounts={},endingRounds={},unfinishedReasons={};
+ const knowledgeCounts={},knowledgeFirstRound={},endingRounds={},unfinishedReasons={},locationVisits={};
  for(let i=0;i<runs;i++){
   const result=simulateScenario(def,data,{...options,seed:seed+i});
   const key=result.endingId||'unfinished';
   outcomes[key]=(outcomes[key]||0)+1;
   if(result.exhausted)exhausted++;
   for(const id of result.knowledge)knowledgeCounts[id]=(knowledgeCounts[id]||0)+1;
+  for(const step of result.trace){
+   if(step.type==='move')locationVisits[step.locationId]=(locationVisits[step.locationId]||0)+1;
+   for(const id of step.gainedKnowledge||[]){
+    const rounds=knowledgeFirstRound[id]||(knowledgeFirstRound[id]=[]);
+    rounds.push(step.round);
+   }
+  }
   if(result.endingId){
    const rounds=endingRounds[result.endingId]||(endingRounds[result.endingId]=[]);
    rounds.push(result.round);
@@ -80,5 +91,6 @@ export function simulateBatch(def,data,{runs=100,seed=1,...options}={}){
   if(samples.length<5)samples.push({...result,trace:undefined});
  }
  const endingRoundStats=Object.fromEntries(Object.entries(endingRounds).map(([id,rounds])=>[id,{count:rounds.length,min:Math.min(...rounds),max:Math.max(...rounds),mean:Math.round(rounds.reduce((a,b)=>a+b,0)/rounds.length*100)/100}]));
- return {runs,seed,outcomes,exhausted,knowledgeCounts,endingRoundStats,unfinishedReasons,samples};
+ const knowledgeRoundStats=Object.fromEntries(Object.entries(knowledgeFirstRound).map(([id,rounds])=>[id,{count:rounds.length,min:Math.min(...rounds),max:Math.max(...rounds),mean:Math.round(rounds.reduce((a,b)=>a+b,0)/rounds.length*100)/100}]));
+ return {runs,seed,outcomes,exhausted,knowledgeCounts,knowledgeRoundStats,locationVisits,endingRoundStats,unfinishedReasons,samples};
 }

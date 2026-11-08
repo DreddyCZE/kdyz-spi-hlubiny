@@ -6,7 +6,7 @@ import {newScenarioSession,scenarioSessionTransition} from '../src/engine/scenar
 import {currentCard,meetsConditions} from '../src/engine/game.js';
 import {validScenarioSession} from '../src/engine/scenario-storage.js';
 const step=(s,a)=>scenarioSessionTransition(s,{...a,revision:s.game.revision},def,data);
-const at=(s,locationId)=>({...s,game:{...s.game,locationId,ap:3,drawnCards:{...s.game.drawnCards,[locationId]:undefined},choiceId:null,result:null}});
+const at=(s,locationId)=>({...s,game:{...s.game,locationId,ap:3,choiceId:null,result:null}});
 const card=(s,id)=>({...s,game:{...s.game,drawnCards:{...s.game.drawnCards,[s.game.locationId]:id},choiceId:null,result:null}});
 const resolve=(s,cardId,choiceId)=>step(card(s,cardId),{type:'resolve',cardId,choiceId});
 const choose=(s,cardId,choiceId,dice)=>{s=card(s,cardId);s=step(s,{type:'choose',choiceId});s=step(s,{type:'startTest',cardId,choiceId,dice});return step(s,{type:'acceptTest'});};

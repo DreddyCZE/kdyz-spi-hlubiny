@@ -6,7 +6,7 @@ export function seededDice(seed=1){
  const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
  return ()=>[1+Math.floor(random()*6),1+Math.floor(random()*6)];
 }
-export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,reroll=false}={}){
+export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,chooseEnding,reroll=false}={}){
  if(!Number.isSafeInteger(maxActions)||maxActions<1||maxActions>100000)throw new RangeError('maxActions');
  const dice=seededDice(seed),trace=[];let session=newScenarioSession(def,data),attempts=0;
  const dispatch=action=>{
@@ -19,7 +19,8 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   const view=scenarioSessionView(session,def),game=session.game;
   if(view.ending||game.ended)break;
   if(view.availableEndings.length){
-   const ending=view.availableEndings.find(e=>e.kind==='victory')||view.availableEndings[0];
+   const ending=chooseEnding?.(view.availableEndings,game,session.scenario)||view.availableEndings.find(e=>e.kind==='victory')||view.availableEndings[0];
+   if(!view.availableEndings.some(e=>e.id===ending?.id))throw new Error('Strategy chose unavailable ending');
    dispatch({type:'finishScenario',endingId:ending.id});continue;
   }
   if(game.round>def.rules.maxRounds)break;

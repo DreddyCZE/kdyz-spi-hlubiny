@@ -10,11 +10,11 @@ export const blackwaterItems=Object.freeze([
 ]);
 export const blackwaterItemById=Object.freeze(Object.fromEntries(blackwaterItems.map(i=>[i.id,i])));
 export function startingInventory(){return ['bw-bandage','bw-salt'];}
-export function useBlackwaterItem(state,id){
+export function useBlackwaterItem(state,id,limits={hp:6,san:8}){
  const item=blackwaterItemById[id];
  if(!item||item.kind!=='consumable'||!state.inventory.includes(id)||state.ended)return state;
- if(item.effect.type==='heal'&&state.hp>=6)return state;
- if(item.effect.type==='calm'&&state.san>=8)return state;
+ if(item.effect.type==='heal'&&state.hp>=limits.hp)return state;
+ if(item.effect.type==='calm'&&state.san>=limits.san)return state;
  const next=structuredClone(state);
  if(item.effect.type==='heal')next.hp=Math.min(6,next.hp+item.effect.amount);
  else if(item.effect.type==='calm')next.san=Math.min(8,next.san+item.effect.amount);

@@ -464,3 +464,20 @@ main{max-width:1660px;padding:5px 14px 18px}
 .outcome-content>p:not(.eyebrow){font:italic 17px/1.55 Georgia}
 .outcome-content button{padding:12px 25px;background:#1d3a31;color:#f2deb3;border:2px solid #947b51;cursor:pointer}
 @media(max-width:540px){.battle-dialog{padding:12px}.battle-opponents{grid-template-columns:1fr 24px 1fr;gap:5px}.battle-opponents h3{font-size:15px}.battle-versus{font-size:19px}.battle-art{height:110px}.outcome-content{padding:16px}}
+
+.battle-dice,.battle-tokens{display:flex;align-items:center;justify-content:center;gap:9px;min-height:34px;margin:9px auto}
+.battle-die{width:47px;height:47px;display:grid;place-items:center;background:#e9dbb9;color:#29281d;border:3px solid #8b7551;border-radius:8px;box-shadow:3px 4px 0 #5c4c35;font:700 25px Georgia}
+.battle-die.spinning{animation:battle-shake .14s ease-in-out infinite alternate}
+@keyframes battle-shake{from{transform:rotate(-13deg) translateY(-3px)}to{transform:rotate(12deg) translateY(4px)}}
+.damage-token{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:50%;border:2px solid #e3b19a;background:#772c2d;color:#fff0d9;box-shadow:0 2px 4px #0009;font:700 16px Georgia;animation:token-drop .3s ease-out}
+.damage-token.investigator-damage{background:#5e4247}
+@keyframes token-drop{from{transform:translateY(-16px) scale(1.5);opacity:0}to{transform:none;opacity:1}}
+.battle-art.wounded{box-shadow:inset 0 0 25px #9d272755}
+.reward-dialog{width:min(90vw,440px);border:6px double #bda46f;background:linear-gradient(#e8d7b1,#c6ab7d);color:#30281d;text-align:center;padding:25px;box-shadow:0 25px 90px #000c}
+.reward-dialog::backdrop{background:#05120cc0;backdrop-filter:blur(5px)}
+.reward-emblem{font:85px Georgia;color:#836735;text-shadow:0 2px 3px #fff8;animation:reward-in .6s ease-out}
+@keyframes reward-in{from{transform:scale(.35) rotate(-60deg);opacity:0}to{transform:none;opacity:1}}
+.reward-dialog h2{font:700 29px Georgia;margin:10px}
+.reward-dialog>p:not(.eyebrow){font:italic 18px/1.5 Georgia}
+.reward-dialog button{padding:12px 22px;background:#17392e;color:#e7d5b3;border:2px solid #89714d;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.battle-die.spinning,.damage-token,.reward-emblem{animation:none}}

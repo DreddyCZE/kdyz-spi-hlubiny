@@ -1,6 +1,6 @@
 // Deterministic, engine-level playthrough simulator. No UI, browser, or Blackwater assumptions.
 import {newScenarioSession,scenarioSessionTransition,scenarioSessionView} from './scenario-session.js';
-import {currentCard,explorationView} from './game.js';
+import {currentCard,explorationView,evaluate,attributes} from './game.js';
 export function seededDice(seed=1){
  let state=seed>>>0;
  const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
@@ -36,7 +36,12 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
     if(choice.test){
      const started=dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
      if(started){
-      if(reroll&&session.scenario.pendingTest&&session.game.san>=2)dispatch({type:'rerollTest',dice:dice()});
+      if(session.scenario.pendingTest&&session.game.san>=2){
+       const test=choice.test,first=session.scenario.pendingTest.firstDice;
+       const result=evaluate(...first,attributes[test.attribute]+(test.modifier||0),test.difficulty);
+       const shouldReroll=typeof reroll==='function'?reroll({game:session.game,card,choice,result,round:session.game.round}):Boolean(reroll);
+       if(shouldReroll)dispatch({type:'rerollTest',dice:dice()});
+      }
       dispatch({type:'acceptTest'});
      }
      if(started)continue;

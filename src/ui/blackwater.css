@@ -411,3 +411,17 @@ main{max-width:1660px;padding:5px 14px 18px}
 .myth-discard-card p{font:italic 12px/1.4 Georgia}
 .myth-discard-card small{display:block;border-top:1px solid #a18b69;padding-top:7px;font:700 11px Georgia}
 @media(prefers-reduced-motion:reduce){.myth-illustration span{animation:none}}
+
+/* Brief cinematic scene cards for movement and encounter starts. */
+.transition-dialog{width:min(90vw,490px);max-height:85vh;padding:0;border:3px double #bca16d;background:#112721;color:#ead5a8;box-shadow:0 20px 100px #000d}
+.transition-dialog::backdrop{background:#06100c99;backdrop-filter:blur(3px)}
+.transition-scene{padding:26px 28px 24px;text-align:center;background:radial-gradient(ellipse at top,#315047,#10231f 75%)}
+.transition-symbol{display:block;margin:0 auto 12px;font:76px Georgia;color:#ddc18a;text-shadow:0 0 28px #c6a26c88;animation:scene-in .45s ease-out both}
+.transition-scene .eyebrow{letter-spacing:.2em;color:#d6a86d}
+.transition-scene h2{font:700 clamp(26px,4vw,37px) Georgia;margin:8px 0 12px;color:#f1d9a7}
+.transition-scene>p:not(.eyebrow){font:italic 16px/1.5 Georgia;color:#d6d0ba;margin:0 auto 20px;max-width:380px}
+.transition-scene button{padding:9px 20px;background:#cfb381;color:#1d2d27;border:1px solid #f0d5a1;cursor:pointer}
+.transition-dialog[data-kind^="NEBEZPEČÍ"] .transition-scene{background:radial-gradient(ellipse at top,#57322d,#1b1c1b 75%)}
+.transition-dialog[data-kind^="NEBEZPEČÍ"] .transition-symbol{color:#e4a391}
+@keyframes scene-in{from{opacity:0;transform:translateY(15px) scale(.85);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@media(prefers-reduced-motion:reduce){.transition-symbol{animation:none}}

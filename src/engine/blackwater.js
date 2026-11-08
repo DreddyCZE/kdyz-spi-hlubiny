@@ -6,7 +6,7 @@ import { newMythState, mythPhase, publicMyth } from './myth.js';
 import { startCombat, combatTurn } from './combat.js';
 import { startingInventory, useBlackwaterItem } from '../data/blackwater-items.js';
 import { selectInvestigator, useInvestigatorAbility } from '../data/blackwater-investigators.js';
-import { moveEnemies } from './blackwater-map.js';
+import { moveEnemies, blackwaterRoutes } from './blackwater-map.js';
 
 export const blackwaterContent=createContent(blackwaterM4Cards);
 export function newBlackwaterGame(){
@@ -60,6 +60,7 @@ export function blackwaterTransition(state,action){
     return {...state,revision:state.revision+1,combat:null};
   }
   if(state.combat?.status==='active')return state;
+  if(action.type==='move' && !blackwaterRoutes[state.game.locationId]?.includes(action.locationId))return state;
   if(action.type==='endRound'){
     if(state.game.round>=7)return state;
     const game=transition(state.game,{type:'endRound'},blackwaterContent);

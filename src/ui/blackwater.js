@@ -195,7 +195,7 @@ function render(){
  $('locations').replaceChildren(svg,...pins,...tokens,playerToken);
  $('locations').setAttribute('aria-description','Lokace s jasným okrajem jsou dostupné za jeden akční bod. Žeton označuje aktuální polohu vyšetřovatele.');
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
- $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1||Boolean(view.result))));
+ $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';
  $('items').replaceChildren(...view.inventory.map(id=>{const item=blackwaterItemById[id];const b=button('',()=>send('useItem',{itemId:id}),rolling||view.ended||item?.kind!=='consumable','item-card');const art=document.createElement('span');art.className='item-art';art.textContent=itemGlyph[id]||'✦';const title=document.createElement('strong');title.textContent=item?.name||id;const desc=document.createElement('small');desc.textContent=item?.description||'';b.append(art,title,desc);b.title=(item?.name||id)+': '+(item?.description||'');return b;}));
  if(!view.inventory.length)$('items').textContent='Prázdný inventář.';

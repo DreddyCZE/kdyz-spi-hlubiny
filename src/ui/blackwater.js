@@ -12,7 +12,7 @@ import {imageForCard,storyArt} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
-let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null;
+let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null,battleRolling=false,pendingReward=null;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztrácejí beze stopy. Jen někdo musí mít odvahu hledat tam, kde ostatní zavírají dveře.',occultist:'V zakázaných knihách už četla o zvonech, které znějí pod hladinou. Teď poprvé slyší jeden na vlastní uši.',sailor:'Příliv zná lépe než vlastní dlaň. Ale této noci se moře vrací s něčím, co nikdy nemělo vyplout.'};
 const investigatorGlyph={detective:'⌕',occultist:'✧',sailor:'⚓'};
@@ -79,15 +79,44 @@ function renderBattle(){
  $('battleMonsterArt').textContent=combat.enemyId==='enemy-fog-hound'?'♧':combat.enemyId==='enemy-bell-keeper'?'♢':'◆';
  $('battleMonsterName').textContent=enemy?.name||combat.enemyId;
  $('battleMonsterStats').textContent='♥ '+combat.enemyHp+' · Obrana '+enemy?.defense+' · Výměna '+combat.exchange+'/3';
+ $('battleMonsterArt').dataset.damage=String(Math.max(0,(enemy?.hp||0)-combat.enemyHp));
+ $('battleInvestigatorArt').dataset.damage=String(Math.max(0,investigator.hp-state.game.hp));
+ $('battleMonsterArt').classList.toggle('wounded',Boolean(combat.playerDamage||combat.playerSanLoss));
  const report=combat.roll;
- $('battleReport').textContent=report?('Hod '+combat.dice.join(' + ')+' · '+labels[report.key]+' · Ztráta zdraví '+combat.playerDamage+' · Ztráta příčetnosti '+combat.playerSanLoss):'Rozhodni se, zda budeš bojovat, nebo se pokusíš uniknout.';
+ $('battleReport').textContent=battleRolling?'Kostky se kutálejí…':report?('Hod '+combat.dice.join(' + ')+' · '+labels[report.key]+' · Ztráta zdraví '+combat.playerDamage+' · Ztráta příčetnosti '+combat.playerSanLoss):'Rozhodni se, zda budeš bojovat, nebo se pokusíš uniknout.';
+ $('battleReport').classList.toggle('battle-rolling',battleRolling);
+ $('battleDice').replaceChildren(...(battleRolling?['?','?']:combat.dice||[]).map(value=>{const die=document.createElement('span');die.className='battle-die'+(battleRolling?' spinning':'');die.textContent=value;return die;}));
+ $('battleTokens').replaceChildren(...Array.from({length:Math.max(0,(enemy?.hp||0)-combat.enemyHp)},()=>{const token=document.createElement('span');token.className='damage-token';token.textContent='✕';token.title='Zranění nepřítele';return token;}),...Array.from({length:Math.max(0,investigator.hp-state.game.hp)},()=>{const token=document.createElement('span');token.className='damage-token investigator-damage';token.textContent='♥';token.title='Zranění vyšetřovatele';return token;}));
  $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>button((itemGlyph[id]||'✦')+' '+blackwaterItemById[id].name+' · '+blackwaterItemById[id].description,()=>send('useItem',{itemId:id}),id!=='bw-salt'&&combat.status==='active','battle-item')));
  if(!$('battleItems').children.length)$('battleItems').textContent='Žádné použitelné předměty.';
  $('battleActions').replaceChildren(...(combat.status==='active'?[
-  button('⚔ Zaútočit · hod 2 kostkami',()=>send('combatTurn',{move:'attack',dice:rollDice()})),
-  button('➤ Pokusit se utéct · hod 2 kostkami',()=>send('combatTurn',{move:'escape',dice:rollDice()}))
+  button('⚔ Zaútočit · hod 2 kostkami',()=>rollCombat('attack'),battleRolling),
+  button('➤ Pokusit se utéct · hod 2 kostkami',()=>rollCombat('escape'),battleRolling)
  ]:[button('Pokračovat →',()=>send('closeCombat'))]));
  if(!dialog.open)dialog.showModal();
+}
+function rollCombat(move){
+ if(battleRolling||!state.combat||state.combat.status!=='active')return;
+ battleRolling=true;renderBattle();
+ const dice=rollDice(),delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850;
+ const finish=()=>{battleRolling=false;send('combatTurn',{move,dice});};
+ if(!delay){finish();return;}
+ let ticks=0;
+ const timer=window.setInterval(()=>{
+  if(!$('battleDialog').open){window.clearInterval(timer);battleRolling=false;return;}
+  $('battleDice').replaceChildren(...[0,1].map(()=>{const el=document.createElement('span');el.className='battle-die spinning';el.textContent=1+Math.floor(Math.random()*6);return el;}));
+  if(++ticks>=12){window.clearInterval(timer);window.setTimeout(finish,90);}
+ },65);
+}
+function showRewardEffect(previous){
+ const freshEvidence=state.game.evidence.filter(id=>!previous.evidence.includes(id));
+ const freshKnowledge=state.game.knowledge.filter(id=>!previous.knowledge.includes(id));
+ const gained=[...freshEvidence,...freshKnowledge];
+ if(!gained.length)return;
+ const names=gained.map(id=>rewards.find(item=>item.id===id)?.name||id);
+ $('rewardTitle').textContent=freshEvidence.length?'Nová stopa nalezena':'Nový poznatek';
+ $('rewardText').textContent=names.join(' · ');
+ $('rewardDialog').showModal();
 }
 function showOutcome(){
  const result=publicBlackwater(state).result;
@@ -115,16 +144,17 @@ function send(type,rest={}){
 function resolveCard(card,choice){
  if(rolling)return;
  const dice=choice.test?rollDice():null;
+ const previous={evidence:[...state.game.evidence],knowledge:[...state.game.knowledge]};
  const next=blackwaterTransition(state,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(dice?{dice}:{})});
  if(next===state){$('message').textContent='Rozhodnutí nelze provést.';return;}
  state=next;saveBlackwater(storage,state);
- if(!dice){render();showOutcome();return;}
+ if(!dice){render();showOutcome();pendingReward=previous;return;}
  rolling=true;render();
  const diceBox=$('dice');diceBox.hidden=false;diceBox.classList.add('rolling');
  $('result').textContent='Osud rozhoduje…';$('die1').textContent='?';$('die2').textContent='?';
  const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:1050;
  if(delay){let ticks=0;rollTimer=window.setInterval(()=>{ticks++;$('die1').textContent=String(1+Math.floor(Math.random()*6));$('die2').textContent=String(1+Math.floor(Math.random()*6));$('diceTotal').textContent='Kostky se kutálejí…';if(ticks>15){window.clearInterval(rollTimer);rollTimer=null;}},65);}
- window.setTimeout(()=>{if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}rolling=false;render();showOutcome();},delay);
+ window.setTimeout(()=>{if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}rolling=false;render();showOutcome();pendingReward=previous;},delay);
 }
 function render(){
  const view=publicBlackwater(state);
@@ -165,7 +195,7 @@ function render(){
  $('locations').replaceChildren(svg,...pins,...tokens,playerToken);
  $('locations').setAttribute('aria-description','Lokace s jasným okrajem jsou dostupné za jeden akční bod. Žeton označuje aktuální polohu vyšetřovatele.');
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
- $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
+ $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1||Boolean(view.result))));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';
  $('items').replaceChildren(...view.inventory.map(id=>{const item=blackwaterItemById[id];const b=button('',()=>send('useItem',{itemId:id}),rolling||view.ended||item?.kind!=='consumable','item-card');const art=document.createElement('span');art.className='item-art';art.textContent=itemGlyph[id]||'✦';const title=document.createElement('strong');title.textContent=item?.name||id;const desc=document.createElement('small');desc.textContent=item?.description||'';b.append(art,title,desc);b.title=(item?.name||id)+': '+(item?.description||'');return b;}));
  if(!view.inventory.length)$('items').textContent='Prázdný inventář.';
@@ -232,7 +262,8 @@ function render(){
  if(view.ended)$('message').textContent='';
 }
 $('transitionContinue').onclick=()=>$('transitionDialog').close();
-$('outcomeContinue').onclick=()=>$('outcomeDialog').close();
+$('outcomeContinue').onclick=()=>{$('outcomeDialog').close();if(pendingReward){const previous=pendingReward;pendingReward=null;showRewardEffect(previous);}};
+$('rewardContinue').onclick=()=>$('rewardDialog').close();
 
 $('mythConfirm').onclick=()=>$('mythDialog').close();
 $('mythHistoryOpen').onclick=showMythHistory;

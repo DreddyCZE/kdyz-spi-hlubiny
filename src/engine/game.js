@@ -35,7 +35,7 @@ export function currentCard(s,data=content){
 }
 // Explicit unlock gates hide future choice labels, not just the outcome text.
 function containsLockedChoice(s,conditions,data){
-  const gated=c=>c.type==='choiceUnlocked'||c.type==='hasKnowledge'||c.type==='deductionCompleted'||(c.conditions||[]).some(gated)||c.condition&&gated(c.condition);
+  const gated=c=>c.type==='choiceUnlocked'||c.type==='hasKnowledge'||c.type==='deductionCompleted'||c.type==='flagEquals'||(c.conditions||[]).some(gated)||c.condition&&gated(c.condition);
   return conditions.some(c=>gated(c)&&!conditionMet(s,c,data.investigation.itemEvidence));
 }
 export function selectedChoice(s,c=currentCard(s)){return c?.choices.find(o=>o.id===s.choiceId)||c?.choices.find(o=>o.available)||c?.choices[0]||null;}

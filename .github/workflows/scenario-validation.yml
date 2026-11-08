@@ -1,0 +1,25 @@
+name: Scenario engine validation
+on:
+  push:
+    branches:
+      - feature/scenario-framework-p1
+  pull_request:
+    branches:
+      - main
+      - feature/m4-blackwater-scenario-design
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Seeded simulation smoke test
+        run: node scripts/simulate-scenario.mjs 20 42

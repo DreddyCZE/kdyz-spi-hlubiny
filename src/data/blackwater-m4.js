@@ -1,4 +1,4 @@
-// M4 scenario expansion: additive content with stable IDs; no changes to legacy cards.
+// Optional M4 scenario content. Not included in legacy default decks until scenario selection exists.
 export const blackwaterM4Cards = [
   {
     "id": "bw-00-01",
@@ -299,6 +299,801 @@ export const blackwaterM4Cards = [
           },
           "criticalFailure": {
             "text": "Na dveře někdo zaklepe z druhé strany. -1 SAN, Hrozba +1.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "bw-01-01",
+    "type": "evidence",
+    "locationId": "location-1",
+    "title": "Dům se solí",
+    "description": "V opuštěném domě jsou všechny prahy posypané solí. Na zdi visí mapa tunelů a v prachu jsou otisky dětských bot.",
+    "repeatable": false,
+    "conditions": [],
+    "choices": [
+      {
+        "id": "bw-01-01-inspect",
+        "label": "Prostudovat mapu a značení",
+        "apCost": 1,
+        "test": {
+          "attribute": "VN",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: chodba vede pod pobřežními domy Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: chodba vede pod pobřežními domy",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: chodba vede pod pobřežními domy",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "bw-01-01-alternate",
+        "label": "Prohledat zazděné dveře",
+        "apCost": 1,
+        "test": {
+          "attribute": "SÍ",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: za zdí se skrývá vstup do starého tunelu Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: za zdí se skrývá vstup do starého tunelu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: za zdí se skrývá vstup do starého tunelu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-7"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "bw-02-01",
+    "type": "evidence",
+    "locationId": "location-2",
+    "title": "Vymazaná stránka",
+    "description": "V městském archivu chybí stránka se jmény těch, kteří zmizeli při posledním přílivu. Mezi listy zůstala otlačená stopa inkoustu.",
+    "repeatable": false,
+    "conditions": [],
+    "choices": [
+      {
+        "id": "bw-02-01-inspect",
+        "label": "Obnovit otisk písma",
+        "apCost": 1,
+        "test": {
+          "attribute": "VĚ",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: zmizelá jména byla vyškrtnuta z knihy Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-10"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: zmizelá jména byla vyškrtnuta z knihy",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-10"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: zmizelá jména byla vyškrtnuta z knihy",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-10"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-10"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "bw-02-01-alternate",
+        "label": "Porovnat zápisy s mapou majáku",
+        "apCost": 1,
+        "test": {
+          "attribute": "VN",
+          "difficulty": 9
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: záznamy ukazují k majáku Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: záznamy ukazují k majáku",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: záznamy ukazují k majáku",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "bw-04-01",
+    "type": "evidence",
+    "locationId": "location-4",
+    "title": "Hrob bez jména",
+    "description": "Pod nakloněným náhrobkem je prázdná rakev. Na víku někdo vyryl stejný znak, jaký se objevuje v rybářově deníku.",
+    "repeatable": false,
+    "conditions": [],
+    "choices": [
+      {
+        "id": "bw-04-01-inspect",
+        "label": "Překreslit rytinu",
+        "apCost": 1,
+        "test": {
+          "attribute": "VĚ",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: symbol spojuje hrob s obřadem přílivu Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: symbol spojuje hrob s obřadem přílivu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: symbol spojuje hrob s obřadem přílivu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "bw-04-01-alternate",
+        "label": "Prozkoumat staré pohřební záznamy",
+        "apCost": 1,
+        "test": {
+          "attribute": "VN",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: jméno zvoníka bylo záměrně vymazáno Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: jméno zvoníka bylo záměrně vymazáno",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: jméno zvoníka bylo záměrně vymazáno",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "bw-05-01",
+    "type": "evidence",
+    "locationId": "location-5",
+    "title": "Signální kniha",
+    "description": "Světlo majáku se každou noc rozsvítí přesně při třetím úderu. Ve služební knize někdo škrtl poslední směnu.",
+    "repeatable": false,
+    "conditions": [],
+    "choices": [
+      {
+        "id": "bw-05-01-inspect",
+        "label": "Prostudovat služební záznamy",
+        "apCost": 1,
+        "test": {
+          "attribute": "VĚ",
+          "difficulty": 9
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: maják vysílá signál ve stejném rytmu jako zvon Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: maják vysílá signál ve stejném rytmu jako zvon",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: maják vysílá signál ve stejném rytmu jako zvon",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-9"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "bw-05-01-alternate",
+        "label": "Zkontrolovat mechaniku světla",
+        "apCost": 1,
+        "test": {
+          "attribute": "VN",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: pod majákem je skrytý servisní vstup Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: pod majákem je skrytý servisní vstup",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: pod majákem je skrytý servisní vstup",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "bw-06-01",
+    "type": "evidence",
+    "locationId": "location-6",
+    "title": "Kruh z kostí",
+    "description": "V jeskyni se mezi černými kameny rýsuje kruh z bělavých úlomků. Každá přílivová vlna přinese další, přestože zde není žádný otvor do moře.",
+    "repeatable": false,
+    "conditions": [],
+    "choices": [
+      {
+        "id": "bw-06-01-inspect",
+        "label": "Překreslit kruh bez dotyku",
+        "apCost": 1,
+        "test": {
+          "attribute": "VĚ",
+          "difficulty": 9
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: rytina označuje hranici rituálu Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: rytina označuje hranici rituálu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: rytina označuje hranici rituálu",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-14"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
+            "effects": [
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              },
+              {
+                "type": "modifyThreat",
+                "amount": 1
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "bw-06-01-alternate",
+        "label": "Najít bezpečnou cestu kolem kruhu",
+        "apCost": 1,
+        "test": {
+          "attribute": "VN",
+          "difficulty": 8
+        },
+        "outcomes": {
+          "criticalSuccess": {
+            "text": "Odhalíš skrytou souvislost: servisní chodba vede kolem obřadního místa Podaří se ti zároveň zadržet postup rituálu.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              },
+              {
+                "type": "modifyRitual",
+                "amount": -1
+              }
+            ]
+          },
+          "greatSuccess": {
+            "text": "Důkladně prozkoumáš stopu: servisní chodba vede kolem obřadního místa",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              }
+            ]
+          },
+          "success": {
+            "text": "Získáš důležitou stopu: servisní chodba vede kolem obřadního místa",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              }
+            ]
+          },
+          "partialSuccess": {
+            "text": "Získáš stopu, ale to, co spatříš, tě připraví o klid.",
+            "effects": [
+              {
+                "type": "addEvidence",
+                "id": "reward-16"
+              },
+              {
+                "type": "modifyStat",
+                "stat": "san",
+                "amount": -1
+              }
+            ]
+          },
+          "failure": {
+            "text": "Stopa se ztratí, ale další odpovědi mohou čekat jinde.",
+            "effects": []
+          },
+          "criticalFailure": {
+            "text": "Místo se probudí a temnota si všimne tvé přítomnosti.",
             "effects": [
               {
                 "type": "modifyStat",

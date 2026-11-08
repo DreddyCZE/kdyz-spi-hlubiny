@@ -5,6 +5,7 @@ import { newState, transition, currentCard, explorationView, visibleResult } fro
 import { newMythState, mythPhase, publicMyth } from './myth.js';
 import { startCombat, combatTurn } from './combat.js';
 import { startingInventory, useBlackwaterItem } from '../data/blackwater-items.js';
+import { selectInvestigator, useInvestigatorAbility } from '../data/blackwater-investigators.js';
 
 export const blackwaterContent=createContent(blackwaterM4Cards);
 export function newBlackwaterGame(){
@@ -15,6 +16,8 @@ export function newBlackwaterGame(){
 export function blackwaterTransition(state,action){
   if(state?.scenario!=='blackwater'||state.version!==1||action?.revision!==state.revision)return state;
   if(state.game.ended)return state;
+  if(action.type==='selectInvestigator')return selectInvestigator(state,action.investigatorId);
+  if(action.type==='useAbility')return useInvestigatorAbility(state);
   if(action.type==='useItem'){
     if(state.combat?.status==='active'){
       if(action.itemId!=='bw-salt'||!state.game.inventory.includes('bw-salt'))return state;
@@ -81,7 +84,7 @@ export function publicBlackwater(state){
   const {game}=state;
   return {scenario:state.scenario,revision:state.revision,round:game.round,ap:game.ap,
     hp:game.hp,san:game.san,threat:game.threat,ritual:game.ritual,ended:game.ended,
-    inventory:[...game.inventory],
+    inventory:[...game.inventory],investigatorId:state.investigatorId||null,abilityUsed:state.abilityUsed||false,
     locationId:game.locationId,card:currentCard(game,blackwaterContent),
     exploration:explorationView(game,blackwaterContent),result:visibleResult(game,blackwaterContent),
     myth:publicMyth(state.myth),combat:state.combat?{...state.combat}:null};

@@ -38,5 +38,6 @@ export function createContent(cards, investigation = investigationDefinitions, o
 }
 export const content=createContent([...migrated,exampleCard]);
 // Opt-in Blackwater content; legacy default decks must remain unchanged.
+const companionFlags=blackwaterCompanions.flatMap(c=>c.abilities.map(a=>a.discoveryFlagId).filter(Boolean));
 const puzzleFlags=blackwaterPuzzles.flatMap(p=>p.onSolve.concat(p.onWrong).filter(e=>e.type==='setFlag').map(e=>e.id));
-export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards],investigationDefinitions,{flags:[...new Set([...flags,...puzzleFlags])]}),puzzles:blackwaterPuzzles,companions:blackwaterCompanions});
+export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards],investigationDefinitions,{flags:[...new Set([...flags,...puzzleFlags,...companionFlags])]}),puzzles:blackwaterPuzzles,companions:blackwaterCompanions});

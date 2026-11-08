@@ -6,11 +6,13 @@ import { validateCards, outcomeKeys } from '../src/engine/schema.js';
 import { newState, transition, currentCard, visibleResult } from '../src/engine/game.js';
 
 test('M4 cards are registered, have stable unique IDs and valid references', () => {
-  assert.equal(blackwaterM4Cards.length, 2);
-  assert.equal(new Set(blackwaterM4Cards.map(c => c.id)).size, 2);
-  assert.deepEqual(validateCards(content.cards, content.refs), []);
+  assert.equal(blackwaterM4Cards.length, 7);
+  assert.equal(new Set(blackwaterM4Cards.map(c => c.id)).size, 7);
+  const scenario = createContent(blackwaterM4Cards);
+  assert.deepEqual(validateCards(scenario.cards, scenario.refs), []);
+  assert.equal(content.byId['bw-00-01'], undefined, 'legacy default deck remains unchanged');
   for (const card of blackwaterM4Cards) {
-    assert.ok(content.byId[card.id]);
+    assert.ok(scenario.byId[card.id]);
     assert.equal(card.choices.length, 2);
     for (const choice of card.choices) assert.deepEqual(Object.keys(choice.outcomes).sort(), [...outcomeKeys].sort());
   }

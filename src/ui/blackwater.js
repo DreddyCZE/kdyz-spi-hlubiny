@@ -5,6 +5,7 @@ import {blackwaterItemById} from '../data/blackwater-items.js';
 import {enemies as enemyDefinitions} from '../engine/combat.js';
 import {rollDice,labels} from '../engine/game.js';
 import {blackwaterMap} from '../data/map.js';
+import {blackwaterRoutes} from '../engine/blackwater-map.js';
 import {locations} from '../data/locations.js';
 import {imageForCard} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
@@ -41,12 +42,24 @@ function render(){
  $('investigatorName').textContent=investigator.name;$('investigatorRole').textContent=investigator.role+' · '+investigator.ability;
  const stats=[['Kolo',view.round+'/7'],['Akční body',view.ap],['Zdraví',view.hp+'/'+investigator.hp],['Příčetnost',view.san+'/'+investigator.san],['Hrozba',view.threat+'/10'],['Rituál',view.ritual+'/8']];
  $('stats').replaceChildren(...stats.map(([name,value])=>{const el=document.createElement('div');el.className='stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=value;el.append(label,strong);return el;}));
- $('locations').replaceChildren(...locations.map(loc=>{
-  const current=loc.id===view.locationId,enemyCount=view.myth.enemies.filter(e=>e.locationId===loc.id).length;
-  const b=button((current?'◉ ':'')+loc.name+(enemyCount?' ◆'+enemyCount:''),()=>send('move',{locationId:loc.id}),rolling||view.ended||current||view.ap<1||state.combat?.status==='active','map-point'+(current?' active':'')+(enemyCount?' enemy':''));
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('map-routes');svg.setAttribute('aria-hidden','true');
+ for(const [from,neighbors] of Object.entries(blackwaterRoutes))for(const to of neighbors){
+  if(from>=to)continue;
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  const a=blackwaterMap.points[from],b=blackwaterMap.points[to];
+  line.setAttribute('x1',a.x);line.setAttribute('y1',a.y);line.setAttribute('x2',b.x);line.setAttribute('y2',b.y);
+  if(from===view.locationId||to===view.locationId)line.classList.add('reachable-route');
+  svg.append(line);
+ }
+ const pins=locations.map(loc=>{
+  const current=loc.id===view.locationId,reachable=blackwaterRoutes[view.locationId]?.includes(loc.id),enemyCount=view.myth.enemies.filter(e=>e.locationId===loc.id).length;
+  const b=button((current?'◉ ':reachable?'➤ ':'• ')+loc.name+(enemyCount?' ◆'+enemyCount:''),()=>send('move',{locationId:loc.id}),rolling||view.ended||current||!reachable||view.ap<1||state.combat?.status==='active','map-point'+(current?' active':'')+(reachable?' reachable':'')+(enemyCount?' enemy':''));
   b.style.left=blackwaterMap.points[loc.id].x+'%';b.style.top=blackwaterMap.points[loc.id].y+'%';
+  b.title=current?'Aktuální poloha':reachable?'Přesun za 1 akční bod':'Není přímá cesta';
   if(current)b.setAttribute('aria-current','location');return b;
- }));
+ });
+ $('locations').replaceChildren(svg,...pins);
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
  $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';

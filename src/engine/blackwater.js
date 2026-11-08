@@ -1,5 +1,6 @@
 // Opt-in Blackwater runtime. Legacy game state/save v4 is not modified.
 import { blackwaterM4Cards } from '../data/blackwater-m4.js';
+import { additionalBlackwaterCards } from '../data/blackwater-extra.js';
 import { createContent } from './content.js';
 import { newState, transition, currentCard, explorationView, visibleResult } from './game.js';
 import { newMythState, mythPhase, publicMyth } from './myth.js';
@@ -9,7 +10,7 @@ import { selectInvestigator, useInvestigatorAbility } from '../data/blackwater-i
 import { moveEnemies, blackwaterRoutes } from './blackwater-map.js';
 import { investigatorById } from '../data/blackwater-investigators.js';
 
-export const blackwaterContent=createContent(blackwaterM4Cards);
+export const blackwaterContent=createContent([...blackwaterM4Cards,...additionalBlackwaterCards]);
 export function newBlackwaterGame(){
   const game=newState(blackwaterContent);
   game.inventory=startingInventory();

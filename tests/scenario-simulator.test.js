@@ -24,6 +24,7 @@ test('batch reports exactly requested number of outcomes',()=>{
  assert.ok(Number.isInteger(batch.exhausted)&&batch.exhausted>=0&&batch.exhausted<=12);
  assert.equal(Object.values(batch.unfinishedReasons).reduce((a,b)=>a+b,0),batch.outcomes.unfinished||0);
  assert.ok(Object.values(batch.knowledgeCounts).every(n=>n>=1&&n<=12));
+ assert.ok(Object.values(batch.evidenceCounts).every(n=>Number.isInteger(n)&&n>=1&&n<=12));
  for(const [id,stats] of Object.entries(batch.knowledgeRoundStats)){
   assert.equal(stats.count,batch.knowledgeCounts[id]);
   assert.ok(stats.min>=1&&stats.max<=13&&stats.min<=stats.mean&&stats.mean<=stats.max);
@@ -71,4 +72,11 @@ test('knowledge acquisition trace is deterministic and never claims unearned kno
  const gained=result.trace.flatMap(step=>step.gainedKnowledge||[]);
  assert.deepEqual([...new Set(gained)].sort(),[...result.knowledge].sort());
  assert.ok(result.trace.filter(step=>step.gainedKnowledge?.length).every(step=>step.round>=1));
+});
+
+test('evidence counts equal individually collected evidence across seeds',()=>{
+ const batch=simulateBatch(blackwaterScenario,content,{runs:4,seed:42,maxActions:500});
+ const expected={};
+ for(let seed=42;seed<46;seed++)for(const id of simulateScenario(blackwaterScenario,content,{seed,maxActions:500}).evidence)expected[id]=(expected[id]||0)+1;
+ assert.deepEqual(batch.evidenceCounts,expected);
 });

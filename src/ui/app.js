@@ -1,6 +1,7 @@
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
 import { imageForCard, blackwaterImage } from '../data/story-art.js';
+import {scenarioInvestigators,scenarioInvestigator,defaultScenarioInvestigatorId} from '../engine/scenario-investigator.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,currentCard,selectedChoice,visibleResult,rollDice,investigationView,explorationView } from '../engine/game.js';
@@ -24,10 +25,7 @@ import { createJournal } from './journal.js';
 const { map: scenarioMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
-$('investigatorName').textContent=investigatorName;
-// The original occultist illustration is atmospheric art, not a selectable class.
-const portrait=blackwaterImage('investigators','occultist');
-if(portrait)$('investigatorPortrait').style.backgroundImage=`url("${new URL(portrait,document.baseURI).href}")`;
+
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 mountSaveNotice(storage,legacyMode?'legacy':'scenario');
 document.getElementById('roundLimit').textContent=legacyMode?'7':String(activeScenario.rules.maxRounds);
@@ -59,6 +57,14 @@ function render(){
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
+  const selected=legacyMode?null:scenarioInvestigator(session.scenario.investigatorId||defaultScenarioInvestigatorId);
+  $('investigatorName').textContent=selected?.name||investigatorName;
+  $('investigatorRole').textContent=selected?.role||'Výzkumnice';
+  const portrait=blackwaterImage('investigators',selected?.portraitId||'occultist');
+  $('investigatorPortrait').style.backgroundImage=portrait?`url("${new URL(portrait,document.baseURI).href}")`:'none';
+  const canSelect=!legacyMode&&state.round===1&&state.revision===0&&!state.ended&&!Object.keys(state.drawnCards).length;
+  investigatorSelection.hidden=!canSelect;
+  if(canSelect)investigatorSelection.value=selected?.id||defaultScenarioInvestigatorId;
   $('heroStats').textContent=`HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
@@ -228,6 +234,12 @@ const status=document.createElement('p');status.id='gameStatus';status.setAttrib
 const companionActions=document.createElement('div');companionActions.id='scenario-companions';companionActions.className='scenario-feature';companionActions.setAttribute('aria-label','Společníci');$('cardStory').after(companionActions);
 const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.className='scenario-feature';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardStory').after(puzzleActions);
 const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
+const investigatorSelection=document.createElement('select');
+investigatorSelection.id='investigatorSelection';
+investigatorSelection.setAttribute('aria-label','Vyber vyšetřovatele před první akcí');
+for(const i of scenarioInvestigators){const option=document.createElement('option');option.value=i.id;option.textContent=i.name+' · '+i.role;investigatorSelection.append(option);}
+investigatorSelection.onchange=()=>dispatch({type:'selectInvestigator',investigatorId:investigatorSelection.value});
+$('heroStats').before(investigatorSelection);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;

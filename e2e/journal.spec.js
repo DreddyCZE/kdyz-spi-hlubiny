@@ -2,17 +2,18 @@ import { test, expect } from '@playwright/test';
 
 const openJournal = page => page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
 const tab = (page, name) => page.getByRole('tab', { name: new RegExp('^' + name + ' · ') });
-const saved = page => page.evaluate(() => localStorage.getItem('hlubiny-v3'));
+const saved = page => page.evaluate(() => localStorage.getItem('hlubiny-v4'));
 
 async function acquireEvidence(page) {
   await page.addInitScript(() => { Math.random = () => .5; });
   await page.goto('./');
   await page.clock.install();
   for (let i = 0; i < 2; i++) {
+    await page.locator('#draw').click();
     await page.locator('#roll').click();
     await page.clock.fastForward(1000);
     await expect(page.locator('#reveal')).toBeVisible();
-    if (!i) await page.locator('#next').click();
+    await page.locator('#next').click();
   }
 }
 
@@ -24,8 +25,10 @@ test('empty journal, all tabs, keyboard navigation and opening leave save untouc
   await page.keyboard.press('Escape');
   expect(await saved(page)).toBe(pristine);
   await expect(page.locator('#ap')).toHaveText('3');
+  await page.locator('#draw').click();
   await page.locator('#choices button').first().click(); // Persist a real state/revision.
   const before = await saved(page);
+  expect(before).not.toBeNull();
   await openJournal(page);
   await expect(page.getByRole('heading', { name: 'Vyšetřovací deník', exact: true })).toBeVisible();
   await expect(tab(page, 'Důkazy')).toHaveAttribute('aria-selected', 'true');

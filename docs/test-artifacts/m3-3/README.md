@@ -1,6 +1,6 @@
 # M3.3 – vyšetřovací deník
 
-Skutečné screenshoty sestavené aplikace z `/dist/`, Chromium, 7. 11. 2026. Důkazy vznikly dvěma deterministickými hody 4 + 4 v běžném UI. Znalost vznikla až explicitním vyhodnocením důkazů.
+Skutečné screenshoty sestavené aplikace z `/dist/`, Chromium. Důkazy vznikly dvěma deterministickými hody 4 + 4 v běžném UI; každá karta byla výslovně dobrána z balíčku. Znalost vznikla až explicitním vyhodnocením důkazů. Snímky byly obnoveny po integraci balíčků M3.2 a save v4.
 
 | Šířka | Důkazy před dedukcí | Znalost po dedukci |
 | --- | --- | --- |
@@ -10,4 +10,4 @@ Skutečné screenshoty sestavené aplikace z `/dist/`, Chromium, 7. 11. 2026. D�
 
 Vizuálně ověřeny všechny tři šířky: čitelný obsah, kontrastní focus, bez horizontálního přetékání. Dlouhý obsah používá svislý scroll dialogu. Záložky mají minimálně 44 × 44 px; na mobilu tvoří dva sloupce.
 
-Ověření: 46 unit testů, 33 Chromium E2E testů, build a `git diff --check` prošly. Screenshoty pořídil [vlastní test deníku](../../../e2e/journal.spec.js), který kontroluje také klávesnici, reduced-motion, bezpečné texty, skutečné odměny, reload a zachování uloženého stavu při prohlížení.
+Ověření po integraci: 55 unit testů, 37 Chromium E2E, build a `git diff --check`. Screenshoty pořídil [vlastní test deníku](../../../e2e/journal.spec.js), který kontroluje také klávesnici, reduced-motion, bezpečné texty, skutečné odměny, reload a zachování uloženého stavu při prohlížení.

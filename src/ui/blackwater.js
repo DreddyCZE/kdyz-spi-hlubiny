@@ -10,6 +10,8 @@ import {locations} from '../data/locations.js';
 import {mythEvents} from '../engine/myth.js';
 import {blackwaterImage} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
+import {protectedSaveStorage} from '../engine/save-compatibility.js';
+import {mountSaveNotice} from './save-compatibility.js';
 const $=id=>document.getElementById(id);
 // Resolve against the document so /dist/, project Pages and /preview/ share one path rule.
 function paintArt(target, group, id) {
@@ -21,6 +23,8 @@ function paintArt(target, group, id) {
 }
 
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
+mountSaveNotice(storage,'blackwater');
+storage=protectedSaveStorage(storage,'ksh-blackwater-v1');
 let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null,battleRolling=false,pendingReward=null;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztrácejí beze stopy. Jen někdo musí mít odvahu hledat tam, kde ostatní zavírají dveře.',occultist:'V zakázaných knihách už četla o zvonech, které znějí pod hladinou. Teď poprvé slyší jeden na vlastní uši.',sailor:'Příliv zná lépe než vlastní dlaň. Ale této noci se moře vrací s něčím, co nikdy nemělo vyplout.'};

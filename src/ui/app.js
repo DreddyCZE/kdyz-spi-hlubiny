@@ -24,7 +24,7 @@ function render(){
   const choiceFocus=focused?.dataset.choiceId;
   const mapFocus=focused?.dataset.locationId;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
-  const scene=scenarioSessionView(session,activeScenario);
+  const scene=scenarioSessionView(session,activeScenario,content);
   const pending=scene.pendingTest;
   const clock=scene.clocks.find(c=>c.id===clockDisplayId)||scene.clocks[0];
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
@@ -87,6 +87,48 @@ function render(){
   $('roll').disabled=rolling||!scene.canAct||!choice?.available;
   $('next').disabled=rolling||!!pending||!scene.canAct||!result;
   $('endRound').disabled=rolling||!!pending||!scene.canAct;
+  // Accessible puzzle controls use the public projection, never private answers.
+  puzzleActions.replaceChildren();
+  for(const p of scene.puzzles){
+    const section=document.createElement('section');section.className='puzzle-panel';
+    const title=document.createElement('h3');title.textContent=p.title;section.append(title);
+    const status=document.createElement('p');status.textContent=p.status==='solved'?'Vyřešeno':p.status==='blocked'?'Pokusy vyčerpány · hledej jinou cestu':'Hádanka · pokusy '+p.attempts;section.append(status);
+    for(const clue of p.clues){const item=document.createElement('p');item.textContent=clue.text;section.append(item);}
+    for(const hint of p.hints){const item=document.createElement('p');item.textContent='Nápověda: '+hint.text;section.append(item);}
+    if(p.status==='open'&&scene.canAct&&!pending){
+      const answer=[];
+      if(p.type==='sequence'){
+        answer.push(...p.interaction.symbols);
+        const controls=document.createElement('div');controls.className='puzzle-sequence';
+        const draw=()=>{
+          controls.replaceChildren(...answer.map((symbol,i)=>{
+            const cell=document.createElement('div');cell.className='puzzle-symbol';
+            const label=document.createElement('span');label.textContent=symbol;cell.append(label);
+            const left=button('←',()=>{[answer[i-1],answer[i]]=[answer[i],answer[i-1]];draw();},i===0);
+            const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];draw();},i===answer.length-1);
+            left.setAttribute('aria-label','Posunout '+symbol+' doleva');
+            right.setAttribute('aria-label','Posunout '+symbol+' doprava');
+            cell.append(left,right);return cell;
+          }));
+        };draw();section.append(controls);
+      }else if(p.type==='deduction'){
+        const select=document.createElement('select');
+        for(const option of p.interaction.options){const el=document.createElement('option');el.value=option;el.textContent=option;select.append(el);}
+        section.append(select);answer.push(select);
+      }else{
+        const note=document.createElement('p');note.textContent='Tento typ hádanky bude mít vlastní ovládání v další fázi.';section.append(note);
+      }
+      if(p.type==='sequence'||p.type==='deduction'){
+        section.append(button('Ověřit řešení',()=>dispatch({type:'attemptPuzzle',revision:state.revision,puzzleId:p.id,answer:p.type==='sequence'?[...answer]:answer[0].value})));
+      }
+      for(const hint of (content.puzzles.find(x=>x.id===p.id)?.hints||[])){
+        if(!p.hints.some(x=>x.id===hint.id)){
+          section.append(button('Zobrazit nápovědu',()=>dispatch({type:'revealPuzzleHint',revision:state.revision,puzzleId:p.id,hintId:hint.id})));
+        }
+      }
+    }
+    puzzleActions.append(section);
+  }
   finaleActions.replaceChildren(...scene.availableEndings.map(e=>button('Dokončit scénář: '+e.title,()=>dispatch({type:'finishScenario',revision:state.revision,endingId:e.id}),false,'primary')));
   $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
@@ -105,6 +147,7 @@ const acceptButton=button('Přijmout výsledek',()=>dispatch({type:'acceptTest',
 rerollControls.append(rerollInfo,rerollButton,acceptButton);
 $('roll').after(rerollControls);
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
+const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardTitle').before(puzzleActions);
 const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{

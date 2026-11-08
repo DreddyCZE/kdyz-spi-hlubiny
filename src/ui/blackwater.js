@@ -11,7 +11,7 @@ import {imageForCard} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
-let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false;
+let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztrácejí beze stopy. Jen někdo musí mít odvahu hledat tam, kde ostatní zavírají dveře.',occultist:'V zakázaných knihách už četla o zvonech, které znějí pod hladinou. Teď poprvé slyší jeden na vlastní uši.',sailor:'Příliv zná lépe než vlastní dlaň. Ale této noci se moře vrací s něčím, co nikdy nemělo vyplout.'};
 const investigatorGlyph={detective:'⌕',occultist:'✧',sailor:'⚓'};
@@ -34,8 +34,9 @@ function resolveCard(card,choice){
  rolling=true;render();
  const diceBox=$('dice');diceBox.hidden=false;diceBox.classList.add('rolling');
  $('result').textContent='Osud rozhoduje…';$('die1').textContent='?';$('die2').textContent='?';
- const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850;
- window.setTimeout(()=>{rolling=false;render();},delay);
+ const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:1050;
+ if(delay){let ticks=0;rollTimer=window.setInterval(()=>{ticks++;$('die1').textContent=String(1+Math.floor(Math.random()*6));$('die2').textContent=String(1+Math.floor(Math.random()*6));$('diceTotal').textContent='Kostky se kutálejí…';if(ticks>15){window.clearInterval(rollTimer);rollTimer=null;}},65);}
+ window.setTimeout(()=>{if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}rolling=false;render();},delay);
 }
 function render(){
  const view=publicBlackwater(state);
@@ -73,6 +74,7 @@ function render(){
  const tokens=view.myth.enemies.map((e,index)=>{const token=document.createElement('span');token.className='map-token enemy-token';token.textContent='◆';token.title=enemyName(e.enemyId)+' · '+(locations.find(l=>l.id===e.locationId)?.name||'');token.style.left=(blackwaterMap.points[e.locationId].x+5+index%2*2)+'%';token.style.top=(blackwaterMap.points[e.locationId].y-5)+'%';return token;});
  const playerToken=document.createElement('span');playerToken.className='map-token investigator-token';playerToken.textContent=investigatorGlyph[investigator.id];playerToken.title=investigator.name;playerToken.style.left=(blackwaterMap.points[view.locationId].x-5)+'%';playerToken.style.top=(blackwaterMap.points[view.locationId].y-5)+'%';
  $('locations').replaceChildren(svg,...pins,...tokens,playerToken);
+ $('locations').setAttribute('aria-description','Lokace s jasným okrajem jsou dostupné za jeden akční bod. Žeton označuje aktuální polohu vyšetřovatele.');
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
  $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';
@@ -93,6 +95,7 @@ function render(){
  $('storyArt').style.backgroundImage='linear-gradient(0deg,#1a2828,#0000 75%),url("'+new URL(imageForCard(card),document.baseURI).href+'")';
  $('choices').replaceChildren(...(card?.choices||[]).map(choice=>button(choice.label+' · '+choice.apCost+' AP'+(choice.test?' · '+choice.test.attribute+' / '+choice.test.difficulty:''),()=>resolveCard(card,choice),rolling||!choice.available||Boolean(view.result)||state.combat?.status==='active')));
  const result=view.result;
+ $('story').dataset.phase=rolling?'rolling':result?'resolved':card?'decision':'concealed';
  $('dice').hidden=!result||!result.dice;
  $('dice').classList.toggle('rolling',rolling);
  $('die1').textContent=rolling?'?':result?.dice?.[0]??'?';$('die2').textContent=rolling?'?':result?.dice?.[1]??'?';
@@ -133,5 +136,5 @@ $('investigatorClose').onclick=()=>$('investigatorDialog').close();
 $('investigatorDialog').onclick=e=>{if(e.target===$('investigatorDialog'))$('investigatorDialog').close();};
 $('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
 $('combatClose').onclick=()=>send('closeCombat');
-$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;render();};
+$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
 $('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();

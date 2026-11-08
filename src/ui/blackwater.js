@@ -44,13 +44,26 @@ function showMythHistory(){
  if(!ids.length)$('mythHistoryCards').textContent='Zatím nebyla odhalena žádná karta mýtu.';
  $('mythHistoryDialog').showModal();
 }
+let transitionTimer=null;
+function showTransition(kind,title,description,symbol,autoDismiss=false){
+ if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}
+ const dialog=$('transitionDialog');
+ $('transitionKicker').textContent=kind;$('transitionTitle').textContent=title;
+ $('transitionText').textContent=description;$('transitionSymbol').textContent=symbol;
+ dialog.dataset.kind=kind;
+ if(!dialog.open)dialog.showModal();
+ if(autoDismiss)transitionTimer=window.setTimeout(()=>{transitionTimer=null;if(dialog.open)dialog.close();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?250:1350);
+}
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
  if(rolling)return false;
  const next=blackwaterTransition(state,{type,revision:state.revision,...rest});
  if(next===state){$('message').textContent='Akce nyní není dostupná.';return false;}
  const previousMythCount=state.myth.history.length;
+ const previousLocation=state.game.locationId;
  state=next;saveBlackwater(storage,state);$('message').textContent='';render();
+ if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,place.description,locationGlyph[place.id]||'✦',true);}
+ if(type==='startCombat'&&state.combat){showTransition('NEBEZPEČÍ · STŘETNUTÍ',enemyName(state.combat.enemyId),'Něco se vynořilo z mlhy. Připrav se na boj nebo útěk.','⚔');}
  if(type==='endRound'&&state.myth.history.length>previousMythCount){const event=mythEvents.find(e=>e.id===state.myth.history.at(-1));if(event)showMythCard(event,state.myth.history.length);}
  return true;
 }
@@ -173,6 +186,8 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='';
 }
+$('transitionContinue').onclick=()=>{$('transitionDialog').close();if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}};
+$('transitionDialog').addEventListener('close',()=>{if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}});
 $('mythConfirm').onclick=()=>$('mythDialog').close();
 $('mythHistoryOpen').onclick=showMythHistory;
 $('mythHistoryClose').onclick=()=>$('mythHistoryDialog').close();

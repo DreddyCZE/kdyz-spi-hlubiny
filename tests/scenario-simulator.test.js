@@ -43,3 +43,13 @@ test('an action-limited batch counts unfinished reasons separately from endings'
  assert.equal(batch.unfinishedReasons['action-limit'],3);
  assert.equal(batch.outcomes.unfinished,3);
 });
+
+test('conditional reroll policy is reproducible and receives actual result tiers',()=>{
+ const tiers=[];
+ const policy=({game,result})=>{tiers.push(result.key);return game.san>=5&&['failure','criticalFailure'].includes(result.key);};
+ const a=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,reroll:policy});
+ assert.ok(tiers.length>0);
+ assert.ok(tiers.every(k=>['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'].includes(k)));
+ const b=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,reroll:({game,result})=>game.san>=5&&['failure','criticalFailure'].includes(result.key)});
+ assert.deepEqual(a,b);
+});

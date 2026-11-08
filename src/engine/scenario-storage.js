@@ -10,7 +10,7 @@ export function validScenarioSession(s,def,data){
  if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound)return false;
  if(g.round>def.rules.maxRounds&&g.ap!==0)return false;
  // Reuse the strict legacy validator with only the scenario-specific range and ritual exception.
- const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),ended:isEnded(g,{scenarioClock:true})};
+ const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
  if(g.ended!==legacy.ended)return false;
  if(!validState(legacy,data))return false;
  if(!c.clocks||Object.keys(c.clocks).length!==def.clocks.length)return false;

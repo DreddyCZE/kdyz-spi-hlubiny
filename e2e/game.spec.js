@@ -1,3 +1,5 @@
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
 
 test('rozhodnutí → hod → jediný následek → reload bez opakované odměny', async ({ page }, testInfo) => {
@@ -22,20 +24,21 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await expect(page.locator('#roll')).toBeDisabled();
   await expect(page.locator('#endRound')).toBeDisabled();
   await expect(page.locator('#reveal')).toBeEmpty();
-  await expect(page.locator('#ap')).toHaveText('2');
+  await expect(page.locator('#ap')).toHaveText('3');
   await page.clock.fastForward(1000);
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   const reveal = page.locator('#reveal');
   await expect(reveal).toBeVisible();
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#sum')).toHaveText('4 + 4 + 2 + 0 = 10 proti obtížnosti 8');
   await expect(page.locator('#inventory')).toHaveText('Deník');
-  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v4'));
+  const saved = await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)));
   await page.reload();
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v4'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)))).toBe(saved);
   await page.screenshot({ path: testInfo.outputPath('game-after-reload.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Pokračovat', exact: true }).click();
       await page.locator('#draw').click();
@@ -58,6 +61,7 @@ for (const { label, random, reward } of [
       await expect(page.locator('#cardTitle')).toHaveText(title);
       await page.getByRole('button', { name: '🎲 Hodit kostkami', exact: true }).click();
       await page.clock.fastForward(1000);
+      await page.getByRole('button',{name:'Přijmout výsledek'}).click();
       await expect(page.locator('#reveal')).toBeVisible();
       if (title === 'Ztracená loď') await expect(page.locator('#inventory')).toHaveText(reward);
       await page.getByRole('button', { name: 'Pokračovat', exact: true }).click();
@@ -74,11 +78,9 @@ for (const { label, random, reward } of [
     await expect(page.locator('#inventory')).toContainText('Opis poznámky');
     await expect(page.locator('#ap')).toHaveText('0');
     await expect(page.locator('#roll')).toBeDisabled();
-    // Explicit deduction action; acquired information alone must not reveal the knowledge.
+    // The active scenario performs deduction automatically when evidence is obtained.
     await expect(page.locator('#journal-evidence')).toContainText('Deník');
-    await expect(page.locator('#journal-knowledge')).not.toContainText('Spojení s majákem');
     await page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
-    await page.getByRole('button', { name: 'Vyhodnotit důkazy', exact: true }).click();
     await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
     await expect(page.locator('#journal-deductions')).toContainText('Kam vedou stopy');
     await expect(page.locator('#deduce')).toBeDisabled();

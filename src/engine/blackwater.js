@@ -8,7 +8,9 @@ import { startingInventory, useBlackwaterItem } from '../data/blackwater-items.j
 
 export const blackwaterContent=createContent(blackwaterM4Cards);
 export function newBlackwaterGame(){
-  return {scenario:'blackwater',version:1,revision:0,game:newState(blackwaterContent),myth:newMythState(),combat:null};
+  const game=newState(blackwaterContent);
+  game.inventory=startingInventory();
+  return {scenario:'blackwater',version:1,revision:0,game,myth:newMythState(),combat:null};
 }
 export function blackwaterTransition(state,action){
   if(state?.scenario!=='blackwater'||state.version!==1||action?.revision!==state.revision)return state;

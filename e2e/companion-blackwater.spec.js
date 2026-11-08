@@ -7,11 +7,14 @@ test('Blackwater dog recruitment, ability cooldown and reload',async({page})=>{
  await expect(companions.getByRole('heading',{name:'Toulavý pes'})).toBeVisible();
  await companions.getByRole('button',{name:'Přijmout společníka'}).click();
  await expect(companions).toContainText('Doprovází tě');
+ await expect(companions).not.toContainText('Pes se zastaví u vlhkých stop');
  await companions.getByRole('button',{name:'Použít: Zachytit stopu'}).click();
  await expect(companions).toContainText('Pes se zastaví u vlhkých stop');
  await expect(companions.getByRole('button',{name:'Zachytit stopu · použito v tomto kole'})).toBeDisabled();
+ await expect(page.locator('#log')).toContainText('Pes se zastaví u vlhkých stop');
  await page.reload();
  await expect(companions).toContainText('Doprovází tě');
+ await expect(page.locator('#log')).toContainText('Pes se zastaví u vlhkých stop');
  await expect(companions.getByRole('button',{name:'Zachytit stopu · použito v tomto kole'})).toBeDisabled();
  await page.locator('#endRound').click();
  await expect(companions.getByRole('button',{name:'Použít: Zachytit stopu'})).toBeEnabled();

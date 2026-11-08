@@ -14,6 +14,7 @@ applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 let session=loadScenarioSession(storage,activeScenario,content),state=session.game,rolling=false,timer;
+const puzzleDrafts=new Map();
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
@@ -98,14 +99,15 @@ function render(){
     if(p.status==='open'&&scene.canAct&&!pending){
       const answer=[];
       if(p.type==='sequence'){
-        answer.push(...p.interaction.symbols);
+        const previous=puzzleDrafts.get(p.id);
+        answer.push(...(Array.isArray(previous)&&previous.length===p.interaction.symbols.length&&previous.every(x=>p.interaction.symbols.includes(x))?previous:p.interaction.symbols));
         const controls=document.createElement('div');controls.className='puzzle-sequence';
         const draw=()=>{
           controls.replaceChildren(...answer.map((symbol,i)=>{
             const cell=document.createElement('div');cell.className='puzzle-symbol';
             const label=document.createElement('span');label.textContent=symbol;cell.append(label);
-            const left=button('←',()=>{[answer[i-1],answer[i]]=[answer[i],answer[i-1]];draw();},i===0);
-            const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];draw();},i===answer.length-1);
+            const left=button('←',()=>{[answer[i-1],answer[i]]=[answer[i],answer[i-1]];puzzleDrafts.set(p.id,[...answer]);draw();},i===0);
+            const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];puzzleDrafts.set(p.id,[...answer]);draw();},i===answer.length-1);
             left.setAttribute('aria-label','Posunout '+symbol+' doleva');
             right.setAttribute('aria-label','Posunout '+symbol+' doprava');
             cell.append(left,right);return cell;
@@ -121,12 +123,11 @@ function render(){
       if(p.type==='sequence'||p.type==='deduction'){
         section.append(button('Ověřit řešení',()=>dispatch({type:'attemptPuzzle',revision:state.revision,puzzleId:p.id,answer:p.type==='sequence'?[...answer]:answer[0].value})));
       }
-      for(const hint of (content.puzzles.find(x=>x.id===p.id)?.hints||[])){
-        if(!p.hints.some(x=>x.id===hint.id)){
-          section.append(button('Zobrazit nápovědu',()=>dispatch({type:'revealPuzzleHint',revision:state.revision,puzzleId:p.id,hintId:hint.id})));
-        }
+      for(const hint of p.availableHints){
+        section.append(button('Zobrazit nápovědu',()=>dispatch({type:'revealPuzzleHint',revision:state.revision,puzzleId:p.id,hintId:hint.id})));
       }
     }
+    if(p.status!=='open')puzzleDrafts.delete(p.id);
     puzzleActions.append(section);
   }
   finaleActions.replaceChildren(...scene.availableEndings.map(e=>button('Dokončit scénář: '+e.title,()=>dispatch({type:'finishScenario',revision:state.revision,endingId:e.id}),false,'primary')));
@@ -165,7 +166,7 @@ $('endRound').onclick=()=>dispatch({type:'endRound'});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');
-  session=newScenarioSession(activeScenario,content);state=session.game;persist();render();
+  session=newScenarioSession(activeScenario,content);state=session.game;puzzleDrafts.clear();persist();render();
 };
 render();
 

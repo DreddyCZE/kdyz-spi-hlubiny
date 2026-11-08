@@ -1,6 +1,8 @@
 import {test,expect} from '@playwright/test';
 import {blackwaterContent as content} from '../src/engine/content.js';
-const saveKey='hlubiny-scenario-v1-blackwater';
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
+const saveKey=scenarioSaveKey(blackwaterScenario);
 async function resolveDrawn(page){
  await page.locator('#roll').click();
  if(await page.getByRole('button',{name:'Přijmout výsledek'}).isVisible()){

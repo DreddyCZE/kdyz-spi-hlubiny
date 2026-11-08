@@ -87,6 +87,7 @@ function render(){
   $('roll').disabled=rolling||!scene.canAct||!choice?.available;
   $('next').disabled=rolling||!!pending||!scene.canAct||!result;
   $('endRound').disabled=rolling||!!pending||!scene.canAct;
+  finaleActions.replaceChildren(...scene.availableEndings.map(e=>button('Dokončit scénář: '+e.title,()=>dispatch({type:'finishScenario',revision:state.revision,endingId:e.id}),false,'primary')));
   $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
@@ -104,6 +105,7 @@ const acceptButton=button('Přijmout výsledek',()=>dispatch({type:'acceptTest',
 rerollControls.append(rerollInfo,rerollButton,acceptButton);
 $('roll').after(rerollControls);
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
+const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;

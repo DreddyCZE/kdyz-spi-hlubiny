@@ -24,6 +24,7 @@ export function validateScenario(def){
     if(!Number.isSafeInteger(c.max)||c.max<1)err('clocks['+i+'].max','positive integer required');
     if(!Number.isSafeInteger(c.initial)||c.initial<0||c.initial>c.max)err('clocks['+i+'].initial','out of range');
     if(typeof c.label!=='string'||!c.label.trim())err('clocks['+i+'].label','required');
+    if(c.milestones!==undefined&&(!Array.isArray(c.milestones)||!unique(c.milestones.map(m=>m.round))||c.milestones.some(m=>!Number.isSafeInteger(m.round)||m.round<2||m.round>rules.maxRounds+1||!Number.isSafeInteger(m.value)||m.value<c.initial||m.value>c.max)))err('clocks['+i+'].milestones','invalid milestones');
   }
   if((def.clocks||[]).length&&!def.modules?.includes('scenario-clock'))err('modules','scenario-clock required for clocks');
   if(!Array.isArray(def.endings)||!def.endings.length||!unique(def.endings.map(e=>e.id)))err('endings','unique endings required');

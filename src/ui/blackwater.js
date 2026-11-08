@@ -11,7 +11,7 @@ import {imageForCard} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
-let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false;
+let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
@@ -72,6 +72,8 @@ function render(){
  $('deckHint').textContent=view.exploration.available===0?'Balíček je vyčerpaný. Pokračuj na jiné lokaci nebo ukonči kolo.':view.ap===0?'Nemáš akční body. Ukonči kolo.':'';
  $('draw').disabled=rolling||view.ended||Boolean(view.card)||!view.exploration.canDraw||state.combat?.status==='active';
  const card=view.card;
+ $('story').classList.toggle('unrevealed',!card);
+ $('cardBack').hidden=Boolean(card);
  $('cardTitle').textContent=card?.title||'Co ukrývá mlha?';
  $('cardText').textContent=card?.description||'Otoč kartu a vstup do příběhu. Následky rozhodnutí se odhalí teprve po vyhodnocení.';
  $('cardType').textContent=card?({encounter:'SETKÁNÍ',event:'UDÁLOST',item:'PŘEDMĚT',evidence:'DŮKAZ'}[card.type]||'PŘÍBĚH'):'NEODHALENÁ KARTA';
@@ -91,6 +93,8 @@ function render(){
  $('result').hidden=!rolling&&!result;
  $('result').textContent=rolling?'Osud rozhoduje…':result?labels[result.key]+' — '+result.text:card?'Následky zůstávají skryté. Zvol postup a odhal svůj osud.':'Balíček čeká na první průzkum.';
  $('next').disabled=rolling||!result||view.ended;
+ $('combatStage').hidden=!view.combat;
+ $('combatClose').hidden=!view.combat||view.combat.status==='active';
  $('combat').replaceChildren();
  if(view.combat){
   const info=document.createElement('p');info.textContent=enemyName(view.combat.enemyId)+' · HP '+view.combat.enemyHp+' · '+view.combat.status;$('combat').append(info);
@@ -99,6 +103,9 @@ function render(){
  }else $('combat').textContent='Žádné aktivní střetnutí.';
  $('myth').textContent=view.myth.lastEvent?view.myth.lastEvent.title+' — '+view.myth.lastEvent.text:'Noc zatím mlčí.';
  $('endRound').disabled=rolling||view.ended||view.round>=7||state.combat?.status==='active';
+ $('endRound').textContent=view.ap===0?'Pokračovat: fáze mýtu →':'Ukončit kolo ↗';
+ $('journalToggle').setAttribute('aria-expanded',String(journalOpen));
+ document.querySelector('.side-panel').classList.toggle('journal-open',journalOpen);
  const rewardName=id=>rewards.find(item=>item.id===id)?.name||id;
  const note=(id)=>{const p=document.createElement('p');p.className='journal-note';p.textContent='✧ '+rewardName(id);return p;};
  $('evidence').replaceChildren(...state.game.evidence.map(note));
@@ -108,5 +115,7 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='Scénář skončil. Temnota zvítězila.';
 }
+$('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
+$('combatClose').onclick=()=>send('closeCombat');
 $('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;render();};
 $('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();

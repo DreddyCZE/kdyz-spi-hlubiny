@@ -23,3 +23,5 @@ jobs:
       - run: npm run build
       - name: Seeded simulation smoke test
         run: node scripts/simulate-scenario.mjs 20 42
+      - name: Compare deterministic strategies
+        run: node scripts/compare-scenario-strategies.mjs 20 42

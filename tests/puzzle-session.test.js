@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newScenarioSession,scenarioSessionTransition,scenarioSessionView} from '../src/engine/scenario-session.js';
 import {content} from '../src/engine/content.js';
-import {blackwaterScenario} from '../src/data/scenarios/blackwater.js';
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
 const puzzle={id:'puzzle-check',version:1,title:'Zámek',locationId:content.refs.locations[0],type:'deduction',clues:[{id:'clue-check',text:'Odpověď je ano.',sourceEvidenceId:'reward-10'}],interaction:{options:['yes','no'],answer:'yes'},attempts:{mode:'limited',max:2},hints:[],onSolve:[{type:'setFlag',id:'puzzle-solved',value:true}],onWrong:[{type:'modifyThreat',amount:1}],fallback:{type:'alternatePath',id:'alternate-check'}};
 test('puzzle transitions are atomic, revision guarded, and persist in scenario state',()=>{
   const data={...content,puzzles:[puzzle]},session=newScenarioSession(blackwaterScenario,data);

@@ -6,6 +6,7 @@ import { newMythState, mythPhase, publicMyth } from './myth.js';
 import { startCombat, combatTurn } from './combat.js';
 import { startingInventory, useBlackwaterItem } from '../data/blackwater-items.js';
 import { selectInvestigator, useInvestigatorAbility } from '../data/blackwater-investigators.js';
+import { moveEnemies } from './blackwater-map.js';
 
 export const blackwaterContent=createContent(blackwaterM4Cards);
 export function newBlackwaterGame(){
@@ -66,6 +67,8 @@ export function blackwaterTransition(state,action){
     // Base game advances ritual by one; myth adds the event-specific effect.
     const before={...state.myth,ritual:game.ritual,threat:game.threat,round:state.myth.round};
     const myth=mythPhase(before,before.history.length);
+    // Pursuit advances one connected location per myth phase. New spawns also move.
+    myth.enemies=moveEnemies(myth.enemies,game.locationId);
     game.ritual=myth.ritual;game.threat=myth.threat;
     game.ended=game.ended||game.ritual>=8||game.threat>=10;
     if(game.ended)game.log.unshift('Konec scénáře: temnota zvítězila.');

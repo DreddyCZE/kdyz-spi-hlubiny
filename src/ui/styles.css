@@ -166,3 +166,9 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .scenario-feature h3 { margin: 0 0 .6rem; font-size: 1.1rem; }
 .scenario-feature button { margin: .25rem; }
 .game-modes a[aria-current='page'] { font-weight: 800; text-decoration-thickness: 2px; }
+
+/* Reuse the original Blackwater location illustrations without touching map hit targets. */
+.hero.has-location-art { position: relative; isolation: isolate; min-height: 145px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: #102522; }
+.hero.has-location-art::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg,#0a1719 4%,#0a1719dc 38%,#0a171933 100%),var(--location-art) center 45%/cover no-repeat; }
+.hero.has-location-art h2 { color: #f2dfb7; text-shadow: 0 2px 4px #000; }
+.hero.has-location-art p { color: #f2e7d1; text-shadow: 0 1px 3px #000; }

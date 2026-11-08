@@ -1,6 +1,7 @@
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
+import {validatePuzzle} from './puzzle.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
 export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
@@ -24,6 +25,18 @@ export function validScenarioSession(s,def,data){
   if(!p||typeof p.cardId!=='string'||typeof p.choiceId!=='string'||p.revision!==g.revision||!validDice(p.firstDice)||p.secondDice!==null&&!validDice(p.secondDice))return false;
   const card=currentCard(g,data),choice=card?.choices.find(x=>x.id===p.choiceId);
   if(!card||card.id!==p.cardId||!choice?.test||!choice.available||g.ended||c.endingId!==null)return false;
+ }
+ if(c.puzzles!==undefined){
+  if(!c.puzzles||typeof c.puzzles!=='object'||Array.isArray(c.puzzles))return false;
+  const defs=new Map((data.puzzles||[]).filter(p=>validatePuzzle(p).length===0).map(p=>[p.id,p]));
+  if(Object.keys(c.puzzles).length>defs.size)return false;
+  for(const [id,p] of Object.entries(c.puzzles)){
+   const d=defs.get(id);
+   if(!d||!p||!['open','solved','blocked'].includes(p.status)||!Number.isSafeInteger(p.attempts)||p.attempts<0||p.attempts>10000||!Array.isArray(p.hintIds)||new Set(p.hintIds).size!==p.hintIds.length||p.hintIds.some(h=>!d.hints.some(x=>x.id===h)))return false;
+   if(d.attempts.mode==='limited'&&p.attempts>d.attempts.max)return false;
+   if(p.status==='blocked'&&(d.attempts.mode!=='limited'||p.attempts!==d.attempts.max))return false;
+   if(p.status==='solved'&&p.attempts===0)return false;
+  }
  }
  if(c.endingId!==null&&!def.endings.some(e=>e.id===c.endingId))return false;
  if(g.round>def.rules.maxRounds&&!c.endingId)return false;

@@ -543,3 +543,18 @@ main{max-width:1660px;padding:5px 14px 18px}
 .battle-dialog .battle-investigator .card-wounds .damage-token{background:#5a2728;border-color:#c38776}
 .battle-dialog .battle-monster .card-wounds .damage-token{background:#582c2e;border-color:#d5a19b}
 @media(max-height:760px){.battle-dialog{padding:12px 20px}.battle-dialog .battle-art{height:110px}.battle-dialog .battle-roll-tray{margin:5px auto}.battle-dialog .battle-report{margin:5px auto!important;padding:7px!important}}
+
+/* Combat exchange is a physical card revealed over the tabletop. */
+.battle-outcome-dialog{box-sizing:border-box;width:min(92vw,480px);max-height:90dvh;overflow-y:auto;padding:26px 30px 30px;text-align:center;color:#30271c;background:linear-gradient(145deg,#eddfbb,#c9b18a);border:6px double #8b714a;box-shadow:0 0 0 2px #e6d29d,0 25px 80px #000c}
+.battle-outcome-dialog::backdrop{background:#020e0cc4;backdrop-filter:blur(7px)}
+.battle-outcome-dialog[open]{animation:combat-card-reveal .4s cubic-bezier(.2,.8,.2,1) both}
+.battle-outcome-dialog .eyebrow{color:#795332}
+.battle-outcome-dialog h2{font-size:clamp(26px,5vw,36px);line-height:1.1;margin:10px 0 16px}
+.battle-outcome-dialog>p:not(.eyebrow){font:italic 17px/1.5 Georgia;margin:12px 0 18px}
+.battle-outcome-seal{width:120px;height:105px;margin:0 auto 18px;display:grid;place-items:center;font-size:64px;color:#e3c99a;background:radial-gradient(#476b5c,#162c27);border:4px double #a99060;box-shadow:0 4px 0 #8e7855}
+.battle-outcome-dialog[data-result="failure"] .battle-outcome-seal,.battle-outcome-dialog[data-result="criticalFailure"] .battle-outcome-seal{background:radial-gradient(#7b3d3c,#281719)}
+.battle-outcome-dice{padding:10px;border-top:1px solid #9d865e;border-bottom:1px solid #9d865e;font-weight:bold}
+.battle-outcome-damage{margin:12px 0 20px;min-height:20px;font-weight:bold;color:#784332}
+.battle-outcome-dialog .primary{background:#203e33;color:#f4e3bb;border:2px solid #a58a58;padding:11px 22px;min-height:43px}
+@keyframes combat-card-reveal{from{opacity:0;transform:perspective(800px) rotateY(-18deg) translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.battle-outcome-dialog[open]{animation:none}}

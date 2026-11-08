@@ -39,8 +39,10 @@ export function scenarioSessionTransition(session,action,def,data){
     else if(active)next=useCompanionAbility(active,state,action.abilityId,action.trigger,game.round);
     if(!next)return session;
     const ability=action.type==='useCompanionAbility'?active?.abilities.find(a=>a.id===action.abilityId):null;
+    const discovered=ability?.discoveryFlagId&&!game.flags[ability.discoveryFlagId];
     const nextLog=ability?[ability.name+': '+ability.text,...game.log].slice(0,100):game.log;
-    return {...session,game:{...game,revision:game.revision+1,log:nextLog},scenario:{...sc,companion:next}};
+    const nextFlags=discovered?{...game.flags,[ability.discoveryFlagId]:true}:game.flags;
+    return {...session,game:{...game,revision:game.revision+1,flags:nextFlags,log:nextLog},scenario:{...sc,companion:next}};
   }
   // Optional puzzle subsystem: old sessions and scenarios without puzzles stay valid.
   if(['attemptPuzzle','revealPuzzleHint'].includes(action.type)){

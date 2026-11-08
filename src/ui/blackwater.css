@@ -529,11 +529,6 @@ main{max-width:1660px;padding:5px 14px 18px}
 @media(prefers-reduced-motion:reduce){.battle-dialog .battle-art.wounded{animation:none}}
 
 /* Each opponent has its own symbolic portrait instead of a repeated location photo. */
-.battle-dialog .battle-investigator .battle-art{background:radial-gradient(ellipse at 48% 25%,#52796a 0%,#25483d 44%,#0b201b 100%)!important;color:#e8d29a}
-.battle-dialog .battle-monster .battle-art{background:radial-gradient(ellipse at 50% 30%,#78544e 0%,#35282b 45%,#160e16 100%)!important;color:#e8b9a6;filter:none}
-.battle-dialog .battle-monster .battle-art[data-enemy="enemy-fog-hound"]{background:radial-gradient(ellipse at 50% 70%,#647a75 0%,#2a4145 45%,#101e27 100%)!important}
-.battle-dialog .battle-monster .battle-art[data-enemy="enemy-hollow-orderly"]{background:radial-gradient(ellipse at 40% 20%,#938b76 0%,#4e524a 40%,#222b2a 100%)!important}
-.battle-dialog .battle-monster .battle-art[data-enemy="enemy-bell-keeper"]{background:radial-gradient(ellipse at 50% 20%,#725c35 0%,#352a26 42%,#110e17 100%)!important}
 .battle-dialog .battle-art{font-size:clamp(58px,9vw,100px);display:grid;place-items:center;box-shadow:inset 0 0 35px #0009}
 .battle-dialog .battle-art::after{content:"";position:absolute;inset:8px;border:1px solid #d9c08d55;pointer-events:none}
 .battle-dialog .battle-tokens:not(:empty){max-width:620px;font:italic 14px/1.4 Georgia;color:#e4cfa8;text-align:center;padding:5px 10px}
@@ -626,3 +621,53 @@ main{max-width:1660px;padding:5px 14px 18px}
 @media (prefers-reduced-motion:reduce){
  .myth-dialog .myth-illustration #mythGlyph{animation:none!important}
 }
+
+/* M4 integrated raster system. Background colours never reset the image URL. */
+#characterGlyph{display:block;width:100%;height:100%;min-height:430px;background-size:cover;background-position:50% 35%}
+.selection-portrait{height:auto!important;aspect-ratio:3/2;min-height:150px;background-position:center 35%!important}
+.mini-portrait{background-position:center 30%!important}
+.story-art[data-art]:not([data-art=""]){background-size:cover;background-position:center;filter:none}
+.item-card .item-art,.battle-item-art{background-size:cover;background-position:center;background-repeat:no-repeat}
+.battle-item-art{display:block;flex:0 0 42px;width:42px;height:42px;border:1px solid #9b835c}
+.battle-dialog .battle-items .battle-item{display:flex;align-items:center;gap:9px;text-align:left;font-size:12px;line-height:1.3}
+.myth-dialog .myth-illustration #mythGlyph{position:absolute;right:12px;bottom:10px;width:36px;height:36px;font-size:20px;animation:none}
+.transition-artwork .transition-symbol{position:absolute;right:10px;bottom:8px;font-size:24px;line-height:32px;width:34px;height:34px;background:#102d2acc;border:1px solid #bda16d;border-radius:50%;margin:0}
+.outcome-art[data-art],.reward-emblem[data-art],.battle-outcome-seal[data-art]{background-size:cover;background-position:center;background-repeat:no-repeat}
+.reward-dialog .reward-emblem,.battle-outcome-dialog .battle-outcome-seal{width:100%;height:160px;max-width:none;border-radius:0;margin:0 0 16px;animation:none}
+.battle-dialog .battle-art{min-height:0!important;height:150px;background-position:center 35%!important;filter:none}
+.battle-dialog .battle-art::before,.battle-dialog .battle-art::after{display:none}
+.battle-dialog .battle-actions{position:static;bottom:auto}
+.battle-dialog .battle-opponents{gap:9px;align-items:start}
+.battle-dialog .battle-versus{align-self:center;font-size:24px}
+.battle-dialog>h3{font-size:16px}
+.battle-dialog .battle-flavor{font-size:14px}
+.battle-dialog .battle-items button,.battle-dialog .battle-actions button{min-height:44px}
+button:disabled{opacity:.58}
+@media(max-width:600px){
+ #characterGlyph{min-height:200px;aspect-ratio:3/2}
+ .character-portrait{min-height:0}
+ .battle-dialog{width:calc(100vw - 16px);padding:10px;max-height:calc(100dvh - 16px)}
+ .battle-dialog .battle-opponents{grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);gap:4px}
+ .battle-dialog .battle-opponents article{padding:5px;border-width:3px}
+ .battle-dialog .battle-art{height:110px}
+ .battle-dialog .battle-opponents h3{font-size:15px}
+ .battle-dialog .battle-opponents p{font-size:12px;margin:4px 0}
+ .battle-dialog .card-wounds{min-height:22px}
+ .battle-dialog .damage-token{width:18px;height:18px;font-size:11px}
+ .battle-dialog>p:not(.eyebrow){font-size:13px;line-height:1.35;margin:6px auto}
+ .battle-dialog .battle-items{gap:5px}
+ .battle-dialog .battle-items button{flex-basis:100%;padding:5px 7px}
+ .battle-dialog .battle-actions{gap:5px}
+ .battle-dialog .battle-actions button{font-size:12px;flex-basis:100%}
+ .myth-parchment{padding:14px}
+ .myth-parchment>p:not(.eyebrow){font-size:15px;line-height:1.4}
+ .myth-dialog .myth-illustration{min-height:150px;height:150px}
+ .transition-dialog,.outcome-dialog{max-height:calc(100dvh - 20px);overflow:auto}
+}
+@media(max-height:740px) and (min-width:601px){.battle-dialog .battle-art{height:100px}.battle-dialog .battle-roll-tray{margin:4px auto}.battle-dialog>p:not(.eyebrow){margin:4px auto}}
+
+/* Modal actions stay stable under the pointer and keep parchment-safe contrast. */
+dialog button:not(:disabled):hover,dialog button.primary:not(:disabled):hover{background:#284c40;color:#f7e6bd;border-color:#c4a46c;transform:none}
+.battle-dialog .battle-actions button:not(:disabled):hover{transform:none}
+.battle-outcome-dialog .primary{scroll-margin-block:12px}
+@media(prefers-reduced-motion:reduce){dialog,dialog *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

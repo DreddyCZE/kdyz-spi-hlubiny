@@ -8,17 +8,30 @@ import {blackwaterMap} from '../data/map.js';
 import {blackwaterRoutes} from '../engine/blackwater-map.js';
 import {locations} from '../data/locations.js';
 import {mythEvents} from '../engine/myth.js';
-import {imageForCard,storyArt} from '../data/story-art.js';
+import {blackwaterImage} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
-const portraitUrl=id=>new URL('../assets/portraits/'+id+'.svg',import.meta.url).href;
-const monsterPortraitId={'enemy-drowned-sailor':'drowned-sailor','enemy-fog-hound':'fog-hound','enemy-hollow-orderly':'hollow-orderly','enemy-bell-keeper':'bell-keeper'};
+// Resolve against the document so /dist/, project Pages and /preview/ share one path rule.
+function paintArt(target, group, id) {
+ const src=blackwaterImage(group,id);
+ target.style.backgroundImage=src?'url("'+new URL(src,document.baseURI).href+'")':'none';
+ target.dataset.art=src||'';
+ for(const node of [...target.childNodes])if(node.nodeType===3)node.remove();
+ return src;
+}
 
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
 let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null,battleRolling=false,pendingReward=null;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztrácejí beze stopy. Jen někdo musí mít odvahu hledat tam, kde ostatní zavírají dveře.',occultist:'V zakázaných knihách už četla o zvonech, které znějí pod hladinou. Teď poprvé slyší jeden na vlastní uši.',sailor:'Příliv zná lépe než vlastní dlaň. Ale této noci se moře vrací s něčím, co nikdy nemělo vyplout.'};
 const investigatorGlyph={detective:'⌕',occultist:'✧',sailor:'⚓'};
+// Mirror only current item availability; effects remain exclusively in the engine.
+function itemReady(id, game, investigator, combat) {
+ if(combat?.status==='active')return id==='bw-salt';
+ if(id==='bw-bandage')return game.hp<investigator.hp;
+ if(id==='bw-laudanum')return game.san<investigator.san;
+ return false;
+}
 const itemGlyph={ 'bw-bandage':'✚','bw-laudanum':'⚗','bw-salt':'✧','bw-revolver':'⌁','bw-bell-key':'⚿','bw-cylinder':'♫','bw-tide-page':'▤'};
 const locationGlyph={'location-0':'⚓','location-1':'⌂','location-2':'▤','location-3':'✚','location-4':'✝','location-5':'✦','location-6':'◆'};
 
@@ -26,11 +39,7 @@ const mythGlyphs={'myth-bell':'♢','myth-fog':'≋','myth-knock':'⌂','myth-ho
 function mythEffectText(event){return event.effects.map(effect=>effect.type==='modifyRitual'?'Rituál +'+effect.amount:effect.type==='modifyThreat'?'Hrozba +'+effect.amount:effect.type==='spawnEnemy'?'Nový nepřítel: '+enemyName(effect.enemyId):'Událost').join(' · ');}
 function showMythCard(event,index){
  $('mythGlyph').textContent=mythGlyphs[event.id]||'✦';
- // Use an existing painted WebP scene as a temporary illustrated myth-card background.
- // A dedicated artwork can replace it without changing game state or myth rules.
- const mythScenes={'myth-bell':'location-5','myth-fog':'location-0','myth-knock':'location-1','myth-hound':'location-4','myth-lantern':'location-5','myth-orderly':'location-3'};
- const scene=storyArt.byLocationId[mythScenes[event.id]||'location-0'];
- $('mythIllustration').style.backgroundImage='linear-gradient(0deg,#06171480,#06171412),url("'+scene+'")';
+ paintArt($('mythIllustration'),'myths',event.id);
  $('mythCardNumber').textContent='UDÁLOST '+index+' / FÁZE MÝTU';
  $('mythCardTitle').textContent=event.title;
  $('mythCardText').textContent=event.text;
@@ -44,7 +53,7 @@ function showMythHistory(){
   if(!event)return document.createTextNode('');
   const card=document.createElement('article');card.className='myth-discard-card';
   const symbol=document.createElement('span');symbol.className='myth-discard-glyph';symbol.textContent=mythGlyphs[id]||'✦';
-  symbol.style.backgroundImage='linear-gradient(0deg,#07181488,#07181422),url("'+(storyArt.byLocationId[({'myth-bell':'location-5','myth-fog':'location-0','myth-knock':'location-1','myth-hound':'location-4','myth-lantern':'location-5','myth-orderly':'location-3'})[id]||'location-0']||storyArt.fallback)+'")';
+  paintArt(symbol,'myths',id);
   const heading=document.createElement('h3');heading.textContent=(index+1)+'. '+event.title;
   const story=document.createElement('p');story.textContent=event.text;
   const effect=document.createElement('small');effect.textContent=mythEffectText(event);
@@ -66,7 +75,8 @@ function showTransition(kind,title,description,symbol,artUrl=null){
  const dialog=$('transitionDialog');
  $('transitionKicker').textContent=kind;$('transitionTitle').textContent=title;
  $('transitionText').textContent=description;$('transitionSymbol').textContent=symbol;
- $('transitionArtwork').style.backgroundImage=artUrl?'linear-gradient(0deg,#08171499,#08171410),url("'+artUrl+'")':'none';
+ $('transitionArtwork').style.backgroundImage=artUrl?'url("'+new URL(artUrl,document.baseURI).href+'")':'none';
+ $('transitionArtwork').dataset.art=artUrl||'';
  dialog.dataset.kind=kind;
  if(!dialog.open)dialog.showModal();
 }
@@ -82,10 +92,10 @@ function renderBattle(){
  const investigator=investigatorById[state.investigatorId],enemy=enemyDefinitions.find(e=>e.id===combat.enemyId);
  $('battleTitle').textContent=combat.status==='active'?'Tváří v tvář temnotě':'Střetnutí skončilo';
  $('battleFlavor').textContent=monsterFlavor[combat.enemyId]||'Něco se vynořilo ze stínů.';
- $('battleInvestigatorArt').textContent='';$('battleInvestigatorArt').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
+ paintArt($('battleInvestigatorArt'),'investigators',investigator.id);
  $('battleInvestigatorName').textContent=investigator.name;
  $('battleInvestigatorStats').textContent='♥ '+state.game.hp+'/'+investigator.hp+' · ◈ '+state.game.san+'/'+investigator.san;
- $('battleMonsterArt').textContent=combat.enemyId==='enemy-fog-hound'?'♧':combat.enemyId==='enemy-bell-keeper'?'♢':'◆';$('battleMonsterArt').style.backgroundImage='url("'+portraitUrl(monsterPortraitId[combat.enemyId]||'drowned-sailor')+'")';
+ paintArt($('battleMonsterArt'),'monsters',combat.enemyId);
  $('battleMonsterName').textContent=enemy?.name||combat.enemyId;
  $('battleMonsterStats').textContent='♥ '+combat.enemyHp+' · Obrana '+enemy?.defense+' · Výměna '+combat.exchange+'/3';
  $('battleMonsterArt').dataset.damage=String(Math.max(0,(enemy?.hp||0)-combat.enemyHp));
@@ -94,7 +104,7 @@ function renderBattle(){
  $('battleMonsterArt').dataset.enemy=combat.enemyId;
  $('battleInvestigatorArt').dataset.investigator=investigator.id;
  // Preserve illustrated card art: do not overwrite the image set above.
- // Fallback raster scenes remain available when a portrait asset is missing.
+ // Every actual investigator and enemy has a validated dedicated raster.
  const report=combat.roll;
  const battleNarration={
   'enemy-drowned-sailor':{attack:'Námořník se zapotácí, voda se rozstříkne po prknech a pod kabátem zapraskají kosti.',escape:'Ustupuješ mezi mokré trámy. Za zády stále slyšíš jeho těžké, neexistující kroky.'},
@@ -115,7 +125,11 @@ function renderBattle(){
  $('battleInvestigatorWounds').replaceChildren(...Array.from({length:Math.max(0,investigator.hp-state.game.hp)},()=>makeToken('♥','investigator-damage','Ztracené zdraví')));
  $('battleTokens').textContent=battleRolling?'Osud se právě rozhoduje…':battleActionText;
 
- $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>button((itemGlyph[id]||'✦')+' '+blackwaterItemById[id].name+' · '+blackwaterItemById[id].description,()=>send('useItem',{itemId:id}),battleRolling||(id!=='bw-salt'&&combat.status==='active'),'battle-item')));
+ $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>{
+  const item=blackwaterItemById[id];
+  const control=button(item.name+' · '+item.description,()=>send('useItem',{itemId:id}),battleRolling||!itemReady(id,state.game,investigator,combat),'battle-item');
+  const art=document.createElement('span');art.className='battle-item-art';art.setAttribute('aria-hidden','true');paintArt(art,'items',id);control.prepend(art);control.title=control.disabled?'Předmět nyní nelze použít. '+item.description:item.description;return control;
+ }));
  if(!$('battleItems').children.length)$('battleItems').textContent='Žádné použitelné předměty.';
  $('battleActions').replaceChildren(...(combat.status==='active'?[
   button('⚔ Zaútočit · hod 2 kostkami',()=>rollCombat('attack'),battleRolling),
@@ -141,7 +155,7 @@ function showBattleOutcome(){
  if(combat.playerSanLoss)damage.push('◈ −'+combat.playerSanLoss+' příčetnost');
  if(combat.lastMove==='attack'&&successful)damage.push('⚔ Nepřítel utrpěl zásah');
  $('battleOutcomeDamage').textContent=damage.join(' · ')||'Bez ztrát';
- $('battleOutcomeSeal').textContent=won?'✦':escaped?'➤':successful?'⚔':'◆';
+ paintArt($('battleOutcomeSeal'),'monsters',combat.enemyId);
  $('battleOutcomeDialog').dataset.result=result;
  $('battleOutcomeContinue').textContent=won||escaped?'Dokončit střetnutí →':'Pokračovat v boji →';
  if(!$('battleOutcomeDialog').open)$('battleOutcomeDialog').showModal();
@@ -165,6 +179,7 @@ function showRewardEffect(previous){
  const gained=[...freshEvidence,...freshKnowledge];
  if(!gained.length)return;
  const names=gained.map(id=>rewards.find(item=>item.id===id)?.name||id);
+ paintArt($('rewardDialog').querySelector('.reward-emblem'),'results','evidence');
  $('rewardTitle').textContent=freshEvidence.length?'Nová stopa nalezena':'Nový poznatek';
  $('rewardText').textContent=names.join(' · ');
  $('rewardDialog').showModal();
@@ -175,7 +190,7 @@ function showOutcome(){
  $('outcomeTitle').textContent=labels[result.key]||'Výsledek';
  $('outcomeStory').textContent=result.text;
  $('outcomeDice').textContent=result.dice?'🎲 '+result.dice.join(' + ')+' = '+result.total:'Rozhodnutí bylo vyhodnoceno bez hodu.';
- $('outcomeArt').textContent=['criticalSuccess','greatSuccess','success'].includes(result.key)?'✦':result.key==='partialSuccess'?'◈':'☠';
+ paintArt($('outcomeArt'),'results',result.key);
  $('outcomeDialog').dataset.outcome=result.key;
  if(!$('outcomeDialog').open)$('outcomeDialog').showModal();
 }
@@ -187,7 +202,7 @@ function send(type,rest={}){
  const previousMythCount=state.myth.history.length;
  const previousLocation=state.game.locationId;
  state=next;saveBlackwater(storage,state);$('message').textContent='';render();
- if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,locationArrival[place.id]||place.description,locationGlyph[place.id]||'✦',storyArt.byLocationId[place.id]);}
+ if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,locationArrival[place.id]||place.description,locationGlyph[place.id]||'✦',blackwaterImage('locations',place.id));}
  if(['startCombat','combatTurn','closeCombat','useItem'].includes(type))renderBattle();
  if(type==='endRound'&&state.myth.history.length>previousMythCount){const event=mythEvents.find(e=>e.id===state.myth.history.at(-1));if(event)showMythCard(event,state.myth.history.length);}
  return true;
@@ -210,7 +225,7 @@ function resolveCard(card,choice){
 function render(){
  const view=publicBlackwater(state);
  $('setup').hidden=Boolean(state.investigatorId);$('game').hidden=!state.investigatorId;
- $('investigators').replaceChildren(...investigators.map(i=>{const card=button('',()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card');const portrait=document.createElement('span');portrait.className='selection-portrait';portrait.textContent='';portrait.style.backgroundImage='url("'+portraitUrl(i.id)+'")';const name=document.createElement('strong');name.textContent=i.name;const role=document.createElement('span');role.className='selection-role';role.textContent=i.role;const flavor=document.createElement('em');flavor.textContent=investigatorFlavor[i.id];const stats=document.createElement('span');stats.className='selection-stats';stats.textContent='♥ '+i.hp+'    ◈ '+i.san;const ability=document.createElement('small');ability.textContent=i.ability;card.append(portrait,name,role,flavor,stats,ability);return card;}));
+ $('investigators').replaceChildren(...investigators.map(i=>{const card=button('',()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card');const portrait=document.createElement('span');portrait.className='selection-portrait';paintArt(portrait,'investigators',i.id);const name=document.createElement('strong');name.textContent=i.name;const role=document.createElement('span');role.className='selection-role';role.textContent=i.role;const flavor=document.createElement('em');flavor.textContent=investigatorFlavor[i.id];const stats=document.createElement('span');stats.className='selection-stats';stats.textContent='♥ '+i.hp+'    ◈ '+i.san;const ability=document.createElement('small');ability.textContent=i.ability;card.append(portrait,name,role,flavor,stats,ability);return card;}));
  if(!state.investigatorId){$('quickStats').replaceChildren();$('message').textContent='';return;}
  const investigator=investigatorById[state.investigatorId];
  $('investigatorName').textContent=investigator.name;$('investigatorRole').textContent=investigator.role+' · '+investigator.ability;
@@ -218,8 +233,8 @@ function render(){
  $('quickStats').replaceChildren(...[['♥',view.hp+'/'+investigator.hp,'Zdraví'],['◈',view.san+'/'+investigator.san,'Příčetnost'],['⚡',view.ap,'Akční body'],['◷',view.round+'/7','Kolo'],['☠',view.threat,'Hrozba'],['✧',view.ritual,'Rituál']].map(([symbol,value,label])=>{const el=document.createElement('span');el.className='quick-stat';el.title=label;el.textContent=symbol+' '+value;return el;}));
  $('characterTitle').textContent=investigator.name;
  $('characterFlavor').textContent=investigatorFlavor[investigator.id];
- $('characterGlyph').textContent='';$('characterGlyph').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
- $('miniPortrait').textContent='';$('miniPortrait').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
+ paintArt($('characterGlyph'),'investigators',investigator.id);
+ paintArt($('miniPortrait'),'investigators',investigator.id);
  $('characterAbility').textContent=investigator.ability+(view.abilityUsed?' (Vyčerpána)':'');
  $('characterStats').textContent='♥ '+view.hp+'/'+investigator.hp+'   ◈ '+view.san+'/'+investigator.san+'   ⚡ '+view.ap;
  $('stats').replaceChildren(...stats.map(([name,value])=>{const el=document.createElement('div');el.className='stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=value;el.append(label,strong);return el;}));
@@ -248,7 +263,7 @@ function render(){
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
  $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';
- $('items').replaceChildren(...view.inventory.map(id=>{const item=blackwaterItemById[id];const b=button('',()=>send('useItem',{itemId:id}),rolling||view.ended||item?.kind!=='consumable','item-card');const art=document.createElement('span');art.className='item-art';art.textContent=itemGlyph[id]||'✦';const title=document.createElement('strong');title.textContent=item?.name||id;const desc=document.createElement('small');desc.textContent=item?.description||'';b.append(art,title,desc);b.title=(item?.name||id)+': '+(item?.description||'');return b;}));
+ $('items').replaceChildren(...view.inventory.map(id=>{const item=blackwaterItemById[id];const b=button('',()=>send('useItem',{itemId:id}),rolling||view.ended||!itemReady(id,view,investigator,state.combat),'item-card');const art=document.createElement('span');art.className='item-art';paintArt(art,'items',id);const title=document.createElement('strong');title.textContent=item?.name||id;const desc=document.createElement('small');desc.textContent=item?.description||'';b.append(art,title,desc);b.title=(item?.name||id)+': '+(item?.description||'')+(b.disabled?' Nyní nelze použít.':'');return b;}));
  if(!view.inventory.length)$('items').textContent='Prázdný inventář.';
  $('ability').disabled=rolling||view.abilityUsed||view.ended||state.combat?.status==='active';
  $('ability').textContent=view.abilityUsed?'Schopnost vyčerpána':'✦ Použít schopnost';
@@ -272,7 +287,11 @@ function render(){
  $('cardTitle').textContent=card?.title||'Co ukrývá mlha?';
  $('cardText').textContent=card?.description||'Otoč kartu a vstup do příběhu. Následky rozhodnutí se odhalí teprve po vyhodnocení.';
  $('cardType').textContent=card?({encounter:'SETKÁNÍ',event:'UDÁLOST',item:'PŘEDMĚT',evidence:'DŮKAZ'}[card.type]||'PŘÍBĚH'):'NEODHALENÁ KARTA';
- $('storyArt').style.backgroundImage='linear-gradient(0deg,#1a2828,#0000 75%),url("'+new URL(imageForCard(card),document.baseURI).href+'")';
+ // Do not request the next illustration before its card has been drawn.
+ const storyArt=$('storyArt');
+ const scene=card&&blackwaterImage('encounters',card.id);
+ storyArt.style.backgroundImage=scene?'url("'+new URL(scene,document.baseURI).href+'")':'none';
+ storyArt.dataset.art=scene||'';
  $('choices').replaceChildren(...(card?.choices||[]).map(choice=>button(choice.label+' · '+choice.apCost+' AP'+(choice.test?' · '+choice.test.attribute+' / '+choice.test.difficulty:''),()=>resolveCard(card,choice),rolling||!choice.available||Boolean(view.result)||state.combat?.status==='active')));
  const result=view.result;
  $('story').dataset.phase=rolling?'rolling':result?'resolved':card?'decision':'concealed';
@@ -328,5 +347,5 @@ $('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
 $('combatClose').onclick=()=>send('closeCombat');
 $('endingJournal').onclick=()=>{journalOpen=true;render();document.querySelector('.side-panel').scrollIntoView({behavior:'smooth',block:'center'});};
 $('endingRestart').onclick=()=> $('reset').click();
-$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();for(const id of ['battleOutcomeDialog','battleDialog'])if($(id).open)$(id).close();battleRolling=false;rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
-$('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();
+$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();for(const id of ['battleOutcomeDialog','battleDialog','investigatorDialog','transitionDialog','mythDialog','mythHistoryDialog','outcomeDialog','rewardDialog'])if($(id).open)$(id).close();battleRolling=false;rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
+$('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();if(state.combat)renderBattle();

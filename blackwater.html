@@ -1,0 +1,9 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blackwater · Když spí hlubiny</title><link rel="stylesheet" href="./src/ui/blackwater.css"></head>
+<body><main><header><a href="./index.html">← Původní hra</a><h1>BLACKWATER</h1><p>Zvony pod přílivem · pracovní herní režim</p></header>
+<section id="setup"><h2>Vyber vyšetřovatele</h2><div id="investigators"></div></section>
+<section id="game" hidden><div id="stats" aria-live="polite"></div><div class="columns">
+<section><h2>Mapa města</h2><div id="locations"></div><h3>Protivníci v okolí</h3><div id="enemies"></div><h3>Inventář</h3><div id="items"></div><button id="ability">Použít schopnost</button></section>
+<section><h2 id="place"></h2><p id="description"></p><button id="draw">Dobrat kartu</button><article id="story"></article><div id="choices"></div><div id="result" role="status"></div><button id="next">Další karta</button><h3>Střetnutí</h3><div id="combat"></div><h3>Fáze mýtu</h3><div id="myth" role="status"></div><button id="endRound">Ukončit kolo</button></section>
+</div></section><p id="message" role="status"></p></main><script type="module" src="./src/ui/blackwater.js"></script></body></html>

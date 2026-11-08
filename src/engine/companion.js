@@ -48,7 +48,7 @@ export function dismissCompanion(state){
 }
 export function companionView(def,state,round){
  if(state.activeId!==def.id)return null;
- return {id:def.id,name:def.name,kind:def.kind,abilities:def.abilities.map(a=>({id:a.id,name:a.name,type:a.type,trigger:a.trigger,text:a.text,available:a.type==='passive'||state.usedRoundByAbility[a.id]!==round}))};
+ return {id:def.id,name:def.name,kind:def.kind,abilities:def.abilities.map(a=>({id:a.id,name:a.name,type:a.type,trigger:a.trigger,text:a.type==='passive'||state.usedRoundByAbility[a.id]!==undefined?a.text:null,available:a.type==='passive'||state.usedRoundByAbility[a.id]!==round}))};
 }
 export function useCompanionAbility(def,state,abilityId,trigger,round){
  if(state.activeId!==def.id||!Number.isSafeInteger(round)||round<1)return null;

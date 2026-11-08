@@ -138,3 +138,24 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .deck-summary { margin: 0 0 1rem; padding: .8rem; border: 1px solid var(--color-border, #56645e); border-radius: .4rem; }
 .deck-summary h3 { margin: 0; } .deck-summary p { margin: .5rem 0; overflow-wrap: anywhere; }
 .deck-summary button { max-width: 100%; }
+
+/* Unified Blackwater presentation: the scenario engine owns all actions and saves. */
+.edition { margin: .4rem 0 0; font: 600 .85rem/1.4 var(--font-label); color: var(--color-brass-light); letter-spacing: .025em; }
+.game-modes { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1rem; padding: .65rem 1rem; margin: -0.6rem 0 1rem; border: 1px solid var(--color-brass); background: var(--texture-leather); font: 600 .82rem/1.5 var(--font-label); }
+.game-modes-current { color: var(--color-brass-light); margin-right: auto; }
+.game-modes a { color: var(--color-brass-light); text-underline-offset: .2em; }
+.game-modes a:hover { color: var(--color-paper-light); }
+/* Map and story stay visible together, with the card receiving more reading space. */
+@media(min-width:1101px) {
+  .layout { grid-template-columns: minmax(0,1.25fr) minmax(390px,1fr); gap: clamp(12px,1.4vw,24px); }
+  .places.mapped { aspect-ratio: 1.65; }
+  .card { padding: clamp(18px,2vw,32px); }
+  .card h2 { font-size: clamp(1.45rem,2vw,2rem); }
+  .investigator-bar > button { min-height: 78px; }
+  .investigator-bar .component-icon { font-size: 1.5rem; margin-bottom: .2rem; }
+}
+@media(max-width:760px) {
+  .game-modes { margin: 0 0 1rem; }
+  .game-modes-current { flex-basis: 100%; }
+  .edition { font-size: .75rem; }
+}

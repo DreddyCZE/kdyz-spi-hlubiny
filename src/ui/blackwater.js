@@ -7,6 +7,7 @@ import {rollDice,labels} from '../engine/game.js';
 import {blackwaterMap} from '../data/map.js';
 import {locations} from '../data/locations.js';
 import {imageForCard} from '../data/story-art.js';
+import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
 let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false;
@@ -55,6 +56,7 @@ function render(){
  $('ability').textContent=view.abilityUsed?'Schopnost vyčerpána':'✦ Použít schopnost';
  $('deckName').textContent=view.exploration.name;
  $('deckCount').textContent='Zbývá '+view.exploration.available+' karet';
+ $('deckHint').textContent=view.exploration.available===0?'Balíček je vyčerpaný. Pokračuj na jiné lokaci nebo ukonči kolo.':view.ap===0?'Nemáš akční body. Ukonči kolo.':'';
  $('draw').disabled=rolling||view.ended||Boolean(view.card)||!view.exploration.canDraw||state.combat?.status==='active';
  const card=view.card;
  $('cardTitle').textContent=card?.title||'Co ukrývá mlha?';
@@ -77,6 +79,12 @@ function render(){
  }else $('combat').textContent='Žádné aktivní střetnutí.';
  $('myth').textContent=view.myth.lastEvent?view.myth.lastEvent.title+' — '+view.myth.lastEvent.text:'Noc zatím mlčí.';
  $('endRound').disabled=rolling||view.ended||view.round>=7||state.combat?.status==='active';
+ const rewardName=id=>rewards.find(item=>item.id===id)?.name||id;
+ const note=(id)=>{const p=document.createElement('p');p.className='journal-note';p.textContent='✧ '+rewardName(id);return p;};
+ $('evidence').replaceChildren(...state.game.evidence.map(note));
+ if(!state.game.evidence.length)$('evidence').textContent='Zatím žádné stopy.';
+ $('knowledge').replaceChildren(...[...state.game.knowledge,...Object.keys(state.game.deductions).filter(id=>state.game.deductions[id])].map(note));
+ if(!$('knowledge').children.length)$('knowledge').textContent='Dosud žádné závěry.';
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='Scénář skončil. Temnota zvítězila.';
 }

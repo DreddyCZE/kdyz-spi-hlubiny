@@ -114,11 +114,34 @@ function renderBattle(){
  ]:[button('Pokračovat →',()=>send('closeCombat'),battleRolling)]));
  if(!dialog.open)dialog.showModal();
 }
+function showBattleOutcome(){
+ const combat=state.combat;
+ if(!combat?.roll)return;
+ const enemy=enemyDefinitions.find(e=>e.id===combat.enemyId);
+ const name=enemy?.name||'neznámý nepřítel';
+ const won=combat.status==='defeated',escaped=combat.status==='escaped';
+ const result=combat.roll.key;
+ const successful=['criticalSuccess','greatSuccess','success'].includes(result);
+ $('battleOutcomeTitle').textContent=won?'Temnota ustupuje':escaped?'Únik do bezpečí':successful?'Zásah v temnotě':result==='partialSuccess'?'Vítězství za cenu bolesti':'Temnota vrací úder';
+ const intro=combat.lastMove==='escape'?'Ustupuješ před '+name.toLowerCase()+'. Každý krok je zápasem o poslední okamžik svobody.':'Postavíš se proti '+name.toLowerCase()+'. Vzduch prořízne zvuk úderu a za ním se rozhostí ticho.';
+ const ending=won?'Nepřítel se hroutí. Jeho obrys se rozplývá jako inkoust v mořské vodě.':escaped?'Podařilo se uniknout, ale ve tmě za tebou stále něco čeká.':combat.playerDamage||combat.playerSanLoss?'Protiútok tě zasáhl. Přesto boj ještě nemusí být ztracen.':successful?'Tvůj úder našel cíl. Nepřítel couvá, ale stále stojí.':'Stín se ani nepohnul. Znovu se připravuje k útoku.';
+ $('battleOutcomeStory').textContent=intro+' '+ending;
+ $('battleOutcomeDice').textContent='🎲 '+combat.dice.join(' + ')+' · '+labels[result];
+ const damage=[];
+ if(combat.playerDamage)damage.push('♥ −'+combat.playerDamage+' zdraví');
+ if(combat.playerSanLoss)damage.push('◈ −'+combat.playerSanLoss+' příčetnost');
+ if(combat.lastMove==='attack'&&successful)damage.push('⚔ Nepřítel utrpěl zásah');
+ $('battleOutcomeDamage').textContent=damage.join(' · ')||'Bez ztrát';
+ $('battleOutcomeSeal').textContent=won?'✦':escaped?'➤':successful?'⚔':'◆';
+ $('battleOutcomeDialog').dataset.result=result;
+ $('battleOutcomeContinue').textContent=won||escaped?'Dokončit střetnutí →':'Pokračovat v boji →';
+ if(!$('battleOutcomeDialog').open)$('battleOutcomeDialog').showModal();
+}
 function rollCombat(move){
  if(battleRolling||!state.combat||state.combat.status!=='active')return;
  battleRolling=true;renderBattle();
  const dice=rollDice(),delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850;
- const finish=()=>{battleRolling=false;send('combatTurn',{move,dice});};
+ const finish=()=>{battleRolling=false;if(send('combatTurn',{move,dice}))showBattleOutcome();};
  if(!delay){finish();return;}
  let ticks=0;
  const timer=window.setInterval(()=>{
@@ -280,6 +303,7 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='';
 }
+$('battleOutcomeContinue').onclick=()=>{$('battleOutcomeDialog').close();if(state.combat?.status!=='active')send('closeCombat');};
 $('transitionContinue').onclick=()=>$('transitionDialog').close();
 $('outcomeContinue').onclick=()=>{$('outcomeDialog').close();if(pendingReward){const previous=pendingReward;pendingReward=null;showRewardEffect(previous);}};
 $('rewardContinue').onclick=()=>$('rewardDialog').close();
@@ -295,5 +319,5 @@ $('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
 $('combatClose').onclick=()=>send('closeCombat');
 $('endingJournal').onclick=()=>{journalOpen=true;render();document.querySelector('.side-panel').scrollIntoView({behavior:'smooth',block:'center'});};
 $('endingRestart').onclick=()=> $('reset').click();
-$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
+$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();for(const id of ['battleOutcomeDialog','battleDialog'])if($(id).open)$(id).close();battleRolling=false;rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
 $('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();

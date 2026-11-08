@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {content} from '../src/engine/content.js';
+import {blackwaterContent as content} from '../src/engine/content.js';
 import {auditDeductionSources} from '../src/engine/scenario-reachability.js';
 const finaleEvidence=['reward-7','reward-9','reward-10','reward-11','reward-12','reward-14','reward-16'];
 test('every Blackwater finale evidence has at least one real card award',()=>{

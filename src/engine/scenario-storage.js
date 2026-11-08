@@ -2,12 +2,14 @@ import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
 import {validatePuzzle} from './puzzle.js';
+import {scenarioInvestigator} from './scenario-investigator.js';
 import {validateCompanion} from './companion.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
 export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
  const g=s.game,c=s.scenario;
+ if(c.investigatorId!==undefined&&!scenarioInvestigator(c.investigatorId))return false;
  if(c.schemaVersion!==1||c.scenarioId!==def.id||c.scenarioVersion!==def.version)return false;
  if(!Number.isSafeInteger(g.round)||g.round<1||g.round>def.rules.maxRounds+1)return false;
  if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound)return false;

@@ -527,3 +527,19 @@ main{max-width:1660px;padding:5px 14px 18px}
 @keyframes combat-impact{0%{filter:brightness(1.8) sepia(1);transform:translateX(6px)}40%{transform:translateX(-5px)}100%{transform:none}}
 @media(max-width:600px){.battle-dialog{max-height:95dvh}.battle-dialog .battle-art{height:110px}.battle-dialog .battle-actions{bottom:-12px}.battle-dialog .battle-opponents article{padding:5px}}
 @media(prefers-reduced-motion:reduce){.battle-dialog .battle-art.wounded{animation:none}}
+
+/* Each opponent has its own symbolic portrait instead of a repeated location photo. */
+.battle-dialog .battle-investigator .battle-art{background:radial-gradient(ellipse at 48% 25%,#52796a 0%,#25483d 44%,#0b201b 100%)!important;color:#e8d29a}
+.battle-dialog .battle-monster .battle-art{background:radial-gradient(ellipse at 50% 30%,#78544e 0%,#35282b 45%,#160e16 100%)!important;color:#e8b9a6;filter:none}
+.battle-dialog .battle-monster .battle-art[data-enemy="enemy-fog-hound"]{background:radial-gradient(ellipse at 50% 70%,#647a75 0%,#2a4145 45%,#101e27 100%)!important}
+.battle-dialog .battle-monster .battle-art[data-enemy="enemy-hollow-orderly"]{background:radial-gradient(ellipse at 40% 20%,#938b76 0%,#4e524a 40%,#222b2a 100%)!important}
+.battle-dialog .battle-monster .battle-art[data-enemy="enemy-bell-keeper"]{background:radial-gradient(ellipse at 50% 20%,#725c35 0%,#352a26 42%,#110e17 100%)!important}
+.battle-dialog .battle-art{font-size:clamp(58px,9vw,100px);display:grid;place-items:center;box-shadow:inset 0 0 35px #0009}
+.battle-dialog .battle-art::after{content:"";position:absolute;inset:8px;border:1px solid #d9c08d55;pointer-events:none}
+.battle-dialog .battle-tokens:not(:empty){max-width:620px;font:italic 14px/1.4 Georgia;color:#e4cfa8;text-align:center;padding:5px 10px}
+.battle-dialog .battle-roll-tray{max-width:540px}
+.battle-dialog .battle-report[data-result="partialSuccess"]{border-color:#a88a4e;background:#4a4030}
+.battle-dialog .battle-report[data-result="success"]{border-color:#688d73;background:#29463c}
+.battle-dialog .battle-investigator .card-wounds .damage-token{background:#5a2728;border-color:#c38776}
+.battle-dialog .battle-monster .card-wounds .damage-token{background:#582c2e;border-color:#d5a19b}
+@media(max-height:760px){.battle-dialog{padding:12px 20px}.battle-dialog .battle-art{height:110px}.battle-dialog .battle-roll-tray{margin:5px auto}.battle-dialog .battle-report{margin:5px auto!important;padding:7px!important}}

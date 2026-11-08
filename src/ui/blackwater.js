@@ -61,6 +61,44 @@ function showTransition(kind,title,description,symbol,artUrl=null){
  dialog.dataset.kind=kind;
  if(!dialog.open)dialog.showModal();
 }
+const monsterFlavor={
+ 'enemy-drowned-sailor':'Z promočeného kabátu odkapává mořská voda. Muž před tebou nemá dech, přesto ze rtů uniká melodie potopeného zvonu.',
+ 'enemy-fog-hound':'Z mlhy se vynoří zvíře bez stínu. Jeho tlapy nevydávají zvuk a mezi zuby se zachytává šedé světlo.',
+ 'enemy-hollow-orderly':'Bílý plášť je potřísněný solí. Ošetřovatel stojí nepřirozeně strnule a zpod obvazů se ozývá škrábání.',
+ 'enemy-bell-keeper':'Tam, kde by měla být tvář, je jen hladká tma. Každý jeho krok provází úder zvonu, který nikdo jiný neslyší.'
+};
+function renderBattle(){
+ const combat=state.combat,dialog=$('battleDialog');
+ if(!combat){if(dialog.open)dialog.close();return;}
+ const investigator=investigatorById[state.investigatorId],enemy=enemyDefinitions.find(e=>e.id===combat.enemyId);
+ $('battleTitle').textContent=combat.status==='active'?'Tváří v tvář temnotě':'Střetnutí skončilo';
+ $('battleFlavor').textContent=monsterFlavor[combat.enemyId]||'Něco se vynořilo ze stínů.';
+ $('battleInvestigatorArt').textContent=investigatorGlyph[investigator.id];
+ $('battleInvestigatorName').textContent=investigator.name;
+ $('battleInvestigatorStats').textContent='♥ '+state.game.hp+'/'+investigator.hp+' · ◈ '+state.game.san+'/'+investigator.san;
+ $('battleMonsterArt').textContent=combat.enemyId==='enemy-fog-hound'?'♧':combat.enemyId==='enemy-bell-keeper'?'♢':'◆';
+ $('battleMonsterName').textContent=enemy?.name||combat.enemyId;
+ $('battleMonsterStats').textContent='♥ '+combat.enemyHp+' · Obrana '+enemy?.defense+' · Výměna '+combat.exchange+'/3';
+ const report=combat.roll;
+ $('battleReport').textContent=report?('Hod '+combat.dice.join(' + ')+' · '+labels[report.key]+' · Ztráta zdraví '+combat.playerDamage+' · Ztráta příčetnosti '+combat.playerSanLoss):'Rozhodni se, zda budeš bojovat, nebo se pokusíš uniknout.';
+ $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>button((itemGlyph[id]||'✦')+' '+blackwaterItemById[id].name+' · '+blackwaterItemById[id].description,()=>send('useItem',{itemId:id}),id!=='bw-salt'&&combat.status==='active','battle-item')));
+ if(!$('battleItems').children.length)$('battleItems').textContent='Žádné použitelné předměty.';
+ $('battleActions').replaceChildren(...(combat.status==='active'?[
+  button('⚔ Zaútočit · hod 2 kostkami',()=>send('combatTurn',{move:'attack',dice:rollDice()})),
+  button('➤ Pokusit se utéct · hod 2 kostkami',()=>send('combatTurn',{move:'escape',dice:rollDice()}))
+ ]:[button('Pokračovat →',()=>send('closeCombat'))]));
+ if(!dialog.open)dialog.showModal();
+}
+function showOutcome(){
+ const result=publicBlackwater(state).result;
+ if(!result)return;
+ $('outcomeTitle').textContent=labels[result.key]||'Výsledek';
+ $('outcomeStory').textContent=result.text;
+ $('outcomeDice').textContent=result.dice?'🎲 '+result.dice.join(' + ')+' = '+result.total:'Rozhodnutí bylo vyhodnoceno bez hodu.';
+ $('outcomeArt').textContent=['criticalSuccess','greatSuccess','success'].includes(result.key)?'✦':result.key==='partialSuccess'?'◈':'☠';
+ $('outcomeDialog').dataset.outcome=result.key;
+ if(!$('outcomeDialog').open)$('outcomeDialog').showModal();
+}
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
  if(rolling)return false;
@@ -70,7 +108,7 @@ function send(type,rest={}){
  const previousLocation=state.game.locationId;
  state=next;saveBlackwater(storage,state);$('message').textContent='';render();
  if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,locationArrival[place.id]||place.description,locationGlyph[place.id]||'✦',storyArt.byLocationId[place.id]);}
- if(type==='startCombat'&&state.combat){showTransition('NEBEZPEČÍ · STŘETNUTÍ',enemyName(state.combat.enemyId),'Něco se vynořilo z mlhy. Připrav se na boj nebo útěk.','⚔');}
+ if(['startCombat','combatTurn','closeCombat','useItem'].includes(type))renderBattle();
  if(type==='endRound'&&state.myth.history.length>previousMythCount){const event=mythEvents.find(e=>e.id===state.myth.history.at(-1));if(event)showMythCard(event,state.myth.history.length);}
  return true;
 }
@@ -80,13 +118,13 @@ function resolveCard(card,choice){
  const next=blackwaterTransition(state,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(dice?{dice}:{})});
  if(next===state){$('message').textContent='Rozhodnutí nelze provést.';return;}
  state=next;saveBlackwater(storage,state);
- if(!dice){render();return;}
+ if(!dice){render();showOutcome();return;}
  rolling=true;render();
  const diceBox=$('dice');diceBox.hidden=false;diceBox.classList.add('rolling');
  $('result').textContent='Osud rozhoduje…';$('die1').textContent='?';$('die2').textContent='?';
  const delay=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:1050;
  if(delay){let ticks=0;rollTimer=window.setInterval(()=>{ticks++;$('die1').textContent=String(1+Math.floor(Math.random()*6));$('die2').textContent=String(1+Math.floor(Math.random()*6));$('diceTotal').textContent='Kostky se kutálejí…';if(ticks>15){window.clearInterval(rollTimer);rollTimer=null;}},65);}
- window.setTimeout(()=>{if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}rolling=false;render();},delay);
+ window.setTimeout(()=>{if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}rolling=false;render();showOutcome();},delay);
 }
 function render(){
  const view=publicBlackwater(state);
@@ -194,6 +232,7 @@ function render(){
  if(view.ended)$('message').textContent='';
 }
 $('transitionContinue').onclick=()=>$('transitionDialog').close();
+$('outcomeContinue').onclick=()=>$('outcomeDialog').close();
 
 $('mythConfirm').onclick=()=>$('mythDialog').close();
 $('mythHistoryOpen').onclick=showMythHistory;

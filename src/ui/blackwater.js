@@ -7,6 +7,7 @@ import {rollDice,labels} from '../engine/game.js';
 import {blackwaterMap} from '../data/map.js';
 import {blackwaterRoutes} from '../engine/blackwater-map.js';
 import {locations} from '../data/locations.js';
+import {mythEvents} from '../engine/myth.js';
 import {imageForCard} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
@@ -17,12 +18,41 @@ const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztr
 const investigatorGlyph={detective:'⌕',occultist:'✧',sailor:'⚓'};
 const itemGlyph={ 'bw-bandage':'✚','bw-laudanum':'⚗','bw-salt':'✧','bw-revolver':'⌁','bw-bell-key':'⚿','bw-cylinder':'♫','bw-tide-page':'▤'};
 const locationGlyph={'location-0':'⚓','location-1':'⌂','location-2':'▤','location-3':'✚','location-4':'✝','location-5':'✦','location-6':'◆'};
+
+const mythGlyphs={'myth-bell':'♢','myth-fog':'≋','myth-knock':'⌂','myth-hound':'♧','myth-lantern':'✧','myth-orderly':'✚'};
+function mythEffectText(event){return event.effects.map(effect=>effect.type==='modifyRitual'?'Rituál +'+effect.amount:effect.type==='modifyThreat'?'Hrozba +'+effect.amount:effect.type==='spawnEnemy'?'Nový nepřítel: '+enemyName(effect.enemyId):'Událost').join(' · ');}
+function showMythCard(event,index){
+ $('mythGlyph').textContent=mythGlyphs[event.id]||'✦';
+ $('mythCardNumber').textContent='UDÁLOST '+index+' / FÁZE MÝTU';
+ $('mythCardTitle').textContent=event.title;
+ $('mythCardText').textContent=event.text;
+ $('mythCardEffect').textContent='ÚČINEK: '+mythEffectText(event);
+ $('mythDialog').showModal();
+}
+function showMythHistory(){
+ const ids=state.myth.history;
+ $('mythHistoryCards').replaceChildren(...ids.map((id,index)=>{
+  const event=mythEvents.find(item=>item.id===id);
+  if(!event)return document.createTextNode('');
+  const card=document.createElement('article');card.className='myth-discard-card';
+  const symbol=document.createElement('span');symbol.className='myth-discard-glyph';symbol.textContent=mythGlyphs[id]||'✦';
+  const heading=document.createElement('h3');heading.textContent=(index+1)+'. '+event.title;
+  const story=document.createElement('p');story.textContent=event.text;
+  const effect=document.createElement('small');effect.textContent=mythEffectText(event);
+  card.append(symbol,heading,story,effect);return card;
+ }));
+ if(!ids.length)$('mythHistoryCards').textContent='Zatím nebyla odhalena žádná karta mýtu.';
+ $('mythHistoryDialog').showModal();
+}
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
  if(rolling)return false;
  const next=blackwaterTransition(state,{type,revision:state.revision,...rest});
  if(next===state){$('message').textContent='Akce nyní není dostupná.';return false;}
- state=next;saveBlackwater(storage,state);$('message').textContent='';render();return true;
+ const previousMythCount=state.myth.history.length;
+ state=next;saveBlackwater(storage,state);$('message').textContent='';render();
+ if(type==='endRound'&&state.myth.history.length>previousMythCount){const event=mythEvents.find(e=>e.id===state.myth.history.at(-1));if(event)showMythCard(event,state.myth.history.length);}
+ return true;
 }
 function resolveCard(card,choice){
  if(rolling)return;
@@ -128,6 +158,7 @@ function render(){
   if(view.combat.status==='active')$('combat').append(button('🎲 Útok',()=>send('combatTurn',{move:'attack',dice:rollDice()}),rolling),button('🎲 Útěk',()=>send('combatTurn',{move:'escape',dice:rollDice()}),rolling));
   else $('combat').append(button('Ukončit střetnutí',()=>send('closeCombat'),rolling));
  }else $('combat').textContent='Žádné aktivní střetnutí.';
+ $('mythHistoryCount').textContent=state.myth.history.length;
  $('myth').textContent=view.myth.lastEvent?view.myth.lastEvent.title+' — '+view.myth.lastEvent.text:'Noc zatím mlčí.';
  $('endRound').disabled=rolling||view.ended||view.round>=7||state.combat?.status==='active';
  $('endRound').textContent=view.ap===0?'Pokračovat: fáze mýtu →':'Ukončit kolo ↗';
@@ -142,6 +173,10 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='';
 }
+$('mythConfirm').onclick=()=>$('mythDialog').close();
+$('mythHistoryOpen').onclick=showMythHistory;
+$('mythHistoryClose').onclick=()=>$('mythHistoryDialog').close();
+$('mythHistoryDialog').onclick=e=>{if(e.target===$('mythHistoryDialog'))$('mythHistoryDialog').close();};
 $('investigatorOpen').onclick=()=>$('investigatorDialog').showModal();
 $('investigatorClose').onclick=()=>$('investigatorDialog').close();
 $('investigatorDialog').onclick=e=>{if(e.target===$('investigatorDialog'))$('investigatorDialog').close();};

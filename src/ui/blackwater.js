@@ -41,8 +41,8 @@ function resolveCard(card,choice){
 function render(){
  const view=publicBlackwater(state);
  $('setup').hidden=Boolean(state.investigatorId);$('game').hidden=!state.investigatorId;
- $('investigators').replaceChildren(...investigators.map(i=>button(i.name+' · '+i.role+' · '+i.ability,()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card')));
- if(!state.investigatorId)return;
+ $('investigators').replaceChildren(...investigators.map(i=>{const card=button('',()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card');const portrait=document.createElement('span');portrait.className='selection-portrait';portrait.textContent=investigatorGlyph[i.id];const name=document.createElement('strong');name.textContent=i.name;const role=document.createElement('span');role.className='selection-role';role.textContent=i.role;const flavor=document.createElement('em');flavor.textContent=investigatorFlavor[i.id];const stats=document.createElement('span');stats.className='selection-stats';stats.textContent='♥ '+i.hp+'    ◈ '+i.san;const ability=document.createElement('small');ability.textContent=i.ability;card.append(portrait,name,role,flavor,stats,ability);return card;}));
+ if(!state.investigatorId){$('quickStats').replaceChildren();$('message').textContent='';return;}
  const investigator=investigatorById[state.investigatorId];
  $('investigatorName').textContent=investigator.name;$('investigatorRole').textContent=investigator.role+' · '+investigator.ability;
  const stats=[['Kolo',view.round+'/7'],['Akční body',view.ap],['Zdraví',view.hp+'/'+investigator.hp],['Příčetnost',view.san+'/'+investigator.san],['Hrozba',view.threat+'/10'],['Rituál',view.ritual+'/8']];
@@ -72,7 +72,7 @@ function render(){
   b.dataset.symbol=locationGlyph[loc.id];
   if(current)b.setAttribute('aria-current','location');return b;
  });
- const tokens=view.myth.enemies.map((e,index)=>{const token=document.createElement('span');token.className='map-token enemy-token';token.textContent='◆';token.title=enemyName(e.enemyId)+' · '+(locations.find(l=>l.id===e.locationId)?.name||'');token.style.left=(blackwaterMap.points[e.locationId].x+5+index%2*2)+'%';token.style.top=(blackwaterMap.points[e.locationId].y-5)+'%';return token;});
+ const enemyOffsets={};const tokens=view.myth.enemies.map(e=>{const index=enemyOffsets[e.locationId]||0;enemyOffsets[e.locationId]=index+1;const token=document.createElement('span');token.className='map-token enemy-token';token.textContent='◆';token.title=enemyName(e.enemyId)+' · '+(locations.find(l=>l.id===e.locationId)?.name||'');token.style.left=(blackwaterMap.points[e.locationId].x+5+(index%3)*3)+'%';token.style.top=(blackwaterMap.points[e.locationId].y-5+Math.floor(index/3)*4)+'%';return token;});
  const playerToken=document.createElement('span');playerToken.className='map-token investigator-token';playerToken.textContent=investigatorGlyph[investigator.id];playerToken.title=investigator.name;playerToken.style.left=(blackwaterMap.points[view.locationId].x-5)+'%';playerToken.style.top=(blackwaterMap.points[view.locationId].y-5)+'%';
  $('locations').replaceChildren(svg,...pins,...tokens,playerToken);
  $('locations').setAttribute('aria-description','Lokace s jasným okrajem jsou dostupné za jeden akční bod. Žeton označuje aktuální polohu vyšetřovatele.');
@@ -90,6 +90,7 @@ function render(){
  const card=view.card;
  $('story').classList.toggle('unrevealed',!card);
  $('story').hidden=Boolean(view.ended);
+ $('story').classList.toggle('deck-empty',!card&&view.exploration.available===0);
  $('ending').hidden=!view.ended;
  if(view.ended){
   const reason=view.hp===0?'Ztracený v temnotě':view.san===0?'Šepot pod hladinou':view.ritual>=8?'Zvon se probudil':view.threat>=10?'Město pohltila mlha':'Hlubiny odpoví';
@@ -139,7 +140,7 @@ function render(){
  $('knowledge').replaceChildren(...[...state.game.knowledge,...Object.keys(state.game.deductions).filter(id=>state.game.deductions[id])].map(note));
  if(!$('knowledge').children.length)$('knowledge').textContent='Dosud žádné závěry.';
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
- if(view.ended)$('message').textContent='Vyšetřování skončilo. Přečti si epilog a prohlédni deník.';
+ if(view.ended)$('message').textContent='';
 }
 $('investigatorOpen').onclick=()=>$('investigatorDialog').showModal();
 $('investigatorClose').onclick=()=>$('investigatorDialog').close();

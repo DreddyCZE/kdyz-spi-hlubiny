@@ -24,3 +24,16 @@ test('companion-gated lead stays unavailable until the scent is discovered',()=>
  assert.ok(next!==session.game);
  assert.ok(currentCard(next,data));
 });
+
+test('lighthouse follow-up requires recorded dog trail, but ordinary route remains playable',()=>{
+ const data=blackwaterContent;
+ const dog=data.byId['bw-lighthouse-dog-trail'];
+ const ordinary=data.byId['bw-lighthouse-salt'];
+ assert.ok(dog);assert.ok(ordinary);
+ let game=newState(data);game.locationId='location-5';
+ assert.equal(dog.conditions[0].id,'dog-trail-recorded');
+ assert.equal(ordinary.conditions.length,0);
+ assert.equal(ordinary.choices[0].test.difficulty,9);
+ assert.equal(data.refs.flags.includes('salt-route-known'),true);
+ assert.equal(data.refs.flags.includes('dog-trail-recorded'),true);
+});

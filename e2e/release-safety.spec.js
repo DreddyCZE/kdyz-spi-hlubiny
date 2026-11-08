@@ -62,3 +62,9 @@ test('a historical backup is not offered as if it could bypass an invalid newer 
  const panel=page.locator('#save-compatibility');await expect(panel).toContainText('starší zálohu');await expect(panel.getByRole('link',{name:'Pokračovat: Původní hra v3',exact:true})).toHaveCount(0);
  await page.goto('/site/index.html?mode=legacy');await page.locator('#endRound').click();expect((await saved(page))[0]).toBe('{broken');expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(JSON.stringify(v3));
 });
+
+test('pre-investigator illustrated save stays protected while a new in-memory session can start',async({page})=>{
+ const unsupported=blackwaterTransition(newBlackwaterGame(),{type:'endRound',revision:0}),raw=JSON.stringify(unsupported);
+ await seed(page,[[keys[1],raw]]);await page.goto('/site/preview/blackwater.html');await expect(page.locator('#save-compatibility')).toContainText('nepodporovaný formát');
+ await page.getByRole('button',{name:/^Detektiv /}).click();await expect(page.locator('#game')).toBeVisible();expect((await saved(page))[1]).toBe(raw);await page.reload();expect((await saved(page))[1]).toBe(raw);
+});

@@ -60,8 +60,12 @@ Při souběhu několika historických legacy klíčů platí původní priorita 
 
 ## Výsledky ověření opravné větve
 
-- 187/187 unit a integračních testů (původně 166; přidáno 21 testů a variant).
-- Kompletní Chromium sada 72/72 (původně 57; přidáno 15 scénářů bezpečného vydání). Po závěrečném zpřesnění legacy obsahu a validace byly všechny nové UI scénáře znovu ověřeny: 15/15.
+- 188/188 unit a integračních testů (původně 166; přidáno 22 testů a variant).
+- Kompletní Chromium sada před poslední historickou regresí: 72/72. Po závěrečném zpřesnění legacy obsahu, validace a doplnění historické regrese byly všechny nové UI scénáře znovu ověřeny: 16/16. Finální úplná sada v CI má 73 testů (původně 57).
 - Produkční build a sestavení `site/` proběhly úspěšně také jako součást E2E serveru; kontrola `git diff --check` bez chyb.
 - Mobilní kontrola při 390 px: nalezené uložené hry a odkazy jsou čitelné, bez vodorovného přetečení. Oddělený limit kol a označení hodin nyní odpovídají zvolenému režimu.
 - Finální CI na HEAD opravného PR je zaznamenané v jeho popisu; žádný PR ani produkční deploy touto prací nebyl sloučen/spuštěn.
+
+### Raná ilustrovaná pozice bez vyšetřovatele
+
+Rozehraný `ksh-blackwater-v1` bez `investigatorId` není obnovitelný současným ilustrovaným UI: výběr postavy engine po začátku hry odmítá. Taková pozice se nyní označí jako nepodporovaná a zůstane chráněná; UI dovolí jen novou hru v paměti. Není automaticky přiřazen Detektiv ani přepsány HP, SAN či inventář. To by byla částečná migrace bez podkladů. Původní předvýběrové UI této historické varianty není v opravě obnoveno. Obnovení takové pozice je známé omezení vyžadující samostatný audit původní verze a rozhodnutí o mapování postav. Nedotčená úvodní pozice před výběrem postavy zůstává podporovaná.

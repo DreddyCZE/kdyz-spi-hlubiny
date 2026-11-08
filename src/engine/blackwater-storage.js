@@ -13,6 +13,9 @@ export function validBlackwaterSave(value){
   if(!value||value.scenario!=='blackwater'||value.version!==1||!integer(value.revision,Number.MAX_SAFE_INTEGER))return false;
   const g=value.game,m=value.myth,hero=investigatorById[value.investigatorId];
   if(value.investigatorId!==undefined&&!Object.hasOwn(investigatorById,value.investigatorId)||value.abilityUsed!==undefined&&typeof value.abilityUsed!=='boolean')return false;
+  // Only an untouched setup can still select a character. Older played saves
+  // without identity cannot resume in this UI; never guess a character or overwrite them.
+  if(!hero&&(value.revision!==0||g?.revision!==0||g?.round!==1))return false;
   if(!g||!integer(g.hp,hero?.hp||6)||!integer(g.san,hero?.san||8)||!integer(g.ap,4))return false;
   const data={...blackwaterContent,refs:{...blackwaterContent.refs,items:[...blackwaterContent.refs.items,...blackwaterItems.map(i=>i.id)]}};
   if(!validState({...g,hp:Math.min(g.hp,6),san:Math.min(g.san,8),ap:Math.min(g.ap,3)},data))return false;

@@ -60,3 +60,9 @@ test('resuming legacy v4 does not introduce scenario knowledge or deductions',as
  const {legacyContent}=await import('../src/engine/content.js');
  assert.deepEqual(legacyContent.refs.knowledge,['blackwater-lighthouse-connection']);assert.deepEqual(legacyContent.investigation.deductions.map(d=>d.id),['blackwater-follow-the-route']);assert.deepEqual(legacyContent.refs.flags,['harbor-note-read']);
 });
+
+test('played pre-investigator Blackwater saves cannot enter an unresumable setup or be overwritten',()=>{
+ const db=store(),old=blackwaterTransition(newBlackwaterGame(),{type:'endRound',revision:0}),raw=JSON.stringify(old);
+ assert.equal(old.investigatorId,undefined);db.setItem(keys[1],raw);assert.equal(inspectSaves(db)[1].status,'invalid');assert.equal(loadBlackwater(db),null);
+ assert.equal(saveBlackwater(protectedSaveStorage(db,keys[1]),newBlackwaterGame()),false);assert.equal(db.getItem(keys[1]),raw);
+});

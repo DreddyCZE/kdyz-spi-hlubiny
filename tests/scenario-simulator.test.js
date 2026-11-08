@@ -24,6 +24,11 @@ test('batch reports exactly requested number of outcomes',()=>{
  assert.ok(Number.isInteger(batch.exhausted)&&batch.exhausted>=0&&batch.exhausted<=12);
  assert.equal(Object.values(batch.unfinishedReasons).reduce((a,b)=>a+b,0),batch.outcomes.unfinished||0);
  assert.ok(Object.values(batch.knowledgeCounts).every(n=>n>=1&&n<=12));
+ for(const [id,stats] of Object.entries(batch.knowledgeRoundStats)){
+  assert.equal(stats.count,batch.knowledgeCounts[id]);
+  assert.ok(stats.min>=1&&stats.max<=13&&stats.min<=stats.mean&&stats.mean<=stats.max);
+ }
+ assert.ok(Object.values(batch.locationVisits).every(n=>Number.isInteger(n)&&n>=1));
  for(const [id,stats] of Object.entries(batch.endingRoundStats)){
   assert.equal(stats.count,batch.outcomes[id]);
   assert.ok(stats.min<=stats.mean&&stats.mean<=stats.max);
@@ -59,4 +64,11 @@ test('simulator can choose alternative ending without changing scenario rules',(
  const result=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,chooseEnding});
  assert.ok(result.endingId===null||['voice-price','deep-answers','quiet-sea','broken-bell'].includes(result.endingId));
  assert.deepEqual(result,simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,chooseEnding}));
+});
+
+test('knowledge acquisition trace is deterministic and never claims unearned knowledge',()=>{
+ const result=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500});
+ const gained=result.trace.flatMap(step=>step.gainedKnowledge||[]);
+ assert.deepEqual([...new Set(gained)].sort(),[...result.knowledge].sort());
+ assert.ok(result.trace.filter(step=>step.gainedKnowledge?.length).every(step=>step.round>=1));
 });

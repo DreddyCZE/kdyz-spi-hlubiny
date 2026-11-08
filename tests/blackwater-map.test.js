@@ -21,7 +21,17 @@ test('enemy pursues player by one edge and cannot teleport',()=>{
 test('myth phase moves existing enemy toward player after each round',()=>{
  let s=newBlackwaterGame();
  s=act(s,'endRound');s=act(s,'endRound'); // drowned sailor at harbor
- s=act(s,'move',{locationId:'location-6'});
+ s=act(s,'move',{locationId:'location-5'});
  s=act(s,'endRound');
  assert.equal(s.myth.enemies.find(e=>e.enemyId==='enemy-drowned-sailor').locationId,'location-5');
+});
+
+test('player can travel only along a connected edge',()=>{
+ let s=newBlackwaterGame();
+ const blocked=act(s,'move',{locationId:'location-3'});
+ assert.equal(blocked,s);
+ s=act(s,'move',{locationId:'location-1'});
+ assert.equal(s.game.locationId,'location-1');
+ assert.equal(s.game.ap,2);
+ assert.equal(act(s,'move',{locationId:'location-5'}),s);
 });

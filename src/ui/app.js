@@ -183,7 +183,7 @@ $('roll').onclick=()=>{
 };
 $('draw').onclick=()=>{dispatch({type:'draw',revision:state.revision});$('cardTitle').focus({preventScroll:true});};
 $('next').onclick=()=>{dispatch({type:'next'});if(!$('draw').disabled)$('draw').focus({preventScroll:true});};
-$('endRound').onclick=()=>dispatch({type:'endRound'});
+$('endRound').onclick=()=>dispatch({type:'endRound',revision:state.revision});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');

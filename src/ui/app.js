@@ -115,14 +115,35 @@ function render(){
         };draw();section.append(controls);
       }else if(p.type==='deduction'){
         const select=document.createElement('select');
+        select.setAttribute('aria-label','Vyber závěr');
         for(const option of p.interaction.options){const el=document.createElement('option');el.value=option;el.textContent=option;select.append(el);}
+        const previous=puzzleDrafts.get(p.id);
+        if(typeof previous==='string'&&p.interaction.options.includes(previous))select.value=previous;
+        select.onchange=()=>puzzleDrafts.set(p.id,select.value);
         section.append(select);answer.push(select);
-      }else{
-        const note=document.createElement('p');note.textContent='Tento typ hádanky bude mít vlastní ovládání v další fázi.';section.append(note);
+      }else if(p.type==='matching'||p.type==='mechanism'){
+        const keys=p.type==='matching'?p.interaction.left:p.interaction.controls;
+        const optionsFor=key=>p.type==='matching'?p.interaction.right:p.interaction.states[key];
+        const previous=puzzleDrafts.get(p.id);
+        const selections=new Map();
+        for(const key of keys){
+          const line=document.createElement('label');line.className='puzzle-match-row';
+          const text=document.createElement('span');text.textContent=key;line.append(text);
+          const select=document.createElement('select');select.setAttribute('aria-label','Nastavení: '+key);
+          for(const value of optionsFor(key)){
+            const option=document.createElement('option');option.value=value;option.textContent=value;select.append(option);
+          }
+          if(previous&&typeof previous==='object'&&!Array.isArray(previous)&&optionsFor(key).includes(previous[key]))select.value=previous[key];
+          selections.set(key,select);
+          select.onchange=()=>puzzleDrafts.set(p.id,Object.fromEntries([...selections].map(([k,v])=>[k,v.value])));
+          line.append(select);section.append(line);
+        }
+        answer.push(selections);
       }
-      if(p.type==='sequence'||p.type==='deduction'){
-        section.append(button('Ověřit řešení',()=>dispatch({type:'attemptPuzzle',revision:state.revision,puzzleId:p.id,answer:p.type==='sequence'?[...answer]:answer[0].value})));
-      }
+      section.append(button('Ověřit řešení',()=>{
+        const response=p.type==='sequence'?[...answer]:p.type==='deduction'?answer[0].value:Object.fromEntries([...answer[0]].map(([k,v])=>[k,v.value]));
+        dispatch({type:'attemptPuzzle',revision:state.revision,puzzleId:p.id,answer:response});
+      }));
       for(const hint of p.availableHints){
         section.append(button('Zobrazit nápovědu',()=>dispatch({type:'revealPuzzleHint',revision:state.revision,puzzleId:p.id,hintId:hint.id})));
       }

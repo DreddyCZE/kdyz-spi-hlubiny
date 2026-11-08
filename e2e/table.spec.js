@@ -18,7 +18,7 @@ for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
     await expect(page.locator('#ap')).toHaveText('2');
     await page.getByRole('button',{name:'Vyšetřovatel',exact:true}).click();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.locator('#heroStats')).toContainText('Eleanor Whitmore');
+    await expect(page.locator('#investigatorName')).toHaveText('Eleanor Whitmore');
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button',{name:'Vyšetřovatel',exact:true})).toBeFocused();
     await page.getByRole('button',{name:'Deník · důkazy',exact:true}).click();

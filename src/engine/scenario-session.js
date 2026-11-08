@@ -19,7 +19,9 @@ export function scenarioSessionTransition(session,action,def,data){
   if(action.type==='endRound'){
     if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds)return session;
     const nextRound=game.round+1;
-    const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
+    const nextGame=game.round===def.rules.maxRounds
+      ? {...game,round:nextRound,ap:0,revision:game.revision+1,log:['Čas vypršel.',...game.log].slice(0,100)}
+      : legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
     if(nextGame===game)return session;
     let nextSc=sc;
     // Seven tolls, triggered once each at scenario-specific milestones.

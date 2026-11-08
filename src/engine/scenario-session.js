@@ -2,10 +2,11 @@
 import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes} from './game.js';
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
 import {deduce} from './investigation.js';
+import {initialPuzzleState,puzzleView,attemptPuzzle,revealPuzzleHint,validatePuzzle} from './puzzle.js';
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
-  return {schemaVersion:1,game,scenario:initialScenarioState(def)};
+  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{}}};
 }
 const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
 const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
@@ -23,6 +24,29 @@ export function scenarioSessionTransition(session,action,def,data){
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
   if(action.type==='deduce'&&def.rules.deductionMode==='automatic')return session;
+  // Optional puzzle subsystem: old sessions and scenarios without puzzles stay valid.
+  if(['attemptPuzzle','revealPuzzleHint'].includes(action.type)){
+    if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds||!Array.isArray(data.puzzles))return session;
+    const p=data.puzzles.find(p=>p.id===action.puzzleId);
+    if(!p||validatePuzzle(p).length||p.locationId!==game.locationId)return session;
+    const previous=sc.puzzles?.[p.id]||initialPuzzleState();
+    if(action.type==='revealPuzzleHint'){
+      const next=revealPuzzleHint(p,previous,action.hintId,game);
+      if(!next)return session;
+      return {...session,game:{...game,revision:game.revision+1},scenario:{...sc,puzzles:{...sc.puzzles,[p.id]:next}}};
+    }
+    const result=attemptPuzzle(p,previous,action.answer);
+    if(!result)return session;
+    const nextGame=structuredClone(game);
+    for(const effect of result.effects){
+      if(effect.type==='setFlag')nextGame.flags[effect.id]=effect.value;
+      else if(effect.type==='modifyThreat')nextGame.threat=Math.max(0,Math.min(10,nextGame.threat+effect.amount));
+      else return session;
+    }
+    nextGame.revision=game.revision+1;
+    nextGame.ended=nextGame.ended||nextGame.threat>=10;
+    return {...session,game:nextGame,scenario:{...sc,puzzles:{...sc.puzzles,[p.id]:result.state}}};
+  }
   if(['startTest','rerollTest','acceptTest'].includes(action.type)){
     if(action.revision!==game.revision)return session;
     if(action.type==='startTest'){
@@ -77,11 +101,12 @@ export function scenarioSessionTransition(session,action,def,data){
   // HP/SAN/threat remain lethal; the scenario clock replaces legacy ritual defeat.
   return {...session,game:autoDeductions(nextGame,def,data)};
 }
-export function scenarioSessionView(session,def){
+export function scenarioSessionView(session,def,data={}){
   return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,
+    puzzles:(Array.isArray(data.puzzles)?data.puzzles:[]).filter(p=>!validatePuzzle(p).length&&p.locationId===session.game.locationId).map(p=>puzzleView(p,session.scenario.puzzles?.[p.id],session.game)),
     availableEndings:session.game.ended||session.game.round>def.rules.maxRounds||session.scenario.pendingTest||(def.finaleLocationId&&session.game.locationId!==def.finaleLocationId)?[]:availableEndings(def,session.game,session.scenario).filter(e=>e.kind!=='defeat').map(e=>({id:e.id,title:e.title,kind:e.kind})),
     canAct:!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};
 }

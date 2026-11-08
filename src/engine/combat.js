@@ -13,12 +13,12 @@ export function startCombat(enemyId) {
   if(!enemy) throw new Error('Unknown enemy');
   return {enemyId,enemyHp:enemy.hp,exchange:0,status:'active'};
 }
-export function combatTurn(state,action,dice) {
+export function combatTurn(state,action,dice,attackBonus=0) {
   if(state.status!=='active') return state;
   if(!['attack','escape'].includes(action)||!Array.isArray(dice)||dice.length!==2) throw new Error('Invalid combat action');
   const enemy=enemies.find(e=>e.id===state.enemyId);
   if(!enemy) throw new Error('Unknown enemy');
-  const test=evaluate(...dice,action==='attack'?attributes['SÍ']:attributes['OB'],action==='attack'?enemy.defense:enemy.escapeDifficulty);
+  const test=evaluate(...dice,action==='attack'?attributes['SÍ']+attackBonus:attributes['OB'],action==='attack'?enemy.defense:enemy.escapeDifficulty);
   const exchange=state.exchange+1;
   const result={...state,exchange,lastMove:action,roll:test,dice:[...dice],playerDamage:0,playerSanLoss:0};
   const damage=()=>{

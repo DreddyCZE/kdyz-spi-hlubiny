@@ -42,6 +42,7 @@ export function puzzleView(p,state,game){
   return {id:p.id,title:p.title,type:p.type,status:s.status,attempts:s.attempts,remaining:p.attempts.mode==='limited'?Math.max(0,p.attempts.max-s.attempts):null,
     clues:p.clues.filter(c=>evidence.includes(c.sourceEvidenceId)).map(c=>({id:c.id,text:c.text})),
     hints:(p.hints||[]).filter(h=>s.hintIds.includes(h.id)&&(!h.sourceEvidenceId||evidence.includes(h.sourceEvidenceId))).map(h=>({id:h.id,text:h.text})),
+    availableHints:(p.hints||[]).filter(h=>!s.hintIds.includes(h.id)&&(!h.sourceEvidenceId||evidence.includes(h.sourceEvidenceId))).map(h=>({id:h.id})),
     interaction:p.type==='sequence'?{symbols:[...p.interaction.symbols]}:p.type==='matching'?{left:[...p.interaction.left],right:[...p.interaction.right]}:p.type==='deduction'?{options:[...p.interaction.options]}:{controls:[...p.interaction.controls],states:structuredClone(p.interaction.states)}};
 }
 function correct(p,a){

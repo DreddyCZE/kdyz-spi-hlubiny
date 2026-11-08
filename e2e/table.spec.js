@@ -119,12 +119,12 @@ test('konec hry zakáže hod i po reloadu a nezmění uložený stav',async({pag
   await expect(page.locator('#gameStatus')).toContainText('Konec scénáře');
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#roll')).toBeDisabled();
-  const saved=await page.evaluate(()=>localStorage.getItem(scenarioSaveKey(blackwaterScenario)));
+  const saved=await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.locator('#roll')).toBeDisabled();
   // Even a synthetic click cannot perform another action.
   await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem(scenarioSaveKey(blackwaterScenario)))).toBe(saved);
+  expect(await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
   await expect(page.locator('#reveal')).toBeEmpty();
 });
 

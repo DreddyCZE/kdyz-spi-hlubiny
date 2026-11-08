@@ -435,3 +435,32 @@ main{max-width:1660px;padding:5px 14px 18px}
 .transition-scene>p:not(.eyebrow){max-width:490px;font-size:17px;line-height:1.55}
 .transition-scene button{min-width:175px;font-weight:700}
 @media(max-width:540px){.transition-artwork{height:170px}.transition-scene>p:not(.eyebrow){font-size:15px}}
+
+/* Standalone tabletop combat scene and post-roll outcome card */
+.battle-dialog,.outcome-dialog{width:min(94vw,850px);max-height:90vh;overflow:auto;border:5px double #bca06a;background:#122821;color:#e9d6ac;box-shadow:0 30px 110px #000e;padding:22px}
+.battle-dialog::backdrop,.outcome-dialog::backdrop{background:#040e0cbb;backdrop-filter:blur(5px)}
+.battle-dialog>.eyebrow{color:#d6aa72;letter-spacing:.2em}
+.battle-dialog>h2{font:700 clamp(27px,4vw,40px) Georgia;text-align:center;margin:8px 0}
+.battle-dialog>p:not(.eyebrow){font:italic 16px/1.55 Georgia;text-align:center;max-width:650px;margin:10px auto 20px}
+.battle-opponents{display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);gap:12px;align-items:center}
+.battle-opponents article{border:5px double #a88e62;background:#d6bf95;color:#33291d;text-align:center;padding:10px}
+.battle-opponents .battle-monster{border-color:#9a6057;background:#bda69a}
+.battle-art{height:clamp(115px,23vh,210px);display:grid;place-items:center;background:radial-gradient(#38564b,#122821);color:#f1d8a0;font:clamp(65px,10vw,110px) Georgia;text-shadow:0 6px 20px #0009}
+.battle-monster .battle-art{background:radial-gradient(#68423d,#1e2020);color:#e4aaa0}
+.battle-opponents h3{font:700 22px Georgia;margin:9px 0 4px}
+.battle-opponents p{margin:0 0 5px;font:14px Georgia}
+.battle-versus{text-align:center;font:30px Georgia;color:#cba677}
+.battle-report{background:#223a32;border:1px solid #88744e;padding:12px!important;font-style:normal!important}
+.battle-dialog>h3{font:700 17px Georgia;margin:12px 0}
+.battle-items,.battle-actions{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0}
+.battle-items button,.battle-actions button{flex:1 1 160px;min-height:43px;background:#d4be93;color:#2b281f;border:2px solid #9e8055;padding:10px;cursor:pointer;font:700 14px Georgia}
+.battle-items button:disabled{opacity:.5;cursor:not-allowed}
+.outcome-dialog{width:min(92vw,530px);padding:0;background:#d5bd92;color:#342719}
+.outcome-art{height:clamp(130px,25vh,230px);display:grid;place-items:center;background:radial-gradient(#476354,#122922);color:#ead39c;font:100px Georgia}
+.outcome-dialog[data-outcome="failure"] .outcome-art,.outcome-dialog[data-outcome="criticalFailure"] .outcome-art{background:radial-gradient(#784b43,#271c20)}
+.outcome-content{padding:22px 27px 26px;text-align:center}
+.outcome-content .eyebrow{color:#79522e}
+.outcome-content h2{font:700 32px Georgia;margin:12px 0}
+.outcome-content>p:not(.eyebrow){font:italic 17px/1.55 Georgia}
+.outcome-content button{padding:12px 25px;background:#1d3a31;color:#f2deb3;border:2px solid #947b51;cursor:pointer}
+@media(max-width:540px){.battle-dialog{padding:12px}.battle-opponents{grid-template-columns:1fr 24px 1fr;gap:5px}.battle-opponents h3{font-size:15px}.battle-versus{font-size:19px}.battle-art{height:110px}.outcome-content{padding:16px}}

@@ -28,7 +28,7 @@ test('three knowledge paths and prepared signal open best ending',()=>{
  assert.strictEqual(chooseEnding(def,g,chosen,'broken-bell'),chosen);
 });
 test('costly and sacrifice endings are independent of best ending',()=>{
- const g={knowledge:['knowledge-body'],flags:{'bell-reachable':true}};
+ const g={knowledge:['knowledge-body','knowledge-voice'],flags:{'bell-reachable':true}};
  assert.deepEqual(availableEndings(def,g,initial()).map(e=>e.id),['broken-bell','voice-price']);
  assert.strictEqual(chooseEnding(def,g,initial(),'quiet-sea').endingId,null);
 });

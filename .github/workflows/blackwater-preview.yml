@@ -1,0 +1,63 @@
+# Reusable artifact builder only. The sole deploy owner is pages.yml.
+name: Build combined Pages artifact
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tooling
+          fetch-depth: 0
+      - name: Pin current branch tips under the publisher lock
+        id: refs
+        working-directory: tooling
+        shell: bash
+        run: |
+          git fetch origin main feature/m4-blackwater-scenario-design
+          root_sha=$(git rev-parse origin/main)
+          preview_sha=$(git rev-parse origin/feature/m4-blackwater-scenario-design)
+          if git merge-base --is-ancestor "$preview_sha" "$root_sha"; then
+            preview_sha="$root_sha"
+          fi
+          echo "root=$root_sha" >> "$GITHUB_OUTPUT"
+          echo "preview=$preview_sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.refs.outputs.root }}
+          path: stable
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.refs.outputs.preview }}
+          path: preview-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Test and build pinned stable source
+        working-directory: stable
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Test and build pinned preview source
+        if: steps.refs.outputs.root != steps.refs.outputs.preview
+        working-directory: preview-source
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Assemble one reproducible artifact
+        working-directory: tooling
+        env:
+          ROOT_SHA: ${{ steps.refs.outputs.root }}
+          PREVIEW_SHA: ${{ steps.refs.outputs.preview }}
+        run: |
+          preview_dist=../preview-source/dist
+          if [ "$ROOT_SHA" = "$PREVIEW_SHA" ]; then preview_dist=../stable/dist; fi
+          node scripts/build-pages.mjs ../stable/dist "$preview_dist" "$ROOT_SHA" "$PREVIEW_SHA"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: tooling/site

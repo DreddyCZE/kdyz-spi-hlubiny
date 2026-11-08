@@ -1,10 +1,15 @@
 import { cards as migrated } from '../data/cards.js';
 import { exampleCard } from '../data/example-card.js';
+import { blackwaterM4Cards } from '../data/blackwater-m4.js';
+import { additionalBlackwaterCards } from '../data/blackwater-extra.js';
 import { explorationDecks } from '../data/decks.js';
 import { locations } from '../data/locations.js';
 import { rewards, flags } from '../data/catalog.js';
 import { assertCards } from './schema.js';
-import { investigationDefinitions } from '../data/investigation.js';
+import { investigationDefinitions,legacyInvestigationDefinitions } from '../data/investigation.js';
+import { blackwaterPuzzles } from '../data/blackwater-puzzles.js';
+import { blackwaterCompanions } from '../data/blackwater-companions.js';
+import { blackwaterCompanionCards } from '../data/blackwater-companion-cards.js';
 import { createInvestigation } from './investigation.js';
 export const catalog = {items:rewards.filter(r=>r.kind==='item').map(r=>r.id),evidence:investigationDefinitions.evidence.map(e=>e.id),knowledge:investigationDefinitions.knowledge.map(k=>k.id),deductions:investigationDefinitions.deductions.map(d=>d.id),locations:locations.map(l=>l.id),flags};
 // Composite items can provide existing evidence without rewriting historical saves.
@@ -33,3 +38,9 @@ export function createContent(cards, investigation = investigationDefinitions, o
   return Object.freeze({decksByLocation:freeze(decksByLocation),cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
 }
 export const content=createContent([...migrated,exampleCard]);
+export const legacyContent=createContent([...migrated,exampleCard],legacyInvestigationDefinitions,{flags:['harbor-note-read']});
+// Opt-in Blackwater content; legacy default decks must remain unchanged.
+const companionCardFlags=blackwaterCompanionCards.flatMap(c=>c.choices.flatMap(o=>Object.values(o.outcomes).flatMap(result=>result.effects.filter(e=>e.type==='setFlag').map(e=>e.id))));
+const companionFlags=blackwaterCompanions.flatMap(c=>c.abilities.map(a=>a.discoveryFlagId).filter(Boolean));
+const puzzleFlags=blackwaterPuzzles.flatMap(p=>p.onSolve.concat(p.onWrong).filter(e=>e.type==='setFlag').map(e=>e.id));
+export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards,...blackwaterCompanionCards],investigationDefinitions,{flags:[...new Set([...flags,...puzzleFlags,...companionFlags,...companionCardFlags])]}),puzzles:blackwaterPuzzles,companions:blackwaterCompanions});

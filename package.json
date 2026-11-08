@@ -14,7 +14,8 @@
     "test:e2e:install": "node scripts/playwright.mjs install chromium",
     "test:e2e": "node scripts/playwright.mjs test",
     "test:e2e:headed": "node scripts/playwright.mjs test --headed",
-    "test:e2e:report": "node scripts/playwright.mjs show-report --host 127.0.0.1"
+    "test:e2e:report": "node scripts/playwright.mjs show-report --host 127.0.0.1",
+    "build:pages": "node scripts/build-pages.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.65.0"

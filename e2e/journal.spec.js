@@ -1,8 +1,10 @@
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
 
 const openJournal = page => page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
 const tab = (page, name) => page.getByRole('tab', { name: new RegExp('^' + name + ' · ') });
-const saved = page => page.evaluate(() => localStorage.getItem('hlubiny-v4'));
+const saved = page => page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
 
 async function acquireEvidence(page) {
   await page.addInitScript(() => { Math.random = () => .5; });
@@ -12,6 +14,7 @@ async function acquireEvidence(page) {
     await page.locator('#draw').click();
     await page.locator('#roll').click();
     await page.clock.fastForward(1000);
+    await page.getByRole('button',{name:'Přijmout výsledek'}).click();
     await expect(page.locator('#reveal')).toBeVisible();
     await page.locator('#next').click();
   }
@@ -62,18 +65,13 @@ test('acquired evidence, available/completed deduction, chronology and reload us
   await expect(tab(page, 'Důkazy')).toHaveText('Důkazy · 2');
   await expect(page.locator('#journal-evidence')).toContainText('Deník');
   await tab(page, 'Dedukce').click();
-  await expect(page.locator('#journal-available')).toContainText('Kam vedou stopy');
-  await expect(page.locator('#journal-available')).toContainText('Požadavky splněny');
-  await expect(page.locator('#journal-knowledge')).not.toContainText('Spojení s majákem');
-  expect(await saved(page)).toBe(before);
-  await page.locator('#deduce').click(); // Only this explicit action changes game state.
+  await expect(page.locator('#deduce')).toBeHidden(); // Scenario deductions run automatically.
   await expect(page.locator('#journal-deductions')).toContainText('Vyhodnoceno');
   await expect(tab(page, 'Dedukce')).toHaveText('Dedukce · 1');
   await tab(page, 'Znalosti').click();
   await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
   const after = await saved(page);
-  expect(JSON.parse(after).ap).toBe(JSON.parse(before).ap);
-  expect(JSON.parse(after).revision).toBe(JSON.parse(before).revision + 1);
+  expect(after).toBe(before); // Reading the journal cannot mutate the save.
   await tab(page, 'Kronika').click();
   await expect(page.locator('#journal-chronicle li').first()).toContainText('Vyšetřování začíná');
   await expect(page.locator('#journal-chronicle')).toContainText('Ztracená loď: Úspěch');
@@ -130,7 +128,7 @@ for (const width of [1440, 390, 320]) {
     await page.screenshot({ path });
     await testInfo.attach(`Vyšetřovací deník ${width}px`, { path, contentType: 'image/png' });
     await tab(page, 'Dedukce').click();
-    await page.locator('#deduce').click();
+    await expect(page.locator('#deduce')).toBeHidden();
     await tab(page, 'Znalosti').click();
     await page.screenshot({ path: testInfo.outputPath(`journal-knowledge-${width}.png`) });
   });

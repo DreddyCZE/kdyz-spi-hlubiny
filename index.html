@@ -6,6 +6,7 @@
 <title>Když spí hlubiny</title>
 <link rel="stylesheet" href="./src/ui/styles.css">
 <link rel="stylesheet" href="./src/ui/journal.css">
+<link rel="stylesheet" href="./src/ui/save-compatibility.css">
 </head>
 <body>
 <a class="skip" href="#cardTitle">Přejít na příběh</a>
@@ -16,9 +17,9 @@
 <h1>KDYŽ SPÍ HLUBINY</h1>
 </div>
 <div class="stats" aria-label="Stav hry">
-<span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / 7</span></span>
+<span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / <span id="roundLimit">12</span></span></span>
 <span class="stat" data-stat="threat" data-symbol="◈"><span class="token-icon" aria-hidden="true">◈</span><span>Hrozba</span><span class="value"><b id="threat"></b> / 10</span></span>
-<span class="stat" data-stat="ritual" data-symbol="✦"><span class="token-icon" aria-hidden="true">✦</span><span>Rituál</span><span class="value"><b id="ritual"></b> / 8</span></span>
+<span class="stat" data-stat="ritual" data-symbol="✦"><span class="token-icon" aria-hidden="true">✦</span><span id="clockLabel">Rituál</span><span class="value"><b id="ritual"></b></span></span>
 <span class="stat" data-stat="hp" data-symbol="♥"><span class="token-icon" aria-hidden="true">♥</span><span>Zdraví</span><span class="value"><b id="hp"></b> / 6</span></span>
 <span class="stat" data-stat="san" data-symbol="◉"><span class="token-icon" aria-hidden="true">◉</span><span>Příčetnost</span><span class="value"><b id="san"></b> / 8</span></span>
 <span class="stat" data-stat="ap" data-symbol="◆"><span class="token-icon" aria-hidden="true">◆</span><span>AP</span><span class="value"><b id="ap"></b> / 3</span></span>

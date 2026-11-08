@@ -1,0 +1,574 @@
+[
+  {
+    "id": "detective",
+    "file": "src/assets/blackwater/detective.webp",
+    "source": "investigator_detective.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract the detective portrait. Keep this man's identity, 1926 fedora and coat, cigarette, painted rain and maritime horror style. Remove all bottom nameplates, lettering and frame fragments. Extend to a clean chest-up landscape portrait with face centered and hat fully visible. No UI, text, borders, watermark. This is an illustration asset, not a card mockup.",
+    "dimensions": [
+      1008,
+      567
+    ],
+    "bytes": 93768,
+    "sha256": "10a4b17b7f34b6b4b3f8ce59979317ed2cb9dbf7d2720c5b3d939e314340272b"
+  },
+  {
+    "id": "drowned",
+    "file": "src/assets/blackwater/drowned.webp",
+    "source": "monster_drowned_sailor.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract this drowned sailor monster retaining the undead face, naval cap, wet seaweed and painted stormy horror style. Remove all bottom label fragments and borders. Extend to a clean chest-up landscape portrait, entire head and cap visible, centered composition. No text, frame, emblems or UI.",
+    "dimensions": [
+      1008,
+      567
+    ],
+    "bytes": 129492,
+    "sha256": "889337c84c83f0809f66455d4abe1c30515cded2f545eb94b20981fd24aadd8e"
+  },
+  {
+    "id": "harbor",
+    "file": "src/assets/blackwater/harbor.webp",
+    "source": "location_harbor.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract only the painted nighttime 1926 New England harbor scene. Keep architecture, boats, warm lantern and dark petrol-green sea. Remove the bottom anchor emblem, gold border and all UI fragments, seamlessly paint underlying scene there. Clean landscape illustration only, no lettering or frames.",
+    "dimensions": [
+      1008,
+      482
+    ],
+    "bytes": 131032,
+    "sha256": "4db679ee59b5b86aab2fc39b93f057ec9d07b52282ead6ae57e0dc508e492893"
+  },
+  {
+    "id": "lighthouse",
+    "file": "src/assets/blackwater/lighthouse.webp",
+    "source": "location_lighthouse.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract only this painted stormy lighthouse scene, preserving the lighthouse, rocky peninsula and golden beam. Remove bottom star emblem and gold frame fragments, complete the scene underneath them. Wide clean illustration only, no text, UI or border.",
+    "dimensions": [
+      1008,
+      476
+    ],
+    "bytes": 98016,
+    "sha256": "70b072d987b7c311b13b07a9e34706923dc38d56140833a72d7f887512fc367f"
+  },
+  {
+    "id": "myth-bell",
+    "file": "src/assets/blackwater/myth-bell.webp",
+    "source": "myth_first_strike.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract and clean the painting of the moored fishing boat in stormy night harbor. Preserve the painted 1926 maritime horror style. Remove central/bottom anchor badge, wave symbol, all gold borders and UI fragments; seamlessly paint the boat and dark water behind them. Landscape illustration only, no text or emblem.",
+    "dimensions": [
+      1008,
+      592
+    ],
+    "bytes": 138868,
+    "sha256": "86edd64ed261eef2369c55988e7845cabc31396a6d66dbc5dcaf35c66fc56179"
+  },
+  {
+    "id": "evidence",
+    "file": "src/assets/blackwater/evidence.webp",
+    "source": "result_evidence.png",
+    "mode": "built-in image_gen edit",
+    "prompt": "Use case: precise-object-edit. Extract this painted investigator evidence still life: old journal, compass, lighthouse photograph, notes, key and lantern. Remove all bottom text strip and gold frame, do not reproduce lettering. Extend into a clean landscape still-life painting, faithful warm brass and dark green palette. No UI, typography, border, or emblems.",
+    "dimensions": [
+      1008,
+      504
+    ],
+    "bytes": 127126,
+    "sha256": "a7b59e251eb7ccdf6ffe326b0151f1c831ccf54f10a17b67c85d34860c6e4c8a"
+  },
+  {
+    "id": "occultist",
+    "file": "src/assets/blackwater/occultist.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: A 1926 female occult scholar with dark bobbed hair and period wool coat, holding a closed old book. Centered chest-up portrait, face fully visible, misty archive background. No magic effects over face.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 69020,
+    "sha256": "e8b4bc25f6605cfb90d718598cbf4b58d4d77a2b388b9da7567e8c4acc35e8eb"
+  },
+  {
+    "id": "sailor",
+    "file": "src/assets/blackwater/sailor.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: A living weathered human sailor with a wool watch cap and navy peacoat, calm resolute face, centered chest-up portrait, wet dock behind him. No undead traits.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 88368,
+    "sha256": "87bebad5b30a99e1c5d4216300c647978d2524f0ed5e485ef48f02712d624330"
+  },
+  {
+    "id": "fog-hound",
+    "file": "src/assets/blackwater/fog-hound.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: A frightening lean spectral hound emerging from gray coastal fog, unmistakable canine face and full head centered, translucent dark fur, wet cobblestones. Portrait, no humans.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 84614,
+    "sha256": "1ccac28107017e912b9df7dfccaff489b443bc936b6d03a1f51a324ec893d0b6"
+  },
+  {
+    "id": "hollow-orderly",
+    "file": "src/assets/blackwater/hollow-orderly.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: An eerie hollow hospital orderly in a 1926 white medical coat and stained face bandages, standing in shadowed asylum corridor, head and shoulders centered. No gore.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 74716,
+    "sha256": "b33a7917328f39bff74d0e94895d1ce878f7aab52042f3c879b3095ee4dfa726"
+  },
+  {
+    "id": "bell-keeper",
+    "file": "src/assets/blackwater/bell-keeper.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: An ancient faceless bell keeper wearing a weathered dark coat near tarnished hanging bells. Smooth shadow where face should be, chest-up centered portrait, no bright symbols.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 83226,
+    "sha256": "ed41cbe3b2d63370882cae7a23be303b40cb7e495a31475dbf008d1ac21386ab"
+  },
+  {
+    "id": "old-town",
+    "file": "src/assets/blackwater/old-town.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: An empty cobblestone street of a 1926 New England old town, salt-weathered wooden houses, dark shuttered windows, a single warm gas lamp, fog, no humans.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 123326,
+    "sha256": "8eefcaf814e74de70e1338bdd1968ccdb3e1e18a41fa7d43ae2ef9d363e597c7"
+  },
+  {
+    "id": "library",
+    "file": "src/assets/blackwater/library.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: The interior of a 1926 coastal town library archive, tall dark shelves, old maps and an open unlettered ledger under a brass reading lamp, rain at high windows. No legible writing.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 110784,
+    "sha256": "1cb0986e3e0e9e1dc09db8eb1c026ce5fd4f6c34bb06cccd51a22b98a10ddd1d"
+  },
+  {
+    "id": "asylum",
+    "file": "src/assets/blackwater/asylum.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: A 1926 seaside asylum corridor with worn white walls, empty wheelchair, half-open heavy door and cold moonlight, quiet unsettling atmosphere. No figures.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 86012,
+    "sha256": "a23f22fb38782f7c82dfb8c02be66ee71c5dd12c9095eab705aace057ac6fa53"
+  },
+  {
+    "id": "cemetery",
+    "file": "src/assets/blackwater/cemetery.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: An old New England cemetery at dusk, leaning weathered gravestones with no legible inscriptions, iron gate, fresh earth, black coastal pines and low sea fog.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 111206,
+    "sha256": "741562da0d414420b65833645495358e4eb7fe33509bf70ecaeec89309a2770b"
+  },
+  {
+    "id": "caves",
+    "file": "src/assets/blackwater/caves.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Use case: illustration-story. Original standalone raster game illustration, fictional Blackwater, coastal New England 1926. Painterly oil and gouache horror, deep petrol green shadows, weathered brass and warm amber light, desaturated realistic details. No UI, text, frame, emblem, watermark or lettering. Landscape 1536x1024, entire main subject comfortably within frame with crop-safe space. Scene: A sea cave under the rocky coast at low tide, slick dark stones, ancient natural arches, black pools reflecting a faint warm light, eerie emptiness.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 89616,
+    "sha256": "1d90893af50c09dd1b02e17a53745e050cbf80de9e8725d5d0b06bc111a43f66"
+  },
+  {
+    "id": "myth-fog",
+    "file": "src/assets/blackwater/myth-fog.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: An impenetrable wall of coastal fog swallows a deserted pier; a drowned figure is only a distant dark silhouette in the mist.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 50432,
+    "sha256": "6fb96a3d708419fd6d0ceda86bf15f6a901e93232d7d98c52fe3173c3a873c00"
+  },
+  {
+    "id": "myth-knock",
+    "file": "src/assets/blackwater/myth-knock.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: Close view of a closed weathered wooden front door in a 1926 New England street at night; rain on brass knocker, subtle suggestion of three impacts, no humans.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 93220,
+    "sha256": "d3479001a966783898557ea4407382231299a551af93263dbe9c4e08eac94e17"
+  },
+  {
+    "id": "myth-hound",
+    "file": "src/assets/blackwater/myth-hound.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: Wet canine pawprints emerging on empty fog-covered cobblestones under a gaslight, unseen animal beyond the frame.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 98428,
+    "sha256": "f5cd2a3b4854110abef96183e48c5548418f2d0ac198aef910f3ea2d53c38bb1"
+  },
+  {
+    "id": "myth-lantern",
+    "file": "src/assets/blackwater/myth-lantern.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: An extinguished old brass lantern with a thin wisp of smoke in the dark lantern room of a coastal lighthouse, black ocean beyond window.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 64496,
+    "sha256": "f1b1aa7c5a39a2489d8ded5943eceae2929d2b3178e96497fb0ecb454a898c4d"
+  },
+  {
+    "id": "myth-orderly",
+    "file": "src/assets/blackwater/myth-orderly.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A heavy door opens by itself into an empty 1926 asylum patient room during night rounds; corridor light, hanging white orderly coat, no figure.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 68248,
+    "sha256": "293d8787941aede0439686c74fc1f1d797c4b6de1389938dd9398966b7b42b4d"
+  },
+  {
+    "id": "bandage",
+    "file": "src/assets/blackwater/bandage.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: Still life of rolled clean linen medical bandages and a small old brass scissors on a dark wooden investigator desk. No text on any objects.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 98028,
+    "sha256": "5ccd472f78ebfa9f4700b8335debfce1f9782cb2c3d187916fdcbb9110788926"
+  },
+  {
+    "id": "laudanum",
+    "file": "src/assets/blackwater/laudanum.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A small unlabeled amber glass apothecary bottle of calming tincture with a glass stopper, dark wooden desk and old cloth.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 84864,
+    "sha256": "7b00e8103330cdcb846fd79484fa58e256543104b4616355ff7c2890cb541560"
+  },
+  {
+    "id": "salt",
+    "file": "src/assets/blackwater/salt.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A small opened cloth pouch of consecrated white sea salt scattered on a dark wooden desk, candlelit still life, no magical symbols.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 91480,
+    "sha256": "a13e06f7801e00361f4c1d75c716423eecb466e69344de5be47445e0a0eacbfb"
+  },
+  {
+    "id": "revolver",
+    "file": "src/assets/blackwater/revolver.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A rusted early 20th century revolver lying safely on a dark wooden desk, leather holster nearby, static still life, no person.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 84398,
+    "sha256": "74ca97cab8826f4b8a26bdcf1e0c0c0aae5067ddf7b494e70515a700d619e16b"
+  },
+  {
+    "id": "bell-key",
+    "file": "src/assets/blackwater/bell-key.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: An ornate weathered brass bell keeper's key on a dark velvet cloth, sea salt and verdigris, dramatic warm glint.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 97392,
+    "sha256": "7ccd89f85220fd9f990f9863d46333124c0ed3dd7cdfc153051082928ad8bf6c"
+  },
+  {
+    "id": "cylinder",
+    "file": "src/assets/blackwater/cylinder.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: An antique wax phonograph cylinder next to its plain open cardboard case on a wooden desk, close still life.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 83458,
+    "sha256": "018c5177218d5be122f4048ac8cf382352533fb7a42b580547af9bb08d98c72b"
+  },
+  {
+    "id": "tide-page",
+    "file": "src/assets/blackwater/tide-page.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A torn page from an old tide book, faint abstract chart lines with no legible lettering, brass paperweight, wet wooden desk.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 114076,
+    "sha256": "8f030f3aa2e3b0f348b75b7b4efe9217d9738cbd04310cd707e6382ee6e2fd11"
+  },
+  {
+    "id": "result-cost",
+    "file": "src/assets/blackwater/result-cost.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: Investigator still life of a bloodstained bandage, broken pencil and recovered unlettered notes on a rain-wet wooden desk, survival at a cost, no gore.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 140006,
+    "sha256": "2eb3da4017d9aaa499c06010cde70ae490c8e8ae28c61961e2f06ca9d02354de"
+  },
+  {
+    "id": "result-danger",
+    "file": "src/assets/blackwater/result-danger.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache horror game illustration, Blackwater New England 1926; dark petrol green and black shadows, weathered brass, subtle warm lantern highlights, realistic period detail. Landscape 1536x1024, crop-safe centered focal point. No writing, UI, frame, badges, watermark or lettering. Scene: A dropped and cracked lantern at the foot of a dark flooded stairway, ominous shadow in black water beyond; dread and failed investigation.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 90510,
+    "sha256": "6bfcd2c0618ed1339feaf7bbf4a88b43dd07481b3a94052e3793a69251561536"
+  },
+  {
+    "id": "bw-00-01",
+    "file": "src/assets/blackwater/bw-00-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: Fishermen silently stand on a fogbound pier, looking into black water where a faint impossible reflection of a bell tower appears.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 66832,
+    "sha256": "f3eac34f37554648a6b389b9d1dec4714b40572c0c4ab49107dde8e6e80e8728"
+  },
+  {
+    "id": "bw-00-02",
+    "file": "src/assets/blackwater/bw-00-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: The dim hold of an abandoned 1926 fishing sloop, wet wool coat on a wooden bench, tarnished ship bell hanging behind it, lantern glow.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 84046,
+    "sha256": "acecfde72447ee8bd96c5914caa785f714064847e5a54f402186b449a1588ca7"
+  },
+  {
+    "id": "bw-01-01",
+    "file": "src/assets/blackwater/bw-01-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: Inside an abandoned New England wooden house, white salt scattered over every threshold, old tunnel map with no legible text on wall, child-sized footprints in dust.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 95418,
+    "sha256": "01487025962b5182c6f07f242ee98c4618995938598707fca8bdc344da13b6dd"
+  },
+  {
+    "id": "bw-01-02",
+    "file": "src/assets/blackwater/bw-01-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A mysterious woman in a black 1926 coat waits under a gaslamp, holding an unlettered telegram envelope, her shadow extends in an impossible direction.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 89440,
+    "sha256": "9bb20d62d1c7a9d87277bf881b1304e1382bb38ad43977c19b51bb4edc2e166b"
+  },
+  {
+    "id": "bw-02-01",
+    "file": "src/assets/blackwater/bw-02-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: An old municipal archive ledger opened to a missing torn page, faint impressions of erased ink, brass desk lamp, no legible letters.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 85868,
+    "sha256": "538de3857e4903172f3f72865f78df14b4bf84fdac320bea6aa619d3137cae12"
+  },
+  {
+    "id": "bw-02-02",
+    "file": "src/assets/blackwater/bw-02-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: An old open coastal atlas on a municipal archive table, impossible coastline shapes drawn in ink, water stains, no legible place names.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 130970,
+    "sha256": "41b32913b94f7ff4f682cf25f62ade18762e493a27166f5635be9a1b13989a03"
+  },
+  {
+    "id": "bw-03-01",
+    "file": "src/assets/blackwater/bw-03-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A frightened patient sits in a bare 1926 asylum room covering both ears, scratched unlettered door and cold moonlight.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 67526,
+    "sha256": "15276738646d7bef4b7e524cc1e6c4febf46e4b3fa4b0b3c82fb1f3fd6bb273a"
+  },
+  {
+    "id": "bw-03-02",
+    "file": "src/assets/blackwater/bw-03-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: An empty rattling hospital trolley at the end of a dim 1926 asylum corridor, half open drawer with old unlettered medical record, no humans.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 92926,
+    "sha256": "0f87095af77db68a91a084435afe58fc6dc5f3312d9f678c76f9e5c51ad7058b"
+  },
+  {
+    "id": "bw-04-01",
+    "file": "src/assets/blackwater/bw-04-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A leaning unlettered gravestone next to an open empty coffin in an old coastal cemetery, faint undecipherable carved marks on the lid, no body.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 106958,
+    "sha256": "9d60f6cebe5a60ecba41ab86fd0c161ff0d5623894b33d24e7e6049753a78c87"
+  },
+  {
+    "id": "bw-04-02",
+    "file": "src/assets/blackwater/bw-04-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: Fresh grave soil cracks and rises between weathered unlettered cemetery stones, faint warm mist seeps out, ominous moonlight, no gore.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 93872,
+    "sha256": "383413dae4a5e44a7a6bf11eb126e018c9e4b2ed69e3a0d48a0830d2aa3dcc4c"
+  },
+  {
+    "id": "bw-05-01",
+    "file": "src/assets/blackwater/bw-05-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: Inside a stormbound lighthouse, an old unlettered shift log lies beside the turning brass light mechanism; moonlit sea visible through glass.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 98148,
+    "sha256": "0f3b13d683ef5a04d98616950623e09e23e0b1ad9dc9141693c419c461ff2c52"
+  },
+  {
+    "id": "bw-05-02",
+    "file": "src/assets/blackwater/bw-05-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A weary lighthouse guard in a soaked 1926 uniform sits on spiral stone stairs, an old pocketwatch in his hand, moonlit window.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 85936,
+    "sha256": "fda93165235a7572bef7496e69cc4c39205139b371977da1c5f204a33057f7fe"
+  },
+  {
+    "id": "bw-06-01",
+    "file": "src/assets/blackwater/bw-06-01.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A mysterious circle of pale bone fragments among slick black stones in a sea cave, shallow tide water and natural stone arches, no gore or humans.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 95798,
+    "sha256": "f48965dba82f77ebda8ec9b2529418849d588d9811b5066e51aee8e73dea2263"
+  },
+  {
+    "id": "bw-06-02",
+    "file": "src/assets/blackwater/bw-06-02.webp",
+    "source": "original generation",
+    "mode": "built-in image_gen generate",
+    "prompt": "Original standalone painterly oil/gouache cosmic horror game illustration, fictional Blackwater coastal New England 1926. Dark green-black palette, muted brass, wet weather, warm lantern accents. Landscape 1536x1024. Scene illustrates only the encounter setup, no resolution or rewards. No typography, readable text, UI, borders, emblems or watermark. Scene: A sea cave chamber of unnaturally large pale seashells, black wet rock and faint ripples, eerie sense of whispered voices, no figures.",
+    "dimensions": [
+      1008,
+      672
+    ],
+    "bytes": 99112,
+    "sha256": "5dc3a86976f63130b7d238d47e449184afc5db64c4c517b4ba24d37cbf93fade"
+  }
+]

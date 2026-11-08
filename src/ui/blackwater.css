@@ -83,3 +83,11 @@ main{max-width:1740px;padding:10px 22px 28px}
 .outcome-slip.sealed{color:#958465;background:repeating-linear-gradient(115deg,#b6a27e,#b6a27e 4px,#c3af89 4px,#c3af89 8px);filter:blur(.8px);user-select:none}
 .outcome-slip.revealed{background:#30473c;color:#f5dca7;border-color:#d6b978;font-weight:700;box-shadow:0 0 10px #8b6e3670}
 .story-body .result[hidden]{display:none!important}
+
+.map-routes{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible}
+.map-routes line{stroke:#e2c791;stroke-width:.38;stroke-dasharray:1.2 1.1;opacity:.35;vector-effect:non-scaling-stroke}
+.map-routes line.reachable-route{stroke:#f4db9c;stroke-width:2.2;stroke-dasharray:4 3;opacity:.92;filter:drop-shadow(0 0 3px #1b3028)}
+.map-point{z-index:2}
+.map-point.reachable{background:#3b4c37;border:2px solid #e6c78b;box-shadow:0 0 0 3px #b8a36b33,0 3px 9px #000c}
+.map-point:disabled:not(.active){opacity:.67}
+.map-point.active{border:2px solid #fff0b7;box-shadow:0 0 0 5px #d9bc6b88,0 0 20px #e3c67a}

@@ -46,7 +46,7 @@ export function blackwaterTransition(state,action){
   if(action.type==='combatTurn'){
     if(!state.combat||state.combat.status!=='active')return state;
     let combat;
-    try{combat=combatTurn(state.combat,action.move,action.dice);}catch{return state;}
+    try{combat=combatTurn(state.combat,action.move,action.dice,action.move==='attack'&&state.game.inventory.includes('bw-revolver')?1:0);}catch{return state;}
     const game=structuredClone(state.game);
     game.hp=Math.max(0,game.hp-combat.playerDamage);
     game.san=Math.max(0,game.san-combat.playerSanLoss);

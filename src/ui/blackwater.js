@@ -86,9 +86,9 @@ function renderBattle(){
  $('battleInvestigatorArt').dataset.damage=String(Math.max(0,investigator.hp-state.game.hp));
  $('battleMonsterArt').classList.toggle('wounded',Boolean(combat.roll&&combat.lastMove==='attack'&&combat.roll.key!=='failure'&&combat.roll.key!=='criticalFailure'));
  $('battleMonsterArt').dataset.enemy=combat.enemyId;
- $('battleMonsterArt').style.backgroundImage='none';
  $('battleInvestigatorArt').dataset.investigator=investigator.id;
- $('battleInvestigatorArt').style.backgroundImage='none';
+ // Preserve illustrated card art: do not overwrite the image set above.
+ // Fallback raster scenes remain available when a portrait asset is missing.
  const report=combat.roll;
  const battleNarration={
   'enemy-drowned-sailor':{attack:'Námořník se zapotácí, voda se rozstříkne po prknech a pod kabátem zapraskají kosti.',escape:'Ustupuješ mezi mokré trámy. Za zády stále slyšíš jeho těžké, neexistující kroky.'},

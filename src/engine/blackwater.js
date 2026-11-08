@@ -36,7 +36,7 @@ export function blackwaterTransition(state,action){
     return {...state,revision:state.revision+1,game};
   }
   if(action.type==='startCombat'){
-    if(state.combat||state.game.ap<1||state.game.result)return state;
+    if(state.combat||state.game.ap<1)return state;
     const enemy=state.myth.enemies.find(e=>e.enemyId===action.enemyId&&e.locationId===state.game.locationId);
     if(!enemy)return state;
     const game=structuredClone(state.game);game.ap--;game.revision++;

@@ -1,0 +1,29 @@
+.card.motion-card-draw {
+  animation: card-draw 720ms cubic-bezier(.2,.72,.24,1) both;
+}
+@keyframes card-draw {
+  0% { opacity: .35; transform: translateY(28px); filter: brightness(.72); }
+  58% { opacity: 1; transform: translateY(-5px); filter: brightness(1.12); }
+  100% { opacity: 1; transform: translateY(0); filter: brightness(1); }
+}
+.die.motion-dice-roll {
+  animation: dice-roll 900ms cubic-bezier(.16,.76,.32,1) both;
+  transform-origin: center;
+}
+@keyframes dice-roll {
+  0% { transform: translateY(0) rotate(0) scale(.8); filter: brightness(.75); }
+  24% { transform: translateY(-18px) rotate(105deg) scale(1.08); }
+  52% { transform: translateY(5px) rotate(235deg) scale(.96); filter: brightness(1.2); }
+  76% { transform: translateY(-7px) rotate(325deg) scale(1.03); }
+  100% { transform: translateY(0) rotate(360deg) scale(1); filter: brightness(1); }
+}
+.reveal.motion-result-reveal {
+  animation: result-reveal 560ms ease-out both;
+}
+@keyframes result-reveal {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(5px); }
+  to { opacity: 1; clip-path: inset(0); transform: translateY(0); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .motion-card-draw, .motion-dice-roll, .motion-result-reveal { animation: none!important; }
+}

@@ -30,11 +30,11 @@ function render(){
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('ritual').title=clock?.label||'Scénářové hodiny';
   $('heroStats').textContent=`${investigatorName} · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
-  const investigation=investigationView(state);
+  const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,activeScenario.rules.deductionMode==='automatic');
-  const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state),choice=selectedChoice(state,card);
-  const result=visibleResult(state),deck=explorationView(state);
+  const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state,content),choice=selectedChoice(state,card);
+  const result=visibleResult(state,content),deck=explorationView(state,content);
   $('deckName').textContent=deck.name;
   $('deckDescription').textContent=deck.description;
   $('deckCounts').textContent=`Dostupné: ${deck.available} · Odložené: ${deck.deferred} · Vyřešené: ${deck.consumed}`;
@@ -109,7 +109,7 @@ const finaleActions=document.createElement('div');finaleActions.id='scenario-fin
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;
-  const card=currentCard(state),choice=selectedChoice(state,card);
+  const card=currentCard(state,content),choice=selectedChoice(state,card);
   const next=scenarioSessionTransition(session,{type:choice.test?'startTest':'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(choice.test?{dice:rollDice()}:{})},activeScenario,content);
   if(next===session)return;session=next;state=session.game;persist();
   if(!choice.test){render();return;}

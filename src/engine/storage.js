@@ -25,6 +25,9 @@ export function validState(s,data=content){
   if(!Array.isArray(s.log)||s.log.length>100||!s.log.every(t=>typeof t==='string'&&t.length<2000))return false;
   if(!isRecord(s.cursors)||!Object.entries(s.cursors).every(([id,n])=>catalog.locations.includes(id)&&Number.isInteger(n)&&n>=0&&n<=deck({...s,locationId:id},data).length))return false;
   if(!isRecord(s.drawnCards)||!Object.entries(s.drawnCards).every(([locationId,id])=>catalog.locations.includes(locationId)&&Object.hasOwn(data.byId,id)&&data.byId[id].locationId===locationId))return false;
+  // Unresolved cards cannot be injected through a save before their gates open.
+  // Completed cards stay pinned even when their effects change those gates.
+  if(Object.values(s.drawnCards).some(id=>!Object.hasOwn(s.resolved||{},id)&&!meetsConditions(s,data.byId[id].conditions,data)))return false;
   if(!isRecord(s.resolved))return false;
   for(const [id,r] of Object.entries(s.resolved)){
     const c=Object.hasOwn(data.byId,id)?data.byId[id]:null;

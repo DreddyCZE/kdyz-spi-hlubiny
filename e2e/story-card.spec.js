@@ -1,3 +1,5 @@
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
 import { cards } from '../src/data/cards.js';
 import { storyArt } from '../src/data/story-art.js';
@@ -42,6 +44,8 @@ test('story art and outcome placeholders never disclose consequence text before 
   await assertConcealed();
   await expect(page.locator('#reveal')).toBeEmpty();
   await page.clock.fastForward(1000);
+  await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#outcomes')).toBeHidden();
   await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   for (const text of hiddenTexts.filter(t => t !== 'Najdeš deník zmizelého rybáře.')) {
@@ -97,12 +101,13 @@ test('reduced motion, keyboard focus and immediate persisted result', async ({ p
   expect(outline).not.toBe('none');
   await page.locator('#roll').focus();
   await page.keyboard.press('Enter');
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#reveal')).toBeVisible();
-  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v4'));
+  const saved = await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.locator('#reveal')).toBeVisible();
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v4'))).toBe(saved);
+  expect(await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
 });
 
 test('actual Old Town choice has five reachable tiers rather than six', async ({ page }) => {

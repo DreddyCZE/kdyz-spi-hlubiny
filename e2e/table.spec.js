@@ -1,3 +1,5 @@
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
 
 for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
@@ -43,9 +45,13 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
   await page.goto('./');
     await page.locator('#draw').click();
   await page.evaluate(async()=>{
-    const {newState}=await import('./src/engine/game.js');
-    const {save}=await import('./src/engine/storage.js');
-    save(localStorage,{...newState(),unlockedLocations:['location-0','location-1']});
+    const {activeScenarioPack}=await import('./src/data/scenario-registry.js');
+    const {newScenarioSession}=await import('./src/engine/scenario-session.js');
+    const {saveScenarioSession}=await import('./src/engine/scenario-storage.js');
+    const {scenario,content}=activeScenarioPack;
+    const session=newScenarioSession(scenario,content);
+    session.game.unlockedLocations=['location-0','location-1'];
+    if(!saveScenarioSession(localStorage,session,scenario,content))throw Error('Scenario save rejected');
   });
   await page.reload();
   const locked=page.getByRole('button',{name:'▣ Knihovna · zamčeno',exact:true});
@@ -53,12 +59,12 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
   await expect(locked).toHaveClass(/locked/);
   await page.getByRole('button',{name:'◇ Staré město',exact:true}).click();
   await expect(page.locator('#ap')).toHaveText('2');
-  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('hlubiny-v4'));s.ap=0;localStorage.setItem('hlubiny-v4',JSON.stringify(s));});
+  await page.evaluate(key=>{const s=JSON.parse(localStorage.getItem(key));s.game.ap=0;localStorage.setItem(key,JSON.stringify(s));},scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.getByRole('button',{name:'◇ Přístav',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Další kolo',exact:true}).click();
   await expect(page.locator('#ap')).toHaveText('3');
-  for(let i=0;i<6;i++)await page.locator('#endRound').click();
+  for(let i=0;i<11;i++)await page.locator('#endRound').click();
   await expect(page.locator('#gameStatus')).toContainText('Konec scénáře');
   await expect(page.getByRole('button',{name:'◇ Přístav',exact:true})).toBeDisabled();
 });
@@ -99,6 +105,7 @@ test('omezený pohyb odhalí výsledek bez animace a výběr zachová focus',asy
   await page.keyboard.press('Enter');
   await expect(page.locator('#choices button').first()).toBeFocused();
   await page.locator('#roll').click();
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#reveal')).toBeVisible();
   expect(await page.locator('#die1').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
 });
@@ -108,45 +115,43 @@ test('konec hry zakáže hod i po reloadu a nezmění uložený stav',async({pag
     await page.locator('#draw').click();
   await expect(page.locator('#roll')).toBeEnabled();
   // Reach the deadline through real actions with an unresolved card still present.
-  for(let i=0;i<7;i++)await page.locator('#endRound').click();
+  for(let i=0;i<12;i++)await page.locator('#endRound').click();
   await expect(page.locator('#gameStatus')).toContainText('Konec scénáře');
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#roll')).toBeDisabled();
-  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v4'));
+  const saved=await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.locator('#roll')).toBeDisabled();
   // Even a synthetic click cannot perform another action.
   await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v4'))).toBe(saved);
+  expect(await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
   await expect(page.locator('#reveal')).toBeEmpty();
 });
 
-test('reload během animace okamžitě odhalí již uložený hod bez opakování',async({page})=>{
+test('reload během animace obnoví nepotvrzený hod bez předčasného odhalení',async({page})=>{
   await page.addInitScript(()=>{Math.random=()=>0.5;});
   await page.goto('./');
-    await page.locator('#draw').click();
+  await page.locator('#draw').click();
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.locator('#roll').click();
   await expect(page.locator('#die1')).toHaveText('?');
   await expect(page.locator('#reveal')).toBeEmpty();
-  await expect(page.locator('#log')).toBeEmpty();
-  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v4'));
-  const state=JSON.parse(saved);
-  expect(state.result.dice).toEqual([4,4]);
-  expect(state.result.key).toBe('success');
-  expect(state.ap).toBe(2);
-  // No fastForward: unload while the cosmetic animation is still pending.
+  const saved=await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
+  const session=JSON.parse(saved);
+  expect(session.scenario.pendingTest.firstDice).toEqual([4,4]);
+  expect(session.game.ap).toBe(3);
+  expect(session.game.result).toBeNull();
   await page.reload();
+  await expect(page.locator('#reveal')).toBeEmpty();
+  await expect(page.locator('#outcomes')).toBeHidden();
+  await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
+  expect(await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
-  await expect(page.locator('#die1')).toHaveText('4');
-  await expect(page.locator('#die2')).toHaveText('4');
-  await expect(page.locator('#die1')).not.toHaveClass(/rolling/);
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#roll')).toBeDisabled();
-  await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v4'))).toBe(saved);
 });
 
 for(const width of [320,390,1440]){

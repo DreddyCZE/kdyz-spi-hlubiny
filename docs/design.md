@@ -34,3 +34,9 @@ Nulové HP/SAN, Hrozba 10, Rituál 8 nebo konec sedmého kola ukončí scénář
 Automatické testy: prahy hodů, kritické výsledky, ceny akcí, neměnnost vstupu, souběžné poškození, vyčerpání karet, konce hry, serializace a neplatné úložiště. Ručně kontroluj desktop i mobil: pohyb, výběr postupu, blokaci během hodu, reset během hodu, obnovu stránky, prázdnou lokaci, sedmé kolo a odmítnuté ukládání.
 
 Revize PR #3 odděluje rozsah obecných podmínek kol od délky prvního scénáře a předává názvy lokací přes metadata aktivního obsahu. Nemění sedmikolová pravidla, rituál, UI ani formát uložených her.
+
+## D3 – stabilizace volitelné vyšetřovací linie
+
+Toulavý pes zůstává bezplatným volitelným společníkem; jeho stopa ani příznak `cave-service-route-used` nejsou podmínkou zakončení. U karty Sůl na schodech je nyní možné odejít za 0 AP: hráč s již zaznamenanou stopou nemusí před porovnáním podstoupit další test. Nová volba nic neodemyká a neuděluje odměnu. Jednorázový neúspěch v Průchodu pod skálou neslibuje neexistující opakování; vyšetřování pokračuje v ostatních lokacích.
+
+Nevyřešená podmíněná karta není veřejně promítána ani přijata z uložené pozice bez splněných podmínek. Již vyhodnocené karty zůstávají dostupné pro zobrazení dosaženého výsledku. Formát save a pravidla legacy hry se nemění.

@@ -91,4 +91,4 @@ export const rewards = [
     "kind": "item"
   }
 ];
-export const flags = ["harbor-note-read"];
+export const flags = ["harbor-note-read","signal-ready","bell-reachable"];

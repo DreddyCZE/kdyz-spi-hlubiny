@@ -85,10 +85,19 @@ function render(){
  $('ability').textContent=view.abilityUsed?'Schopnost vyčerpána':'✦ Použít schopnost';
  $('deckName').textContent=view.exploration.name;
  $('deckCount').textContent='Zbývá '+view.exploration.available+' karet';
- $('deckHint').textContent=view.exploration.available===0?'Balíček je vyčerpaný. Pokračuj na jiné lokaci nebo ukonči kolo.':view.ap===0?'Nemáš akční body. Ukonči kolo.':'';
+ $('deckHint').textContent=view.ended?'Vyšetřování skončilo. Přečti si epilog.':view.exploration.available===0?'Balíček je vyčerpaný. Pokračuj na jiné lokaci nebo ukonči kolo.':view.ap===0?'Nemáš akční body. Ukonči kolo.':'';
  $('draw').disabled=rolling||view.ended||Boolean(view.card)||!view.exploration.canDraw||state.combat?.status==='active';
  const card=view.card;
  $('story').classList.toggle('unrevealed',!card);
+ $('story').hidden=Boolean(view.ended);
+ $('ending').hidden=!view.ended;
+ if(view.ended){
+  const reason=view.hp===0?'Ztracený v temnotě':view.san===0?'Šepot pod hladinou':view.ritual>=8?'Zvon se probudil':view.threat>=10?'Město pohltila mlha':'Hlubiny odpoví';
+  const cause=view.hp===0?'Tělo vyšetřovatele už neuneslo poslední střetnutí.':view.san===0?'Poslední zvuk zvonu zlomil jeho mysl.':view.ritual>=8?'Rituál byl dokončen. Z hlubin zazněl hlas, který neměl nikdy promluvit.':view.threat>=10?'Nebezpečí překročilo poslední hranici a Blackwater zmizel v přílivu.':'Noc skončila dřív, než se podařilo tajemství zastavit.';
+  $('endingTitle').textContent=reason;
+  $('endingText').textContent=cause+' Za '+view.round+' kol jsi shromáždil '+state.game.evidence.length+' stop a '+state.game.knowledge.length+' poznatků. Přístav ztichl, ale na moři stále někdo počítá údery zvonu.';
+ }
+
  $('cardBack').hidden=Boolean(card);
  $('cardTitle').textContent=card?.title||'Co ukrývá mlha?';
  $('cardText').textContent=card?.description||'Otoč kartu a vstup do příběhu. Následky rozhodnutí se odhalí teprve po vyhodnocení.';
@@ -130,12 +139,14 @@ function render(){
  $('knowledge').replaceChildren(...[...state.game.knowledge,...Object.keys(state.game.deductions).filter(id=>state.game.deductions[id])].map(note));
  if(!$('knowledge').children.length)$('knowledge').textContent='Dosud žádné závěry.';
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
- if(view.ended)$('message').textContent='Scénář skončil. Temnota zvítězila.';
+ if(view.ended)$('message').textContent='Vyšetřování skončilo. Přečti si epilog a prohlédni deník.';
 }
 $('investigatorOpen').onclick=()=>$('investigatorDialog').showModal();
 $('investigatorClose').onclick=()=>$('investigatorDialog').close();
 $('investigatorDialog').onclick=e=>{if(e.target===$('investigatorDialog'))$('investigatorDialog').close();};
 $('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
 $('combatClose').onclick=()=>send('closeCombat');
+$('endingJournal').onclick=()=>{journalOpen=true;render();document.querySelector('.side-panel').scrollIntoView({behavior:'smooth',block:'center'});};
+$('endingRestart').onclick=()=> $('reset').click();
 $('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;if(rollTimer){window.clearInterval(rollTimer);rollTimer=null;}render();};
 $('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();

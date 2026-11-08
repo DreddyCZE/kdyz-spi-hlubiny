@@ -1,6 +1,6 @@
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
-import {isEnded} from './game.js';
+import {isEnded,currentCard} from './game.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
@@ -18,6 +18,12 @@ export function validScenarioSession(s,def,data){
   const n=c.clocks[clock.id];if(!Number.isSafeInteger(n)||n<0||n>clock.max)return false;
  }
  if(!Array.isArray(c.eventLedger)||c.eventLedger.length>100||new Set(c.eventLedger).size!==c.eventLedger.length||c.eventLedger.some(x=>typeof x!=='string'||x.length>120))return false;
+ if(c.pendingTest!=null){
+  const p=c.pendingTest,validDice=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
+  if(!p||typeof p.cardId!=='string'||typeof p.choiceId!=='string'||p.revision!==g.revision||!validDice(p.firstDice)||p.secondDice!==null&&!validDice(p.secondDice))return false;
+  const card=currentCard(g,data),choice=card?.choices.find(x=>x.id===p.choiceId);
+  if(!card||card.id!==p.cardId||!choice?.test||!choice.available||g.ended||c.endingId!==null)return false;
+ }
  if(c.endingId!==null&&!def.endings.some(e=>e.id===c.endingId))return false;
  if(g.round>def.rules.maxRounds&&!c.endingId)return false;
  return true;

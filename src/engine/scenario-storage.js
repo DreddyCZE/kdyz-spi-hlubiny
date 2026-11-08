@@ -2,6 +2,7 @@ import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
+export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
  const g=s.game,c=s.scenario;
@@ -29,11 +30,11 @@ export function validScenarioSession(s,def,data){
  return true;
 }
 export function loadScenarioSession(storage,def,data){
- try{const raw=storage?.getItem(SCENARIO_SAVE_KEY);
+ try{const raw=storage?.getItem(scenarioSaveKey(def));
   if(!raw||raw.length>150000)return newScenarioSession(def,data);
   const parsed=JSON.parse(raw);return validScenarioSession(parsed,def,data)?parsed:newScenarioSession(def,data);
  }catch{return newScenarioSession(def,data);}
 }
 export function saveScenarioSession(storage,s,def,data){
- try{if(!validScenarioSession(s,def,data))return false;storage?.setItem(SCENARIO_SAVE_KEY,JSON.stringify(s));return Boolean(storage);}catch{return false;}
+ try{if(!validScenarioSession(s,def,data))return false;storage?.setItem(scenarioSaveKey(def),JSON.stringify(s));return Boolean(storage);}catch{return false;}
 }

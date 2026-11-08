@@ -69,6 +69,13 @@ function render(){
  $('dice').classList.toggle('rolling',rolling);
  $('die1').textContent=rolling?'?':result?.dice?.[0]??'?';$('die2').textContent=rolling?'?':result?.dice?.[1]??'?';
  $('diceTotal').textContent=!rolling&&result?.dice?'Součet '+result.total:'';
+ const outcomeKeys=['criticalSuccess','greatSuccess','success','partialSuccess','failure','criticalFailure'];
+ $('outcomes').replaceChildren(...(card?outcomeKeys.map(key=>{
+  const slip=document.createElement('span');slip.className='outcome-slip'+(!rolling&&result?.key===key?' revealed':' sealed');
+  slip.textContent=!rolling&&result?.key===key?labels[key]:'✦ ✦ ✦';
+  slip.setAttribute('aria-label',!rolling&&result?.key===key?labels[key]:'Neodhalený výsledek');return slip;
+ }):[]));
+ $('result').hidden=!rolling&&!result;
  $('result').textContent=rolling?'Osud rozhoduje…':result?labels[result.key]+' — '+result.text:card?'Následky zůstávají skryté. Zvol postup a odhal svůj osud.':'Balíček čeká na první průzkum.';
  $('next').disabled=rolling||!result||view.ended;
  $('combat').replaceChildren();

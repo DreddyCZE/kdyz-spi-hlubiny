@@ -1,6 +1,6 @@
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
-import { imageForCard } from '../data/story-art.js';
+import { imageForCard, blackwaterImage } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,currentCard,selectedChoice,visibleResult,rollDice,investigationView,explorationView } from '../engine/game.js';
@@ -66,6 +66,10 @@ function render(){
   $('deckCounts').textContent=`Dostupné: ${deck.available} · Odložené: ${deck.deferred} · Vyřešené: ${deck.consumed}`;
   $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!!pending||!scene.canAct||!deck.canDraw;
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
+  const locationArt=blackwaterImage('locations',loc.id);
+  const hero=$('placeTitle').closest('.hero');
+  hero.classList.toggle('has-location-art',Boolean(locationArt));
+  hero.style.setProperty('--location-art',locationArt?`url("${new URL(locationArt,document.baseURI).href}")`:'none');
   $('mapTitle').textContent=scenarioMap.name;
   renderMap($('places'),locations,scenarioMap,state,rolling||!!pending||!scene.canAct,id=>dispatch({type:'move',locationId:id}));
   $('cardArt').classList.toggle('empty',!card);

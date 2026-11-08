@@ -25,6 +25,7 @@ test('active abilities can be used once per round, passive ability has no action
  const used=useCompanionAbility(dog,active,'scent','exploration',1);
  assert.equal(useCompanionAbility(dog,used,'scent','exploration',1),null);
  assert.equal(companionView(dog,used,1).abilities[0].available,false);
+ assert.equal(companionView(dog,used,1).abilities[0].text,dog.abilities[0].text);
  assert.equal(companionView(dog,used,2).abilities[0].available,true);
  assert.ok(useCompanionAbility(dog,used,'scent','exploration',2));
  assert.equal(companionView(dog,used,1).abilities[1].available,true);

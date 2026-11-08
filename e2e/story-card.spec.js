@@ -103,11 +103,11 @@ test('reduced motion, keyboard focus and immediate persisted result', async ({ p
   await page.keyboard.press('Enter');
   await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#reveal')).toBeVisible();
-  const saved = await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)));
+  const saved = await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.locator('#reveal')).toBeVisible();
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)))).toBe(saved);
+  expect(await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
 });
 
 test('actual Old Town choice has five reachable tiers rather than six', async ({ page }) => {

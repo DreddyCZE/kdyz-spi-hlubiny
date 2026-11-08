@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {blackwaterScenario as def} from '../src/data/blackwater-scenario.js';
 import {content} from '../src/engine/content.js';
 import {newScenarioSession,scenarioSessionTransition} from '../src/engine/scenario-session.js';
-import {validScenarioSession,loadScenarioSession,saveScenarioSession,SCENARIO_SAVE_KEY} from '../src/engine/scenario-storage.js';
+import {validScenarioSession,loadScenarioSession,saveScenarioSession,SCENARIO_SAVE_KEY,scenarioSaveKey} from '../src/engine/scenario-storage.js';
 const storage=()=>{const map=new Map();return {getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),map};};
 test('new scenario save is valid and isolated from legacy key',()=>{
  const s=newScenarioSession(def,content),db=storage();
@@ -22,7 +22,7 @@ test('round 10 save reload survives legacy seven-round validator',()=>{
 test('tampered scenario clock or unknown ending resets to clean session',()=>{
  const db=storage();let s=newScenarioSession(def,content);
  s.scenario.clocks['tide-bells']=100;
- db.setItem(SCENARIO_SAVE_KEY,JSON.stringify(s));
+ db.setItem(scenarioSaveKey(def),JSON.stringify(s));
  assert.equal(loadScenarioSession(db,def,content).scenario.clocks['tide-bells'],1);
  s=newScenarioSession(def,content);s.scenario.endingId='hacked';
  assert.equal(validScenarioSession(s,def,content),false);

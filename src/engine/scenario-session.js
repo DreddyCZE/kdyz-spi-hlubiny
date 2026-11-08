@@ -1,6 +1,7 @@
 // Opt-in P1 adapter. Legacy engine and its save format remain unchanged.
 import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes} from './game.js';
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
+import {deduce} from './investigation.js';
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
@@ -9,12 +10,19 @@ export function newScenarioSession(def,data){
 const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
 const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
 const score=(dice,test)=>evaluate(...dice,attributes[test.attribute]+(test.modifier||0),test.difficulty);
+function autoDeductions(game,def,data){
+  if(def.rules.deductionMode!=='automatic'||game.ended)return game;
+  const next=deduce(game,data.investigation);
+  if(next===game)return game;
+  return {...next,revision:game.revision+1,log:next.log.slice(0,100)};
+}
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
   const game=session.game,sc=session.scenario;
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
+  if(action.type==='deduce'&&def.rules.deductionMode==='automatic')return session;
   if(['startTest','rerollTest','acceptTest'].includes(action.type)){
     if(action.revision!==game.revision)return session;
     if(action.type==='startTest'){
@@ -35,7 +43,7 @@ export function scenarioSessionTransition(session,action,def,data){
     const winner=second&&tiers.indexOf(second.key)>tiers.indexOf(first.key)?pending.secondDice:pending.firstDice;
     const nextGame=legacyTransition(game,{type:'resolve',revision:game.revision,cardId:pending.cardId,choiceId:pending.choiceId,dice:winner},data,{...def.rules,scenarioClock:true});
     if(nextGame===game)return session;
-    return {...session,game:nextGame,scenario:{...sc,pendingTest:null}};
+    return {...session,game:autoDeductions(nextGame,def,data),scenario:{...sc,pendingTest:null}};
   }
   if(action.type==='finishScenario'){
     if(!Number.isSafeInteger(action.revision)||action.revision!==game.revision)return session;
@@ -66,7 +74,7 @@ export function scenarioSessionTransition(session,action,def,data){
   const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
   if(nextGame===game)return session;
   // HP/SAN/threat remain lethal; the scenario clock replaces legacy ritual defeat.
-  return {...session,game:nextGame};
+  return {...session,game:autoDeductions(nextGame,def,data)};
 }
 export function scenarioSessionView(session,def){
   return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,

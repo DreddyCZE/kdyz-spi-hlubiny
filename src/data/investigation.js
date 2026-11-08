@@ -40,5 +40,11 @@ deductions.push(
  {id:'blackwater-body-route',name:'Srdce mechanismu',description:'Plány majáku a rituální rytina ukazují cestu k tělu zvonu.',repeatable:false,
   conditions:{type:'all',conditions:[{type:'hasEvidence',id:'reward-9'},{type:'hasEvidence',id:'reward-14'}]},
   effects:[{type:'addKnowledge',id:'knowledge-body'}]},
+ {id:'blackwater-reach-bell',name:'Cesta ke zvonu',description:'Plán a záznam tajného vstupu odhalují přístup ke zvonu.',repeatable:false,
+  conditions:{type:'all',conditions:[{type:'hasEvidence',id:'reward-7'},{type:'hasEvidence',id:'reward-16'}]},
+  effects:[{type:'setFlag',id:'bell-reachable',value:true}]},
+ {id:'blackwater-prepare-signal',name:'Signál proti hlasu',description:'Znalost hlasu a jména umožňuje připravit odpověď.',repeatable:false,
+  conditions:{type:'all',conditions:[{type:'hasKnowledge',id:'knowledge-voice'},{type:'hasKnowledge',id:'knowledge-name'}]},
+  effects:[{type:'setFlag',id:'signal-ready',value:true}]},
 );
 export const investigationDefinitions = {evidence,knowledge,deductions};

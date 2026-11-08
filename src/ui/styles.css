@@ -172,3 +172,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .hero.has-location-art::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg,#0a1719 4%,#0a1719dc 38%,#0a171933 100%),var(--location-art) center 45%/cover no-repeat; }
 .hero.has-location-art h2 { color: #f2dfb7; text-shadow: 0 2px 4px #000; }
 .hero.has-location-art p { color: #f2e7d1; text-shadow: 0 1px 3px #000; }
+
+/* Investigator profile is a presentation-only portrait: current scenario still has one fixed investigator. */
+.investigator-profile { display: grid; grid-template-columns: minmax(100px,150px) minmax(0,1fr); gap: 1rem; align-items: center; padding: .75rem; margin-bottom: 1rem; border: 1px solid var(--color-frame); }
+.investigator-portrait { width: 100%; aspect-ratio: 3/4; background: var(--color-surface) center/cover no-repeat; border: 3px double var(--color-brass); }
+.investigator-profile strong { font-size: 1.3rem; }
+.investigator-profile p { margin: .35rem 0; }
+@media(max-width:400px) { .investigator-profile { grid-template-columns: 90px minmax(0,1fr); } }

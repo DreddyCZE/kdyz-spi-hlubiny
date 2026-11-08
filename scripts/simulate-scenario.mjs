@@ -1,5 +1,5 @@
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
-import {content} from '../src/engine/content.js';
+import {blackwaterContent as content} from '../src/engine/content.js';
 import {simulateBatch} from '../src/engine/scenario-simulator.js';
 import {createEvidenceStrategy} from '../src/engine/scenario-strategy.js';
 const runs=Number(process.argv[2]||100);

@@ -24,7 +24,9 @@ export const blackwaterCompanionCards=[{
     partialSuccess:{text:'Zachytíš směr cesty, ale pohled do temného schodiště tě zneklidní.',effects:[{type:'setFlag',id:'salt-route-known',value:true},{type:'modifyStat',stat:'san',amount:-1}]},
     failure:{text:'Vzor se rozpadá pod prsty. Zatím nemáš jistotu, kudy cesta vedla.',effects:[]},
     criticalFailure:{text:'Za zdí se ozve skřípění. Musíš ustoupit.',effects:[{type:'modifyThreat',amount:1}]}
-   }}
+   }},
+  {id:'bw-lighthouse-salt-leave',label:'Nechat solný vzor být a pokračovat v pátrání',apCost:0,
+   outcomes:{success:{text:'Solný vzor necháš nedotčený. Další souvislosti můžeš hledat v ostatních stopách.',effects:[]}}}
  ]
 },{
  id:'bw-lighthouse-dog-trail',type:'evidence',locationId:'location-5',
@@ -50,7 +52,7 @@ export const blackwaterCompanionCards=[{
     greatSuccess:{text:'Opatrně projdeš a objevíš známky starého servisního přístupu.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]},
     success:{text:'Dostaneš se do chodby za ochozem. Cesta byla nebezpečná, ale zvládl jsi ji.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]},
     partialSuccess:{text:'Proklouzneš úzkým průchodem, ale uklouzneš na mokré skále.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true},{type:'modifyStat',stat:'hp',amount:-1}]},
-    failure:{text:'Voda tě donutí ustoupit. Můžeš to zkusit později nebo hledat jiný způsob.',effects:[]},
+    failure:{text:'Voda tě donutí ustoupit. Tento průchod dnes nepřekonáš; vrať se k pátrání po jiných důkazech. Cesta k závěru vyšetřování zůstává otevřená.',effects:[]},
     criticalFailure:{text:'Příliv tě srazí na kolena. Ze tmy se ozve odpověď.',effects:[{type:'modifyThreat',amount:1}]}
    }}
  ]

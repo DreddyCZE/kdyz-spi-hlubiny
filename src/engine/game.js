@@ -16,7 +16,7 @@ function nextDefinition(s,data=content){
 }
 function activeDefinition(s,data=content){
   const id=s.drawnCards[s.locationId],card=id&&data.byId[id];
-  return card?.locationId===s.locationId?card:null;
+  return card?.locationId===s.locationId&&(Object.hasOwn(s.resolved,card.id)||meetsConditions(s,card.conditions,data))?card:null;
 }
 export function explorationView(s,data=content){
   const cards=deck(s,data),remaining=cards.filter(c=>c.repeatable||!Object.hasOwn(s.resolved,c.id));

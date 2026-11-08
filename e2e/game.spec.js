@@ -9,7 +9,7 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await page.addInitScript(() => { Math.random = () => 0.5; });
   await page.goto('./');
     await page.locator('#draw').click();
-  await expect(page.getByRole('heading', { name: 'KDYŽ SPÍ HLUBINY', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Zvony pod přílivem', exact: true })).toBeVisible();
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#ap')).toHaveText('3');
   await expect(page.locator('#reveal')).toBeEmpty();

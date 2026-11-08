@@ -1,0 +1,60 @@
+name: Publish Blackwater preview
+on:
+  push:
+    branches:
+      - feature/m4-blackwater-scenario-design
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout stable main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: stable
+      - name: Checkout preview branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/m4-blackwater-scenario-design
+          path: preview-source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Build stable site
+        working-directory: stable
+        run: npm run build
+      - name: Test and build preview
+        working-directory: preview-source
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+          npm run build
+      - name: Combine stable root and isolated preview folder
+        run: |
+          mkdir -p site/preview
+          cp -a stable/dist/. site/
+          cp -a preview-source/dist/. site/preview/
+          touch site/.nojekyll
+      - name: Upload Pages bundle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: preview
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}preview/blackwater.html
+    steps:
+      - name: Deploy stable root plus Blackwater preview
+        id: deployment
+        uses: actions/deploy-pages@v4

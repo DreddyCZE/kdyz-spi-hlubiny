@@ -10,6 +10,12 @@ import {load as loadLegacy,save as saveLegacy,SAVE_KEY} from '../engine/storage.
 import {protectedSaveStorage} from '../engine/save-compatibility.js';
 import {mountSaveNotice} from './save-compatibility.js';
 const legacyMode=new URLSearchParams(location.search).get('mode')==='legacy';
+const modeNav=document.querySelector('.game-modes');
+if(legacyMode&&modeNav){
+  modeNav.querySelector('.game-modes-current')?.removeAttribute('aria-current');
+  const current=modeNav.querySelector('a[href="./index.html?mode=legacy"]');
+  if(current)current.setAttribute('aria-current','page');
+}
 const {scenario:activeScenario,presentation,investigatorName,clockDisplayId}=activeScenarioPack;
 const content=legacyMode?legacyContent:activeScenarioPack.content;
 import { newScenarioSession,scenarioSessionTransition as scenarioTransition,scenarioSessionView as scenarioView } from '../engine/scenario-session.js';
@@ -211,8 +217,8 @@ const acceptButton=button('Přijmout výsledek',()=>dispatch({type:'acceptTest',
 rerollControls.append(rerollInfo,rerollButton,acceptButton);
 $('roll').after(rerollControls);
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
-const companionActions=document.createElement('div');companionActions.id='scenario-companions';companionActions.setAttribute('aria-label','Společníci');$('cardTitle').before(companionActions);
-const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardTitle').before(puzzleActions);
+const companionActions=document.createElement('div');companionActions.id='scenario-companions';companionActions.className='scenario-feature';companionActions.setAttribute('aria-label','Společníci');$('cardStory').after(companionActions);
+const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.className='scenario-feature';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardStory').after(puzzleActions);
 const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{

@@ -12,6 +12,8 @@ test('full engine playthrough is deterministic and bounded',()=>{
  const b=simulateScenario(blackwaterScenario,content,{seed:7,maxActions:250});
  assert.deepEqual(a,b);
  assert.ok(a.actions<=250);
+ assert.ok(a.attempts<=250);
+ assert.equal(a.exhausted,a.attempts===250&&!a.endingId);
  assert.ok(a.round>=1&&a.round<=13);
  assert.ok(a.trace.every(step=>step.ap>=0&&step.ap<=3));
 });
@@ -19,4 +21,12 @@ test('batch reports exactly requested number of outcomes',()=>{
  const batch=simulateBatch(blackwaterScenario,content,{runs:12,seed:123,maxActions:250});
  assert.equal(Object.values(batch.outcomes).reduce((a,b)=>a+b,0),12);
  assert.equal(batch.samples.length,5);
+ assert.ok(Number.isInteger(batch.exhausted)&&batch.exhausted>=0&&batch.exhausted<=12);
+});
+
+test('single-attempt budget reports exhaustion rather than pretending completion',()=>{
+ const r=simulateScenario(blackwaterScenario,content,{seed:1,maxActions:1});
+ assert.equal(r.attempts,1);
+ assert.equal(r.exhausted,true);
+ assert.equal(r.endingId,null);
 });

@@ -22,6 +22,12 @@ test('batch reports exactly requested number of outcomes',()=>{
  assert.equal(Object.values(batch.outcomes).reduce((a,b)=>a+b,0),12);
  assert.equal(batch.samples.length,5);
  assert.ok(Number.isInteger(batch.exhausted)&&batch.exhausted>=0&&batch.exhausted<=12);
+ assert.equal(Object.values(batch.unfinishedReasons).reduce((a,b)=>a+b,0),batch.outcomes.unfinished||0);
+ assert.ok(Object.values(batch.knowledgeCounts).every(n=>n>=1&&n<=12));
+ for(const [id,stats] of Object.entries(batch.endingRoundStats)){
+  assert.equal(stats.count,batch.outcomes[id]);
+  assert.ok(stats.min<=stats.mean&&stats.mean<=stats.max);
+ }
 });
 
 test('single-attempt budget reports exhaustion rather than pretending completion',()=>{
@@ -29,4 +35,11 @@ test('single-attempt budget reports exhaustion rather than pretending completion
  assert.equal(r.attempts,1);
  assert.equal(r.exhausted,true);
  assert.equal(r.endingId,null);
+});
+
+test('an action-limited batch counts unfinished reasons separately from endings',()=>{
+ const batch=simulateBatch(blackwaterScenario,content,{runs:3,maxActions:1});
+ assert.equal(batch.exhausted,3);
+ assert.equal(batch.unfinishedReasons['action-limit'],3);
+ assert.equal(batch.outcomes.unfinished,3);
 });

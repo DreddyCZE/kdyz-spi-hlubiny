@@ -7,6 +7,7 @@ import { locations } from '../data/locations.js';
 import { rewards, flags } from '../data/catalog.js';
 import { assertCards } from './schema.js';
 import { investigationDefinitions } from '../data/investigation.js';
+import { blackwaterPuzzles } from '../data/blackwater-puzzles.js';
 import { createInvestigation } from './investigation.js';
 export const catalog = {items:rewards.filter(r=>r.kind==='item').map(r=>r.id),evidence:investigationDefinitions.evidence.map(e=>e.id),knowledge:investigationDefinitions.knowledge.map(k=>k.id),deductions:investigationDefinitions.deductions.map(d=>d.id),locations:locations.map(l=>l.id),flags};
 // Composite items can provide existing evidence without rewriting historical saves.
@@ -36,4 +37,4 @@ export function createContent(cards, investigation = investigationDefinitions, o
 }
 export const content=createContent([...migrated,exampleCard]);
 // Opt-in Blackwater content; legacy default decks must remain unchanged.
-export const blackwaterContent=createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards]);
+export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards]),puzzles:blackwaterPuzzles});

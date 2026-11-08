@@ -336,3 +336,29 @@ main{max-width:1660px;padding:5px 14px 18px}
 .deck-strip:has(#draw:disabled) .deck-token{filter:grayscale(.45);opacity:.8}
 @media(min-width:1100px){.ending-card{min-height:clamp(250px,42vh,460px);padding-top:clamp(20px,5vh,60px)}}
 @media(max-width:780px){.ending-card{min-height:270px;padding:20px 13px}.ending-card>p:not(.eyebrow){font-size:13px}}
+
+/* M4.11: investigator selection is a set of illustrated physical cards. */
+#setup[hidden],#game[hidden]{display:none!important}
+.setup{max-width:1100px;margin:25px auto 0;padding:22px;background:radial-gradient(ellipse at top,#21372f,#10231f 80%);border:2px solid #977d50;box-shadow:0 16px 45px #0009}
+.setup h2{font-size:clamp(24px,2.4vw,34px);margin:6px 0}
+.setup>p:not(.eyebrow){font-size:13px;color:#c5c7b5}
+.investigator-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+.investigator-grid .investigator-card{display:flex;flex-direction:column;gap:8px;text-align:left;min-height:340px;padding:9px;background:linear-gradient(#d9c7a1,#c4ae85);color:#302a20;border:5px double #8b6c42;border-radius:3px;box-shadow:0 5px 0 #0b1714,0 12px 24px #0008;transition:transform .2s,box-shadow .2s}
+.investigator-grid .investigator-card:hover{transform:translateY(-7px) rotate(-1deg);background:#e8d7b3;box-shadow:0 10px 0 #0b1714,0 17px 30px #000a}
+.selection-portrait{display:grid;place-items:center;height:125px;width:100%;background:radial-gradient(ellipse at 45% 30%,#536d5e,#18342f 70%);color:#dfc68e;font:80px Georgia;border:4px double #af9461;text-shadow:0 8px 18px #000a}
+.investigator-card strong{font:700 24px Georgia}
+.investigator-card .selection-role{font:700 10px system-ui;letter-spacing:.13em;text-transform:uppercase;color:#715431}
+.investigator-card em{font:italic 12px/1.35 Georgia;flex:1}
+.investigator-card .selection-stats{font:700 15px system-ui;color:#503d27;border-top:1px solid #9f865c;padding-top:7px}
+.investigator-card small{font:11px/1.35 Georgia;color:#4d3d2d}
+#message:empty{display:none}
+#message{margin:8px 0;color:#dfc18c;font-size:12px}
+.story-card.deck-empty{min-height:0}
+.story-card.deck-empty .story-art{height:75px}
+.story-card.deck-empty .card-back{border-width:5px;outline-offset:-9px;gap:0}
+.story-card.deck-empty .card-back span{font-size:25px}
+.story-card.deck-empty .card-back strong{font-size:12px}
+.story-card.deck-empty .card-back small{display:none}
+.story-card.deck-empty .story-body{padding:5px 10px}
+.story-card.deck-empty .story-body .eyebrow{font-size:9px}
+@media(max-width:780px){.investigator-grid{grid-template-columns:1fr}.investigator-grid .investigator-card{min-height:220px}.selection-portrait{height:85px;font-size:55px}}

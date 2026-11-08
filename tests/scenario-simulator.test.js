@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
-import {content} from '../src/engine/content.js';
+import {blackwaterContent as content} from '../src/engine/content.js';
 import {seededDice,simulateScenario,simulateBatch} from '../src/engine/scenario-simulator.js';
 test('seeded dice are reproducible and within range',()=>{
  const a=seededDice(42),b=seededDice(42);

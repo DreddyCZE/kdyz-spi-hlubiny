@@ -382,3 +382,32 @@ main{max-width:1660px;padding:5px 14px 18px}
 .investigator-grid .investigator-card .selection-stats{color:#43301c!important}
 .investigator-grid .investigator-card small{color:#443222!important}
 @media(max-width:540px){.deck-strip{grid-template-columns:55px minmax(0,1fr);row-gap:5px}.deck-strip>.deck-token{width:45px!important;height:65px!important}.deck-strip>#draw{grid-column:2;grid-row:2;justify-self:start}.map-surface::before{left:7px;bottom:7px;font-size:7px;padding:3px 5px}}
+
+/* M4.13: Myth phase as a dramatic, inspectable tabletop card. */
+.myth-history-open{display:inline-block;margin-top:5px;padding:2px 0;border:0;background:transparent;color:#d4b984;text-decoration:underline;text-underline-offset:3px;font:10px Georgia;cursor:pointer}
+.myth-dialog,.myth-history-dialog{max-width:min(92vw,540px);max-height:90vh;overflow:auto;padding:0;background:#10231f;color:#e8d4a8;border:3px double #bda06a;box-shadow:0 20px 90px #000e}
+.myth-dialog::backdrop,.myth-history-dialog::backdrop{background:#020d0bdc;backdrop-filter:blur(5px)}
+.myth-dialog-inner{padding:13px;background:repeating-linear-gradient(135deg,#ffffff04 0 2px,transparent 2px 9px),#112822}
+.myth-dialog-inner>.eyebrow{margin:3px 8px 11px;text-align:center;letter-spacing:.24em}
+.myth-illustration{height:clamp(130px,24vh,230px);display:grid;place-items:center;border:7px double #a88b58;background:radial-gradient(ellipse at 50% 75%,#947b5066,transparent 45%),radial-gradient(ellipse at 50% 35%,#486257,#091c1b 75%);overflow:hidden;position:relative}
+.myth-illustration:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,#ffffff07 0 1px,transparent 1px 6px);pointer-events:none}
+.myth-illustration span{font:clamp(75px,13vw,145px) Georgia;color:#e2cb98;text-shadow:0 8px 15px #000a,0 0 35px #c5a46caa;animation:myth-reveal 1s ease-out both}
+@keyframes myth-reveal{from{opacity:0;transform:scale(1.3) rotate(-12deg);filter:blur(12px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+.myth-parchment{background:linear-gradient(#e5d4ae,#c9b18a);color:#382a1b;padding:20px 25px 24px;border:2px solid #a48a5c;text-align:center}
+.myth-parchment .eyebrow{color:#75522c}
+.myth-parchment h2{font:700 clamp(25px,3vw,36px) Georgia;margin:10px 0}
+.myth-parchment>p:not(.eyebrow){font:italic 17px/1.55 Georgia;margin:0 auto 18px;max-width:410px}
+.myth-effect{padding:11px;border-block:1px solid #a68b60;font:700 12px Georgia;margin-bottom:17px}
+.myth-parchment button{background:#1b3831;color:#f0dcb2;border:1px solid #826e4c;padding:10px 16px;cursor:pointer}
+.myth-history-dialog{width:min(90vw,660px);padding:18px 20px}
+.myth-history-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.myth-history-head h2{font:700 24px Georgia;margin:0}
+.myth-history-head button{padding:7px 12px}
+.myth-history-dialog>p{font:13px Georgia;color:#c9bc9c}
+.myth-history-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.myth-discard-card{background:#d5c09a;color:#322819;padding:12px;border:4px double #a08454;min-height:185px}
+.myth-discard-glyph{display:block;text-align:center;font:38px Georgia;color:#4b5b4d;background:#233d35;padding:6px}
+.myth-discard-card h3{font:700 17px Georgia;margin:10px 0 5px}
+.myth-discard-card p{font:italic 12px/1.4 Georgia}
+.myth-discard-card small{display:block;border-top:1px solid #a18b69;padding-top:7px;font:700 11px Georgia}
+@media(prefers-reduced-motion:reduce){.myth-illustration span{animation:none}}

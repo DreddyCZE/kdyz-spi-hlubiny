@@ -87,7 +87,7 @@ export function createJournal(anchor, onDeduce) {
   }
   return {
     select,
-    render(view, disabled, log = []) {
+    render(view, disabled, log = [], automatic = false) {
       const model = journalModel(view, log);
       for (const [key, label, empty] of sections) {
         const target = panels.get(key).querySelector('#journal-' + key);
@@ -103,8 +103,11 @@ export function createJournal(anchor, onDeduce) {
         } else list(target, model[key], empty, key === 'deductions' ? value => 'Vyhodnoceno' + (value.count > 1 ? ' · ' + value.count + '×' : '') : null);
       }
       list(available, model.available, 'Žádné další propojení nyní nesplňuje požadavky.', () => 'Požadavky splněny · čeká na vyhodnocení');
-      button.disabled = disabled || !model.available.length;
-      message.textContent = disabled ? 'Vyhodnocení je nyní pozastavené. Získané záznamy můžeš prohlížet.' : model.available.length ? 'Důkazy lze propojit. Vyhodnocení je zdarma.' : 'Deník se doplňuje pouze o získané informace. Prohlížení je zdarma.';
+      button.hidden = automatic;
+      availableHeading.hidden = automatic;
+      available.hidden = automatic;
+      button.disabled = automatic || disabled || !model.available.length;
+      message.textContent = automatic ? 'Deník automaticky propojuje získané důkazy. Není potřeba nic potvrzovat.' : disabled ? 'Vyhodnocení je nyní pozastavené. Získané záznamy můžeš prohlížet.' : model.available.length ? 'Důkazy lze propojit. Vyhodnocení je zdarma.' : 'Deník se doplňuje pouze o získané informace. Prohlížení je zdarma.';
     },
   };
 }

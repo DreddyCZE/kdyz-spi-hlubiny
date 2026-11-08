@@ -25,3 +25,5 @@ jobs:
         run: node scripts/simulate-scenario.mjs 20 42
       - name: Compare deterministic strategies
         run: node scripts/compare-scenario-strategies.mjs 20 42
+      - name: Audit alternative endings
+        run: node scripts/audit-scenario-endings.mjs 20 42

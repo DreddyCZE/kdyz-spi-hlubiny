@@ -4,7 +4,7 @@ import {blackwaterContent as data} from '../src/engine/content.js';
 import {blackwaterScenario as def} from '../src/data/blackwater-scenario.js';
 import {newScenarioSession,scenarioSessionTransition} from '../src/engine/scenario-session.js';
 import {currentCard,meetsConditions} from '../src/engine/game.js';
-import {validScenarioSession} from '../src/engine/scenario-storage.js';
+import {validScenarioSession,saveScenarioSession,loadScenarioSession,scenarioSaveKey} from '../src/engine/scenario-storage.js';
 const step=(s,a)=>scenarioSessionTransition(s,{...a,revision:s.game.revision},def,data);
 const at=(s,locationId)=>({...s,game:{...s.game,locationId,ap:3,choiceId:null,result:null}});
 const card=(s,id)=>({...s,game:{...s.game,drawnCards:{...s.game.drawnCards,[s.game.locationId]:id},choiceId:null,result:null}});
@@ -49,4 +49,23 @@ test('without either clue the cave offers an ordinary test and hides the shortcu
  s=step(s,{type:'acceptTest'});
  assert.equal(s.game.flags['cave-service-route-used'],true);
  assert.equal(validScenarioSession(s,def,data),true);
+});
+
+test('dog investigation flags survive save/load and remain usable at the lighthouse',()=>{
+ let s=newScenarioSession(def,data);
+ s=step(s,{type:'move',locationId:'location-1'});
+ s=step(s,{type:'recruitCompanion',companionId:'blackwater-dog'});
+ s=step(s,{type:'useCompanionAbility',abilityId:'scent',trigger:'exploration'});
+ s=resolve(s,'bw-dog-trail','bw-dog-trail-mark');
+ assert.equal(s.game.flags['dog-trail-recorded'],true);
+ const entries=new Map();
+ const storage={getItem:key=>entries.get(key)??null,setItem:(key,value)=>entries.set(key,value)};
+ assert.equal(saveScenarioSession(storage,s,def,data),true);
+ assert.ok(entries.has(scenarioSaveKey(def)));
+ let loaded=loadScenarioSession(storage,def,data);
+ assert.equal(loaded.game.flags['dog-scent-found'],true);
+ assert.equal(loaded.game.flags['dog-trail-recorded'],true);
+ loaded=at(loaded,'location-5');
+ loaded=resolve(loaded,'bw-lighthouse-dog-trail','bw-lighthouse-dog-compare');
+ assert.equal(loaded.game.flags['salt-route-known'],true);
 });

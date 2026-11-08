@@ -19,8 +19,8 @@ export function scenarioSessionTransition(session,action,def,data){
   if(action.type==='endRound'){
     if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds)return session;
     const nextRound=game.round+1;
-    const nextGame={...game,round:nextRound,ap:nextRound<=def.rules.maxRounds?def.rules.apPerRound:0,revision:game.revision+1,
-      log:['Nové kolo.',...game.log].slice(0,100)};
+    const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
+    if(nextGame===game)return session;
     let nextSc=sc;
     // Seven tolls, triggered once each at scenario-specific milestones.
     for(const clock of def.clocks){
@@ -33,10 +33,9 @@ export function scenarioSessionTransition(session,action,def,data){
     if(defeat)nextSc=chooseEnding(def,nextGame,nextSc,defeat.id);
     return {...session,game:nextGame,scenario:nextSc};
   }
-  const nextGame=legacyTransition(game,action,data);
+  const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
   if(nextGame===game)return session;
-  // Until the full engine migration, legacy HP/SAN/threat/ritual defeat remains authoritative.
-  // Never silently convert a legacy defeat to a scenario victory.
+  // HP/SAN/threat remain lethal; the scenario clock replaces legacy ritual defeat.
   return {...session,game:nextGame};
 }
 export function scenarioSessionView(session,def){

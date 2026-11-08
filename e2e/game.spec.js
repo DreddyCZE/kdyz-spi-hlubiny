@@ -32,13 +32,13 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#sum')).toHaveText('4 + 4 + 2 + 0 = 10 proti obtížnosti 8');
   await expect(page.locator('#inventory')).toHaveText('Deník');
-  const saved = await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)));
+  const saved = await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem(scenarioSaveKey(blackwaterScenario)))).toBe(saved);
+  expect(await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
   await page.screenshot({ path: testInfo.outputPath('game-after-reload.png'), fullPage: true, animations: 'disabled' });
   await page.getByRole('button', { name: 'Pokračovat', exact: true }).click();
       await page.locator('#draw').click();

@@ -32,7 +32,7 @@ function render(){
   $('heroStats').textContent=`Eleanor Whitmore · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
-  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log);
+  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,blackwaterScenario.rules.deductionMode==='automatic');
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state),choice=selectedChoice(state,card);
   const result=visibleResult(state),deck=explorationView(state);
   $('deckName').textContent=deck.name;

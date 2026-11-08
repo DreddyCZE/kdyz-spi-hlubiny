@@ -88,6 +88,29 @@ function render(){
   $('roll').disabled=rolling||!scene.canAct||!choice?.available;
   $('next').disabled=rolling||!!pending||!scene.canAct||!result;
   $('endRound').disabled=rolling||!!pending||!scene.canAct;
+  companionActions.replaceChildren();
+  for(const companion of scene.companion){
+    if(!companion.active&&!companion.recruitable)continue;
+    const section=document.createElement('section');section.className='puzzle-panel';
+    const heading=document.createElement('h3');heading.textContent=companion.name;section.append(heading);
+    if(companion.recruitable){
+      const intro=document.createElement('p');intro.textContent='V mlze se objevil osamělý pes. Může tě doprovázet při vyšetřování.';section.append(intro);
+      section.append(button('Přijmout společníka',()=>dispatch({type:'recruitCompanion',revision:state.revision,companionId:companion.id}),!scene.canAct||!!pending));
+    }
+    if(companion.active){
+      const description=document.createElement('p');description.textContent='Doprovází tě · bez vlastních akčních bodů';section.append(description);
+      for(const ability of companion.active.abilities){
+        if(ability.type==='passive'){
+          const info=document.createElement('p');info.textContent=ability.name+' · '+ability.text;section.append(info);
+        }else{
+          section.append(button(ability.available?'Použít: '+ability.name:ability.name+' · použito v tomto kole',()=>dispatch({type:'useCompanionAbility',revision:state.revision,abilityId:ability.id,trigger:ability.trigger}),!ability.available||!scene.canAct||!!pending));
+          if(!ability.available){const info=document.createElement('p');info.textContent=ability.text;section.append(info);}
+        }
+      }
+      section.append(button('Rozloučit se',()=>dispatch({type:'dismissCompanion',revision:state.revision}),!scene.canAct||!!pending));
+    }
+    companionActions.append(section);
+  }
   // Accessible puzzle controls use the public projection, never private answers.
   puzzleActions.replaceChildren();
   for(const p of scene.puzzles){
@@ -169,6 +192,7 @@ const acceptButton=button('Přijmout výsledek',()=>dispatch({type:'acceptTest',
 rerollControls.append(rerollInfo,rerollButton,acceptButton);
 $('roll').after(rerollControls);
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
+const companionActions=document.createElement('div');companionActions.id='scenario-companions';companionActions.setAttribute('aria-label','Společníci');$('cardTitle').before(companionActions);
 const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardTitle').before(puzzleActions);
 const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));

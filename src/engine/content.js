@@ -34,4 +34,6 @@ export function createContent(cards, investigation = investigationDefinitions, o
   const definitions=freeze(structuredClone(cards));
   return Object.freeze({decksByLocation:freeze(decksByLocation),cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
 }
-export const content=createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards]);
+export const content=createContent([...migrated,exampleCard]);
+// Opt-in Blackwater content; legacy default decks must remain unchanged.
+export const blackwaterContent=createContent([...migrated,exampleCard,...blackwaterM4Cards,...additionalBlackwaterCards]);

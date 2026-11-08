@@ -3,10 +3,11 @@ import {newState,transition as legacyTransition,currentCard,selectedChoice,evalu
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
 import {deduce} from './investigation.js';
 import {initialPuzzleState,puzzleView,attemptPuzzle,revealPuzzleHint,validatePuzzle} from './puzzle.js';
+import {initialCompanionState,validateCompanion,companionAvailable,recruitCompanion,dismissCompanion,useCompanionAbility,companionView} from './companion.js';
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
-  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{}}};
+  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{},companion:initialCompanionState()}};
 }
 const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
 const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
@@ -24,6 +25,21 @@ export function scenarioSessionTransition(session,action,def,data){
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
   if(action.type==='deduce'&&def.rules.deductionMode==='automatic')return session;
+  // D3 companion transitions are revision guarded and never consume AP.
+  if(['recruitCompanion','dismissCompanion','useCompanionAbility'].includes(action.type)){
+    if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds)return session;
+    const state=sc.companion||initialCompanionState();
+    const definitions=(data.companions||[]).filter(d=>!validateCompanion(d).length);
+    const active=definitions.find(d=>d.id===state.activeId);
+    let next=null;
+    if(action.type==='recruitCompanion'){
+      const candidate=definitions.find(d=>d.id===action.companionId);
+      if(candidate)next=recruitCompanion(candidate,state,game);
+    }else if(action.type==='dismissCompanion')next=dismissCompanion(state);
+    else if(active)next=useCompanionAbility(active,state,action.abilityId,action.trigger,game.round);
+    if(!next)return session;
+    return {...session,game:{...game,revision:game.revision+1},scenario:{...sc,companion:next}};
+  }
   // Optional puzzle subsystem: old sessions and scenarios without puzzles stay valid.
   if(['attemptPuzzle','revealPuzzleHint'].includes(action.type)){
     if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds||!Array.isArray(data.puzzles))return session;
@@ -106,6 +122,7 @@ export function scenarioSessionView(session,def,data={}){
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,
+    companion:(Array.isArray(data.companions)?data.companions:[]).filter(d=>!validateCompanion(d).length).map(d=>({id:d.id,name:d.name,kind:d.kind,recruitable:!session.scenario.companion?.activeId&&companionAvailable(d,session.game),active:companionView(d,session.scenario.companion||initialCompanionState(),session.game.round)})),
     puzzles:(Array.isArray(data.puzzles)?data.puzzles:[]).filter(p=>!validatePuzzle(p).length&&p.locationId===session.game.locationId).map(p=>puzzleView(p,session.scenario.puzzles?.[p.id],session.game)),
     availableEndings:session.game.ended||session.game.round>def.rules.maxRounds||session.scenario.pendingTest||(def.finaleLocationId&&session.game.locationId!==def.finaleLocationId)?[]:availableEndings(def,session.game,session.scenario).filter(e=>e.kind!=='defeat').map(e=>({id:e.id,title:e.title,kind:e.kind})),
     canAct:!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};

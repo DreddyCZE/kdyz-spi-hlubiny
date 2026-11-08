@@ -1,15 +1,42 @@
 // Opt-in P1 adapter. Legacy engine and its save format remain unchanged.
-import {newState,transition as legacyTransition} from './game.js';
+import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes} from './game.js';
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
   return {schemaVersion:1,game,scenario:initialScenarioState(def)};
 }
+const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
+const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
+const score=(dice,test)=>evaluate(...dice,attributes[test.attribute]+(test.modifier||0),test.difficulty);
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
   const game=session.game,sc=session.scenario;
+  const pending=sc.pendingTest||null;
+  if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
+  if(['startTest','rerollTest','acceptTest'].includes(action.type)){
+    if(action.revision!==game.revision)return session;
+    if(action.type==='startTest'){
+      if(pending||game.ended||!diceValid(action.dice))return session;
+      const card=currentCard(game,data),choice=selectedChoice(game,card);
+      if(!card||!choice?.test||!choice.available||action.cardId!==card.id||action.choiceId!==choice.id)return session;
+      return {...session,scenario:{...sc,pendingTest:{cardId:card.id,choiceId:choice.id,revision:game.revision,firstDice:[...action.dice],secondDice:null}}};
+    }
+    if(!pending||pending.revision!==game.revision)return session;
+    const card=currentCard(game,data),choice=card?.choices.find(o=>o.id===pending.choiceId);
+    if(!choice?.test||card.id!==pending.cardId||!choice.available)return session;
+    if(action.type==='rerollTest'){
+      if(pending.secondDice||game.san<2||!diceValid(action.dice))return session;
+      return {...session,game:{...game,san:game.san-1},scenario:{...sc,pendingTest:{...pending,secondDice:[...action.dice]}}};
+    }
+    const first=score(pending.firstDice,choice.test);
+    const second=pending.secondDice?score(pending.secondDice,choice.test):null;
+    const winner=second&&tiers.indexOf(second.key)>tiers.indexOf(first.key)?pending.secondDice:pending.firstDice;
+    const nextGame=legacyTransition(game,{type:'resolve',revision:game.revision,cardId:pending.cardId,choiceId:pending.choiceId,dice:winner},data,{...def.rules,scenarioClock:true});
+    if(nextGame===game)return session;
+    return {...session,game:nextGame,scenario:{...sc,pendingTest:null}};
+  }
   if(action.type==='finishScenario'){
     if(!Number.isSafeInteger(action.revision)||action.revision!==game.revision)return session;
     const ending=chooseEnding(def,game,sc,action.endingId);
@@ -35,6 +62,7 @@ export function scenarioSessionTransition(session,action,def,data){
     if(defeat)nextSc=chooseEnding(def,nextGame,nextSc,defeat.id);
     return {...session,game:nextGame,scenario:nextSc};
   }
+  if(action.type==='resolve'&&currentCard(game,data)?.choices.some(c=>c.id===action.choiceId&&c.test))return session;
   const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
   if(nextGame===game)return session;
   // HP/SAN/threat remain lethal; the scenario clock replaces legacy ritual defeat.
@@ -44,5 +72,6 @@ export function scenarioSessionView(session,def){
   return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
+    pendingTest:session.scenario.pendingTest||null,
     canAct:!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};
 }

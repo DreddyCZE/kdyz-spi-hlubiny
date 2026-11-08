@@ -26,12 +26,13 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   if(view.pendingTest){dispatch({type:'acceptTest'});continue;}
   const card=currentCard(game,data);
   if(card&&game.result){dispatch({type:'next'});continue;}
+  if(game.ap===0){if(!dispatch({type:'endRound'}))break;continue;}
   if(card){
    const choices=card.choices.filter(c=>c.available);
    if(choices.length){
     const choice=chooseChoice?.(choices,game,card) || choices[0];
     if(!choices.some(c=>c.id===choice.id))throw new Error('Strategy chose unavailable choice');
-    if(!dispatch({type:'choose',choiceId:choice.id})){} // already-selected choice is a legal no-op
+    dispatch({type:'choose',choiceId:choice.id}); // already-selected choice is a legal no-op
     if(choice.test){
      dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
      if(reroll&&session.scenario.pendingTest&&session.game.san>=2)dispatch({type:'rerollTest',dice:dice()});

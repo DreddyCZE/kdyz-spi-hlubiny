@@ -28,7 +28,7 @@ export function validateScenario(def){
     if(typeof c.label!=='string'||!c.label.trim())err('clocks['+i+'].label','required');
     if(c.milestones!==undefined&&(!Array.isArray(c.milestones)||!unique(c.milestones.map(m=>m?.round))||c.milestones.some(m=>!m||!Number.isSafeInteger(m.round)||m.round<2||m.round>rules.maxRounds+1||!Number.isSafeInteger(m.value)||m.value<c.initial||m.value>c.max)))err('clocks['+i+'].milestones','invalid milestones');
   }
-  if((def.clocks||[]).length&&!Array.isArray(def.modules)&&def.modules.includes('scenario-clock'))err('modules','scenario-clock required for clocks');
+  if(Array.isArray(def.clocks)&&def.clocks.length&&!(Array.isArray(def.modules)&&def.modules.includes('scenario-clock')))err('modules','scenario-clock required for clocks');
   if(!Array.isArray(def.endings)||!def.endings.length||!unique((Array.isArray(def.endings)?def.endings:[]).map(e=>e?.id)))err('endings','unique endings required');
   const clockIds=(Array.isArray(def.clocks)?def.clocks:[]).filter(Boolean).map(c=>c.id);
   for(const [i,e] of (Array.isArray(def.endings)?def.endings:[]).entries()){

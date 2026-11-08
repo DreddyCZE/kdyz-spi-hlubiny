@@ -7,6 +7,7 @@ import { startCombat, combatTurn } from './combat.js';
 import { startingInventory, useBlackwaterItem } from '../data/blackwater-items.js';
 import { selectInvestigator, useInvestigatorAbility } from '../data/blackwater-investigators.js';
 import { moveEnemies, blackwaterRoutes } from './blackwater-map.js';
+import { investigatorById } from '../data/blackwater-investigators.js';
 
 export const blackwaterContent=createContent(blackwaterM4Cards);
 export function newBlackwaterGame(){
@@ -29,7 +30,7 @@ export function blackwaterTransition(state,action){
       myth.enemies=myth.enemies.filter(e=>!(e.enemyId===combat.enemyId&&e.locationId===game.locationId));
       return {...state,revision:state.revision+1,game,myth,combat};
     }
-    const game=useBlackwaterItem(state.game,action.itemId);
+    const game=useBlackwaterItem(state.game,action.itemId,investigatorById[state.investigatorId]||{hp:6,san:8});
     if(game===state.game)return state;
     game.revision++;
     return {...state,revision:state.revision+1,game};

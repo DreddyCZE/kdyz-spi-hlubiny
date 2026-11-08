@@ -128,32 +128,30 @@ test('konec hry zakáže hod i po reloadu a nezmění uložený stav',async({pag
   await expect(page.locator('#reveal')).toBeEmpty();
 });
 
-test('reload během animace okamžitě odhalí již uložený hod bez opakování',async({page})=>{
+test('reload během animace obnoví nepotvrzený hod bez předčasného odhalení',async({page})=>{
   await page.addInitScript(()=>{Math.random=()=>0.5;});
   await page.goto('./');
-    await page.locator('#draw').click();
+  await page.locator('#draw').click();
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.locator('#roll').click();
   await expect(page.locator('#die1')).toHaveText('?');
   await expect(page.locator('#reveal')).toBeEmpty();
-  await expect(page.locator('#log')).toBeEmpty();
-  const saved=await page.evaluate(()=>localStorage.getItem(scenarioSaveKey(blackwaterScenario)));
-  const state=JSON.parse(saved);
-  expect(state.result.dice).toEqual([4,4]);
-  expect(state.result.key).toBe('success');
-  expect(state.ap).toBe(2);
-  // No fastForward: unload while the cosmetic animation is still pending.
+  const saved=await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
+  const session=JSON.parse(saved);
+  expect(session.scenario.pendingTest.firstDice).toEqual([4,4]);
+  expect(session.game.ap).toBe(3);
+  expect(session.game.result).toBeNull();
   await page.reload();
+  await expect(page.locator('#reveal')).toBeEmpty();
+  await expect(page.locator('#outcomes')).toBeHidden();
+  await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
+  expect(await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
+  await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
-  await expect(page.locator('#die1')).toHaveText('4');
-  await expect(page.locator('#die2')).toHaveText('4');
-  await expect(page.locator('#die1')).not.toHaveClass(/rolling/);
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#roll')).toBeDisabled();
-  await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem(scenarioSaveKey(blackwaterScenario)))).toBe(saved);
 });
 
 for(const width of [320,390,1440]){

@@ -13,6 +13,10 @@ const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
 let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
+const investigatorFlavor={detective:'V Blackwateru se pohřešovaní nikdy neztrácejí beze stopy. Jen někdo musí mít odvahu hledat tam, kde ostatní zavírají dveře.',occultist:'V zakázaných knihách už četla o zvonech, které znějí pod hladinou. Teď poprvé slyší jeden na vlastní uši.',sailor:'Příliv zná lépe než vlastní dlaň. Ale této noci se moře vrací s něčím, co nikdy nemělo vyplout.'};
+const investigatorGlyph={detective:'⌕',occultist:'✧',sailor:'⚓'};
+const itemGlyph={ 'bw-bandage':'✚','bw-laudanum':'⚗','bw-salt':'✧','bw-revolver':'⌁','bw-bell-key':'⚿','bw-cylinder':'♫','bw-tide-page':'▤'};
+const locationGlyph={'location-0':'⚓','location-1':'⌂','location-2':'▤','location-3':'✚','location-4':'✝','location-5':'✦','location-6':'◆'};
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
  if(rolling)return false;
@@ -41,6 +45,12 @@ function render(){
  const investigator=investigatorById[state.investigatorId];
  $('investigatorName').textContent=investigator.name;$('investigatorRole').textContent=investigator.role+' · '+investigator.ability;
  const stats=[['Kolo',view.round+'/7'],['Akční body',view.ap],['Zdraví',view.hp+'/'+investigator.hp],['Příčetnost',view.san+'/'+investigator.san],['Hrozba',view.threat+'/10'],['Rituál',view.ritual+'/8']];
+ $('quickStats').replaceChildren(...[['♥',view.hp+'/'+investigator.hp,'Zdraví'],['◈',view.san+'/'+investigator.san,'Příčetnost'],['⚡',view.ap,'Akční body'],['◷',view.round+'/7','Kolo'],['☠',view.threat,'Hrozba'],['✧',view.ritual,'Rituál']].map(([symbol,value,label])=>{const el=document.createElement('span');el.className='quick-stat';el.title=label;el.textContent=symbol+' '+value;return el;}));
+ $('characterTitle').textContent=investigator.name;
+ $('characterFlavor').textContent=investigatorFlavor[investigator.id];
+ $('characterGlyph').textContent=investigatorGlyph[investigator.id];
+ $('characterAbility').textContent=investigator.ability+(view.abilityUsed?' (Vyčerpána)':'');
+ $('characterStats').textContent='♥ '+view.hp+'/'+investigator.hp+'   ◈ '+view.san+'/'+investigator.san+'   ⚡ '+view.ap;
  $('stats').replaceChildren(...stats.map(([name,value])=>{const el=document.createElement('div');el.className='stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=value;el.append(label,strong);return el;}));
  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
  svg.setAttribute('viewBox','0 0 100 100');svg.setAttribute('preserveAspectRatio','none');svg.classList.add('map-routes');svg.setAttribute('aria-hidden','true');
@@ -57,13 +67,16 @@ function render(){
   const b=button((current?'◉ ':reachable?'➤ ':'• ')+loc.name+(enemyCount?' ◆'+enemyCount:''),()=>send('move',{locationId:loc.id}),rolling||view.ended||current||!reachable||view.ap<1||state.combat?.status==='active','map-point'+(current?' active':'')+(reachable?' reachable':'')+(enemyCount?' enemy':''));
   b.style.left=blackwaterMap.points[loc.id].x+'%';b.style.top=blackwaterMap.points[loc.id].y+'%';
   b.title=current?'Aktuální poloha':reachable?'Přesun za 1 akční bod':'Není přímá cesta';
+  b.dataset.symbol=locationGlyph[loc.id];
   if(current)b.setAttribute('aria-current','location');return b;
  });
- $('locations').replaceChildren(svg,...pins);
+ const tokens=view.myth.enemies.map((e,index)=>{const token=document.createElement('span');token.className='map-token enemy-token';token.textContent='◆';token.title=enemyName(e.enemyId)+' · '+(locations.find(l=>l.id===e.locationId)?.name||'');token.style.left=(blackwaterMap.points[e.locationId].x+5+index%2*2)+'%';token.style.top=(blackwaterMap.points[e.locationId].y-5)+'%';return token;});
+ const playerToken=document.createElement('span');playerToken.className='map-token investigator-token';playerToken.textContent=investigatorGlyph[investigator.id];playerToken.title=investigator.name;playerToken.style.left=(blackwaterMap.points[view.locationId].x-5)+'%';playerToken.style.top=(blackwaterMap.points[view.locationId].y-5)+'%';
+ $('locations').replaceChildren(svg,...pins,...tokens,playerToken);
  const place=locations.find(l=>l.id===view.locationId);$('place').textContent=place.name;$('description').textContent=place.description;
  $('enemies').replaceChildren(...view.myth.enemies.filter(e=>e.locationId===view.locationId).map(e=>button('⚔ '+enemyName(e.enemyId),()=>send('startCombat',{enemyId:e.enemyId}),rolling||view.ended||Boolean(state.combat)||view.ap<1)));
  if(!$('enemies').children.length)$('enemies').textContent='Zatím klid. Jen mlha se pohybuje.';
- $('items').replaceChildren(...view.inventory.map(id=>button('▱ '+(blackwaterItemById[id]?.name||id),()=>send('useItem',{itemId:id}),rolling||view.ended)));
+ $('items').replaceChildren(...view.inventory.map(id=>{const item=blackwaterItemById[id];const b=button('',()=>send('useItem',{itemId:id}),rolling||view.ended||item?.kind!=='consumable','item-card');const art=document.createElement('span');art.className='item-art';art.textContent=itemGlyph[id]||'✦';const title=document.createElement('strong');title.textContent=item?.name||id;const desc=document.createElement('small');desc.textContent=item?.description||'';b.append(art,title,desc);b.title=(item?.name||id)+': '+(item?.description||'');return b;}));
  if(!view.inventory.length)$('items').textContent='Prázdný inventář.';
  $('ability').disabled=rolling||view.abilityUsed||view.ended||state.combat?.status==='active';
  $('ability').textContent=view.abilityUsed?'Schopnost vyčerpána':'✦ Použít schopnost';
@@ -115,6 +128,9 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='Scénář skončil. Temnota zvítězila.';
 }
+$('investigatorOpen').onclick=()=>$('investigatorDialog').showModal();
+$('investigatorClose').onclick=()=>$('investigatorDialog').close();
+$('investigatorDialog').onclick=e=>{if(e.target===$('investigatorDialog'))$('investigatorDialog').close();};
 $('journalToggle').onclick=()=>{journalOpen=!journalOpen;render();};
 $('combatClose').onclick=()=>send('closeCombat');
 $('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;render();};

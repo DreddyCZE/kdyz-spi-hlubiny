@@ -24,7 +24,7 @@ for(const width of [1440,390,320])test(`explicit deck draw, keyboard, privacy an
  await page.reload();await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
  await resolveDrawn(page);await page.locator('#next').click();
  await expect(page.locator('#draw')).toBeFocused();await hidden(['0-0']);await expect(page.locator('#deckCounts')).toContainText('Dostupné: 2');
- const saved=await page.evaluate(()=>localStorage.getItem(saveKey));await page.reload();await hidden(['0-0']);expect(await page.evaluate(()=>localStorage.getItem(saveKey))).toBe(saved);
+ const saved=await page.evaluate(key=>localStorage.getItem(key),saveKey);await page.reload();await hidden(['0-0']);expect(await page.evaluate(key=>localStorage.getItem(key),saveKey)).toBe(saved);
  await page.locator('#draw').click();await expect(page.locator('#cardTitle')).toHaveText('Muž z mlhy');await expect(page.locator('#ap')).toHaveText('2');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  await page.screenshot({path:testInfo.outputPath(`drawn-${width}.png`),fullPage:true});

@@ -36,4 +36,22 @@ export const blackwaterCompanionCards=[{
   {id:'bw-lighthouse-dog-ignore',label:'Pokračovat bez porovnání',apCost:0,
    outcomes:{success:{text:'Souvislost zůstane otevřená. Maják můžeš prozkoumat i bez psího vodítka.',effects:[]}}}
  ]
+,{
+ id:'bw-cave-service-route',type:'encounter',locationId:'location-6',
+ title:'Průchod pod skálou',
+ description:'Příliv zaplavuje ústí jeskyně. Za zříceným ochozem vede stará servisní štola; druhá cesta pokračuje přes kluzké kameny přímo k dunění zvonu.',
+ repeatable:false,conditions:[],choices:[
+  {id:'bw-cave-route-known',label:'Využít zaznamenanou servisní cestu',apCost:1,
+   conditions:[{type:'flagEquals',id:'salt-route-known',value:true}],
+   outcomes:{success:{text:'Díky dřívějšímu pátrání rozpoznáš servisní značky. Projdeš bezpečnějším úsekem a dostaneš se blíž ke zvonu, ale samotný rituál musíš stále rozluštit.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]}}},
+  {id:'bw-cave-route-ordinary',label:'Prozkoumat kluzký průchod bez mapy',apCost:1,
+   test:{attribute:'VN',difficulty:9},outcomes:{
+    criticalSuccess:{text:'Najdeš pevné stupy ve skále a dostaneš se dál bez úhony.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]},
+    greatSuccess:{text:'Opatrně projdeš a objevíš známky starého servisního přístupu.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]},
+    success:{text:'Dostaneš se do chodby za ochozem. Cesta byla nebezpečná, ale zvládl jsi ji.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true}]},
+    partialSuccess:{text:'Proklouzneš úzkým průchodem, ale uklouzneš na mokré skále.',effects:[{type:'setFlag',id:'cave-service-route-used',value:true},{type:'modifyStat',stat:'hp',amount:-1}]},
+    failure:{text:'Voda tě donutí ustoupit. Můžeš to zkusit později nebo hledat jiný způsob.',effects:[]},
+    criticalFailure:{text:'Příliv tě srazí na kolena. Ze tmy se ozve odpověď.',effects:[{type:'modifyThreat',amount:1}]}
+   }}
+ ]
 }];

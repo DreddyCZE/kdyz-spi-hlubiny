@@ -6,7 +6,6 @@ export function newScenarioSession(def,data){
   game.ap=def.rules.apPerRound;
   return {schemaVersion:1,game,scenario:initialScenarioState(def)};
 }
-const schedule=Object.freeze({3:2,5:3,7:4,9:5,11:6,13:7});
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
@@ -24,13 +23,11 @@ export function scenarioSessionTransition(session,action,def,data){
       log:['Nové kolo.',...game.log].slice(0,100)};
     let nextSc=sc;
     // Seven tolls, triggered once each at scenario-specific milestones.
-    const bell=schedule[nextRound];
-    if(def.id==='blackwater-bells'&&bell&&def.clocks.some(c=>c.id==='tide-bells')&&sc.clocks['tide-bells']<bell){
-      nextSc=advanceClock(def,nextSc,'tide-bells',bell-nextSc.clocks['tide-bells'],'scheduled-round-'+nextRound);
-    }
-    // The seventh toll at the end of round 12 is a scenario defeat, not an old ritual increment.
-    if(nextRound>def.rules.maxRounds&&def.id==='blackwater-bells'){
-      nextSc=advanceClock(def,nextSc,'tide-bells',7-nextSc.clocks['tide-bells'],'scenario-timeout');
+    for(const clock of def.clocks){
+      const milestone=clock.milestones?.find(m=>m.round===nextRound);
+      if(milestone&&nextSc.clocks[clock.id]<milestone.value){
+        nextSc=advanceClock(def,nextSc,clock.id,milestone.value-nextSc.clocks[clock.id],'scheduled-'+clock.id+'-'+nextRound);
+      }
     }
     const defeat=availableEndings(def,nextGame,nextSc).find(e=>e.kind==='defeat');
     if(defeat)nextSc=chooseEnding(def,nextGame,nextSc,defeat.id);

@@ -3,7 +3,7 @@ import { reachableOutcomeKeys } from './story-card.js';
 import { imageForCard } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
-import { attributes,labels,newState,currentCard,selectedChoice,visibleResult,transition,rollDice,investigationView,explorationView } from '../engine/game.js';
+import { attributes,labels,currentCard,selectedChoice,visibleResult,rollDice,investigationView,explorationView } from '../engine/game.js';
 import { rewardNames } from '../engine/content.js';
 import { blackwaterScenario } from '../data/blackwater-scenario.js';
 import { content } from '../engine/content.js';
@@ -26,6 +26,7 @@ function render(){
   const mapFocus=focused?.dataset.locationId;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
   const scene=scenarioSessionView(session,blackwaterScenario);
+  const pending=scene.pendingTest;
   $('ritual').textContent=scene.clocks[0].current+' / '+scene.clocks[0].max;
   $('ritual').title=scene.clocks[0].label;
   $('heroStats').textContent=`Eleanor Whitmore · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
@@ -37,10 +38,10 @@ function render(){
   $('deckName').textContent=deck.name;
   $('deckDescription').textContent=deck.description;
   $('deckCounts').textContent=`Dostupné: ${deck.available} · Odložené: ${deck.deferred} · Vyřešené: ${deck.consumed}`;
-  $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!scene.canAct||!deck.canDraw;
+  $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!!pending||!scene.canAct||!deck.canDraw;
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
   $('mapTitle').textContent=blackwaterMap.name;
-  renderMap($('places'),locations,blackwaterMap,state,rolling||!scene.canAct,id=>dispatch({type:'move',locationId:id}));
+  renderMap($('places'),locations,blackwaterMap,state,rolling||!!pending||!scene.canAct,id=>dispatch({type:'move',locationId:id}));
   $('cardArt').classList.toggle('empty',!card);
   $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card), document.baseURI).href}")`;
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
@@ -48,7 +49,7 @@ function render(){
   $('cardStory').textContent=card?.description||(deck.canDraw?'Dobrat kartu je zdarma. AP zaplatíš až za zvolený postup.':'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.');
   $('challenge').textContent=choice?`${choice.apCost} AP · `+(choice.test?`Test ${choice.test.attribute} · obtížnost ${choice.test.difficulty} · modifikátor ${choice.test.modifier||0}`:'Rozhodnutí bez testu'):'';
   $('choices').replaceChildren(...(card?.choices||[]).map(o=>{
-    const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!scene.canAct||!o.available,'choice'+(o.id===choice?.id?' active':''));
+    const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!!pending||!scene.canAct||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
   }));
   // Only public test parameters determine the reachable tiers; no hidden definitions.
@@ -74,20 +75,40 @@ function render(){
     $('sum').textContent=result.test?`${result.dice.join(' + ')} + ${attributes[result.test.attribute]} + ${result.test.modifier||0} = ${result.total} proti obtížnosti ${result.test.difficulty}`:'Rozhodnutí bez hodu kostkami.';
   }else{$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='';}
   $('roll').textContent=choice?.test?'🎲 Hodit kostkami':'Provést rozhodnutí';
+  $('roll').hidden=Boolean(pending);
+  rerollControls.hidden=!pending;
+  if(pending){
+    const first=evaluatePending(pending.firstDice,choice?.test);
+    const second=pending.secondDice?evaluatePending(pending.secondDice,choice?.test):null;
+    rerollInfo.textContent='První hod: '+pending.firstDice.join(' + ')+' · '+labels[first.key]+(second?' | Přehod: '+pending.secondDice.join(' + ')+' · '+labels[second.key]:'')+'. Následky se odkryjí až po potvrzení.';
+    rerollButton.disabled=!!second||state.san<2;
+    rerollButton.hidden=!!second;
+  }
   $('roll').disabled=rolling||!scene.canAct||!choice?.available;
-  $('next').disabled=rolling||!scene.canAct||!result;
-  $('endRound').disabled=rolling||!scene.canAct;
+  $('next').disabled=rolling||!!pending||!scene.canAct||!result;
+  $('endRound').disabled=rolling||!!pending||!scene.canAct;
   $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
   if(mapFocus){$('cardTitle').focus({preventScroll:true});}
 }
+const evaluatePending=(dice,test)=>{
+  if(!test)return {key:'failure'};
+  const total=dice[0]+dice[1]+attributes[test.attribute]+(test.modifier||0),margin=total-test.difficulty;
+  return {key:dice[0]===6&&dice[1]===6?'criticalSuccess':dice[0]===1&&dice[1]===1?'criticalFailure':margin>=3?'greatSuccess':margin>=0?'success':margin>=-2?'partialSuccess':'failure'};
+};
+const rerollControls=document.createElement('div');rerollControls.hidden=true;
+const rerollInfo=document.createElement('p');rerollInfo.setAttribute('role','status');
+const rerollButton=button('Sebrat odvahu · přehodit za 1 SAN',()=>dispatch({type:'rerollTest',revision:state.revision,dice:rollDice()}));
+const acceptButton=button('Přijmout výsledek',()=>dispatch({type:'acceptTest',revision:state.revision}));
+rerollControls.append(rerollInfo,rerollButton,acceptButton);
+$('roll').after(rerollControls);
 const status=document.createElement('p');status.id='gameStatus';status.setAttribute('role','status');$('cardTitle').before(status);
 const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;
   const card=currentCard(state),choice=selectedChoice(state,card);
-  const next=scenarioSessionTransition(session,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(choice.test?{dice:rollDice()}:{})},blackwaterScenario,content);
+  const next=scenarioSessionTransition(session,{type:choice.test?'startTest':'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(choice.test?{dice:rollDice()}:{})},blackwaterScenario,content);
   if(next===session)return;session=next;state=session.game;persist();
   if(!choice.test){render();return;}
   rolling=true;for(const id of ['die1','die2'])$(id).classList.add('rolling');render();

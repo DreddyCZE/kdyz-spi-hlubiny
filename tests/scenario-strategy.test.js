@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
-import {content} from '../src/engine/content.js';
+import {blackwaterContent as content} from '../src/engine/content.js';
 import {createEvidenceStrategy} from '../src/engine/scenario-strategy.js';
 import {simulateScenario} from '../src/engine/scenario-simulator.js';
 test('strategy derives goals from knowledge and flags without named-story logic',()=>{

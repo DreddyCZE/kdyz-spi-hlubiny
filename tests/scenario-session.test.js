@@ -15,7 +15,7 @@ test('rounds advance to twelve without legacy ritual tick',()=>{
   s=step(s,{type:'endRound'});
   assert.equal(s.game.round,i+1);
   assert.equal(s.game.ritual,1);
-  assert.equal(s.scenario.clocks['tide-bells'],Math.min(7,1+Math.floor((i+1)/2)));
+  assert.equal(s.scenario.clocks['tide-bells'],Math.min(7,1+Math.floor(i/2)));
  }
  assert.equal(s.scenario.endingId,'deep-answers');
  assert.equal(scenarioSessionView(s,def).canAct,false);

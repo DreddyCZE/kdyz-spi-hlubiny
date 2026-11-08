@@ -19,24 +19,27 @@ export function validateScenario(def){
   if(!['manual','automatic'].includes(rules.deductionMode))err('rules.deductionMode','manual or automatic required');
   if(!Array.isArray(def.modules)||!unique(def.modules)||def.modules.some(x=>!supportedModules.includes(x)))err('modules','unsupported or duplicate module');
   if(!Array.isArray(def.locations)||!def.locations.length||!unique(def.locations)||def.locations.some(x=>!isId(x)))err('locations','unique IDs required');
-  if(!Array.isArray(def.clocks)||!unique(def.clocks.map(c=>c.id)))err('clocks','unique clocks required');
-  for(const [i,c] of (def.clocks||[]).entries()){
+  if(!Array.isArray(def.clocks)||!unique((Array.isArray(def.clocks)?def.clocks:[]).map(c=>c?.id)))err('clocks','unique clocks required');
+  for(const [i,c] of (Array.isArray(def.clocks)?def.clocks:[]).entries()){
+    if(!c||typeof c!=='object'){err('clocks['+i+']','expected clock object');continue;}
     if(!isId(c.id))err('clocks['+i+'].id','invalid ID');
     if(!Number.isSafeInteger(c.max)||c.max<1)err('clocks['+i+'].max','positive integer required');
     if(!Number.isSafeInteger(c.initial)||c.initial<0||c.initial>c.max)err('clocks['+i+'].initial','out of range');
     if(typeof c.label!=='string'||!c.label.trim())err('clocks['+i+'].label','required');
-    if(c.milestones!==undefined&&(!Array.isArray(c.milestones)||!unique(c.milestones.map(m=>m.round))||c.milestones.some(m=>!Number.isSafeInteger(m.round)||m.round<2||m.round>rules.maxRounds+1||!Number.isSafeInteger(m.value)||m.value<c.initial||m.value>c.max)))err('clocks['+i+'].milestones','invalid milestones');
+    if(c.milestones!==undefined&&(!Array.isArray(c.milestones)||!unique(c.milestones.map(m=>m?.round))||c.milestones.some(m=>!m||!Number.isSafeInteger(m.round)||m.round<2||m.round>rules.maxRounds+1||!Number.isSafeInteger(m.value)||m.value<c.initial||m.value>c.max)))err('clocks['+i+'].milestones','invalid milestones');
   }
-  if((def.clocks||[]).length&&!def.modules?.includes('scenario-clock'))err('modules','scenario-clock required for clocks');
-  if(!Array.isArray(def.endings)||!def.endings.length||!unique(def.endings.map(e=>e.id)))err('endings','unique endings required');
-  const clockIds=(def.clocks||[]).map(c=>c.id);
-  for(const [i,e] of (def.endings||[]).entries()){
+  if((def.clocks||[]).length&&!Array.isArray(def.modules)&&def.modules.includes('scenario-clock'))err('modules','scenario-clock required for clocks');
+  if(!Array.isArray(def.endings)||!def.endings.length||!unique((Array.isArray(def.endings)?def.endings:[]).map(e=>e?.id)))err('endings','unique endings required');
+  const clockIds=(Array.isArray(def.clocks)?def.clocks:[]).filter(Boolean).map(c=>c.id);
+  for(const [i,e] of (Array.isArray(def.endings)?def.endings:[]).entries()){
+    if(!e||typeof e!=='object'){err('endings['+i+']','expected ending object');continue;}
     if(!isId(e.id))err('endings['+i+'].id','invalid ID');
     if(!endingKinds.includes(e.kind))err('endings['+i+'].kind','invalid kind');
     if(typeof e.title!=='string'||!e.title.trim())err('endings['+i+'].title','required');
     if(!Array.isArray(e.conditions))err('endings['+i+'].conditions','array required');
-    for(const [j,c] of (e.conditions||[]).entries()){
+    for(const [j,c] of (Array.isArray(e.conditions)?e.conditions:[]).entries()){
       const p='endings['+i+'].conditions['+j+']';
+      if(!c||typeof c!=='object'){err(p,'expected condition object');continue;}
       if(!conditionTypes.includes(c.type)||(c.type!=='minKnowledgeCount'&&!isId(c.id)))err(p,'invalid condition');
       if(['clockAtLeast','clockBelow'].includes(c.type)&&(!clockIds.includes(c.id)||!Number.isSafeInteger(c.value)))err(p,'invalid clock threshold');
       if(c.type==='minKnowledgeCount'&&(!Array.isArray(c.ids)||!c.ids.length||!unique(c.ids)||c.ids.some(id=>!isId(id))||!Number.isSafeInteger(c.value)||c.value<1||c.value>c.ids.length))err(p,'invalid knowledge threshold');

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blackwaterContent} from '../src/engine/content.js';
-import {newState,explorationView,currentCard,transition} from '../src/engine/game.js';
+import {newState,explorationView,currentCard,transition,meetsConditions} from '../src/engine/game.js';
 import {newScenarioSession,scenarioSessionTransition} from '../src/engine/scenario-session.js';
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
 import {validScenarioSession} from '../src/engine/scenario-storage.js';
@@ -36,4 +36,21 @@ test('lighthouse follow-up requires recorded dog trail, but ordinary route remai
  assert.equal(ordinary.choices[0].test.difficulty,9);
  assert.equal(data.refs.flags.includes('salt-route-known'),true);
  assert.equal(data.refs.flags.includes('dog-trail-recorded'),true);
+});
+
+test('cave service route is optional, gated by discovered knowledge and has a no-dog alternative',()=>{
+ const data=blackwaterContent;
+ const card=data.byId['bw-cave-service-route'];
+ assert.ok(card);
+ assert.equal(card.conditions.length,0);
+ const special=card.choices.find(c=>c.id==='bw-cave-route-known');
+ const ordinary=card.choices.find(c=>c.id==='bw-cave-route-ordinary');
+ assert.ok(special);assert.ok(ordinary);
+ let game=newState(data);game.locationId='location-6';
+ assert.equal(meetsConditions(game,special.conditions,data),false);
+ assert.equal(meetsConditions(game,ordinary.conditions||[],data),true);
+ assert.equal(ordinary.test.difficulty,9);
+ game.flags['salt-route-known']=true;
+ assert.equal(meetsConditions(game,special.conditions,data),true);
+ assert.equal(data.refs.flags.includes('cave-service-route-used'),true);
 });

@@ -47,6 +47,7 @@ export function scenarioSessionTransition(session,action,def,data){
   }
   if(action.type==='finishScenario'){
     if(!Number.isSafeInteger(action.revision)||action.revision!==game.revision)return session;
+    if(game.ended||game.round>def.rules.maxRounds||(def.finaleLocationId&&game.locationId!==def.finaleLocationId))return session;
     const ending=chooseEnding(def,game,sc,action.endingId);
     return ending===sc?session:{...session,scenario:ending};
   }
@@ -81,5 +82,6 @@ export function scenarioSessionView(session,def){
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,
+    availableEndings:session.game.ended||session.game.round>def.rules.maxRounds||session.scenario.pendingTest||(def.finaleLocationId&&session.game.locationId!==def.finaleLocationId)?[]:availableEndings(def,session.game,session.scenario).filter(e=>e.kind!=='defeat').map(e=>({id:e.id,title:e.title,kind:e.kind})),
     canAct:!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};
 }

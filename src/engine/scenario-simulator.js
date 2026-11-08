@@ -8,14 +8,14 @@ export function seededDice(seed=1){
 }
 export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,reroll=false}={}){
  if(!Number.isSafeInteger(maxActions)||maxActions<1||maxActions>100000)throw new RangeError('maxActions');
- const dice=seededDice(seed),trace=[];let session=newScenarioSession(def,data);
+ const dice=seededDice(seed),trace=[];let session=newScenarioSession(def,data),attempts=0;
  const dispatch=action=>{
   const before=session;
   session=scenarioSessionTransition(session,{...action,revision:session.game.revision},def,data);
   if(session!==before)trace.push({type:action.type,round:session.game.round,ap:session.game.ap,locationId:session.game.locationId,endingId:session.scenario.endingId});
   return session!==before;
  };
- for(let i=0;i<maxActions;i++){
+ for(;attempts<maxActions;attempts++){
   const view=scenarioSessionView(session,def),game=session.game;
   if(view.ending||game.ended)break;
   if(view.availableEndings.length){
@@ -32,12 +32,17 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
    if(choices.length){
     const choice=chooseChoice?.(choices,game,card) || choices[0];
     if(!choices.some(c=>c.id===choice.id))throw new Error('Strategy chose unavailable choice');
-    dispatch({type:'choose',choiceId:choice.id}); // already-selected choice is a legal no-op
+    const selected=dispatch({type:'choose',choiceId:choice.id});
     if(choice.test){
-     dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
-     if(reroll&&session.scenario.pendingTest&&session.game.san>=2)dispatch({type:'rerollTest',dice:dice()});
-     dispatch({type:'acceptTest'});
-    }else dispatch({type:'resolve',cardId:card.id,choiceId:choice.id});
+     const started=dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
+     if(started){
+      if(reroll&&session.scenario.pendingTest&&session.game.san>=2)dispatch({type:'rerollTest',dice:dice()});
+      dispatch({type:'acceptTest'});
+     }
+     if(started)continue;
+    }else if(dispatch({type:'resolve',cardId:card.id,choiceId:choice.id}))continue;
+    // Failed action: do not repeatedly select the same blocked card.
+    if(!selected&&!dispatch({type:'endRound'}))break;
     continue;
    }
   }
@@ -47,16 +52,17 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   if(destination&&locations.includes(destination)&&dispatch({type:'move',locationId:destination}))continue;
   if(!dispatch({type:'endRound'}))break;
  }
- return {seed,endingId:session.scenario.endingId,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,knowledge:[...session.game.knowledge],evidence:[...session.game.evidence],actions:trace.length,trace,exhausted:trace.length>=maxActions};
+ return {seed,endingId:session.scenario.endingId,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,knowledge:[...session.game.knowledge],evidence:[...session.game.evidence],actions:trace.length,attempts,trace,exhausted:attempts>=maxActions&&!session.scenario.endingId&&!session.game.ended};
 }
 export function simulateBatch(def,data,{runs=100,seed=1,...options}={}){
  if(!Number.isSafeInteger(runs)||runs<1||runs>10000)throw new RangeError('runs');
- const outcomes={},samples=[];
+ const outcomes={},samples=[];let exhausted=0;
  for(let i=0;i<runs;i++){
   const result=simulateScenario(def,data,{...options,seed:seed+i});
   const key=result.endingId||'unfinished';
   outcomes[key]=(outcomes[key]||0)+1;
+  if(result.exhausted)exhausted++;
   if(samples.length<5)samples.push({...result,trace:undefined});
  }
- return {runs,seed,outcomes,samples};
+ return {runs,seed,outcomes,exhausted,samples};
 }

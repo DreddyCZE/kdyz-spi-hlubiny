@@ -276,3 +276,48 @@ main{max-width:1660px;padding:5px 14px 18px}
 @media(min-width:1100px) and (min-height:800px){.map-surface{height:min(calc(100vh - 220px),680px)}}
 @media(max-width:1099px){.board{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.map-surface{height:auto;min-height:0;aspect-ratio:1.15/1}.side-panel{grid-template-columns:1fr 1.4fr}}
 @media(max-width:780px){.board{display:flex;flex-direction:column}.map-surface{height:auto;min-height:0;aspect-ratio:1.2/1}.map-panel,.narrative-panel,.side-panel{width:100%}.side-panel{display:grid;grid-template-columns:1fr}.side-panel>.subpanel:not(.expandable){grid-column:1;grid-row:auto;border-left:0;border-top:1px solid #5b6652;padding:8px 0 0}.side-panel.journal-open>.subpanel.expandable:nth-last-child(2),.side-panel.journal-open>.subpanel.expandable:last-child{grid-column:1;grid-row:auto}.masthead{position:relative}.quick-stats{gap:4px}}
+
+/* M4.9: tabletop viewport composition; investigator and items remain on the first screen. */
+@media(min-width:1100px){
+ main{width:min(100%,1700px);max-width:none;padding:4px 12px 12px}
+ .board{grid-template-columns:minmax(0,1.5fr) minmax(345px,.72fr);grid-template-rows:minmax(0,1fr) auto;gap:8px 12px}
+ .map-surface{height:clamp(330px,calc(100vh - 295px),600px)!important;min-height:0;max-height:none}
+ .map-panel{padding:7px}
+ .map-panel .panel-heading{min-height:24px}
+ .map-ornament{padding:0}
+ .map-key{padding:1px 0}
+ .map-threat{padding:2px 0;margin:0}
+ .narrative-panel{min-width:0}
+ .chapter-head{min-height:25px}
+ .deck-strip{padding:3px 0 5px}
+ .story-art{height:clamp(110px,15vh,175px)}
+ .story-body{padding:8px 11px}
+ .story-body h3{font-size:clamp(18px,1.4vw,23px);margin:3px 0}
+ .story-body>p:not(.eyebrow){font-size:12px;line-height:1.35;margin:4px 0}
+ .story-body .choices{margin:5px 0}
+ .story-body .choices button{padding:6px 8px;font-size:12px}
+ .outcome-slips{margin:4px 0}
+ .outcome-slip{min-height:16px;padding:2px}
+ .myth-panel{margin-top:5px}
+ .side-panel{grid-template-columns:64px minmax(180px,.65fr) minmax(0,1.6fr);grid-template-rows:auto auto auto auto;min-height:92px;padding:7px 9px;gap:3px 10px}
+ .side-panel>.investigator-mini{grid-column:1;grid-row:1/5}
+ .side-panel .player-head{grid-column:2/-1;grid-row:1}
+ .side-panel>h2{grid-column:2;grid-row:2}
+ .side-panel>#investigatorRole{grid-column:2;grid-row:3}
+ .side-panel>#ability{grid-column:2;grid-row:4}
+ .side-panel>.inventory-panel{grid-column:3!important;grid-row:2/5!important;padding-left:10px!important}
+ .side-panel.journal-open>.subpanel.expandable:nth-last-child(2){grid-column:1/3;grid-row:5}
+ .side-panel.journal-open>.subpanel.expandable:last-child{grid-column:3;grid-row:5}
+}
+.investigator-mini{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:3px double #bda16d;background:radial-gradient(circle at 50% 25%,#466154,#152b28 80%);box-shadow:2px 3px 0 #08110e;padding:4px}
+.mini-portrait{display:grid;place-items:center;width:46px;height:49px;border:1px solid #bdab7d;color:#e9d7ab;font-size:33px;text-shadow:0 3px 8px #0009}
+.mini-legend{font:6px system-ui;letter-spacing:.08em;color:#d8bd87;text-align:center}
+.inventory-panel h3{margin:0 0 4px}
+#items .item-card{transition:transform .15s,box-shadow .15s;transform:rotate(-1deg)}
+#items .item-card:nth-child(even){transform:rotate(1.5deg)}
+#items .item-card:hover:not(:disabled){transform:translateY(-4px) rotate(0);box-shadow:3px 7px 9px #0008}
+.deck-token{transform:rotate(-7deg);box-shadow:2px 3px 0 #0b1714,5px 6px 0 #bba26f,7px 8px 0 #0b1714}
+.map-token{outline:2px solid #0d241e;outline-offset:1px}
+.map-point.reachable{box-shadow:0 0 0 2px #e3c47c55,0 3px 8px #000b}
+@media(max-width:1099px){.investigator-mini{display:none}}
+@media(max-width:780px){.board{gap:10px}.map-surface{max-height:60vh}.side-panel{padding:9px}.story-art{height:145px}}

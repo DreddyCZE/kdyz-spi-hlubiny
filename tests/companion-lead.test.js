@@ -54,3 +54,17 @@ test('cave service route is optional, gated by discovered knowledge and has a no
  assert.equal(meetsConditions(game,special.conditions,data),true);
  assert.equal(data.refs.flags.includes('cave-service-route-used'),true);
 });
+
+test('unknown cave route choice is not leaked into public card projection',()=>{
+ const data=blackwaterContent;
+ const game=newState(data);
+ game.locationId='location-6';
+ game.drawnCards['location-6']='bw-cave-service-route';
+ const before=currentCard(game,data);
+ assert.ok(before);
+ assert.equal(before.choices.some(c=>c.id==='bw-cave-route-known'),false);
+ assert.equal(before.choices.some(c=>c.id==='bw-cave-route-ordinary'),true);
+ game.flags['salt-route-known']=true;
+ const after=currentCard(game,data);
+ assert.equal(after.choices.some(c=>c.id==='bw-cave-route-known'),true);
+});

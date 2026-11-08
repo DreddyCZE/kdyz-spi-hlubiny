@@ -59,7 +59,7 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
   await expect(locked).toHaveClass(/locked/);
   await page.getByRole('button',{name:'◇ Staré město',exact:true}).click();
   await expect(page.locator('#ap')).toHaveText('2');
-  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem(scenarioSaveKey(blackwaterScenario)));s.ap=0;localStorage.setItem(scenarioSaveKey(blackwaterScenario),JSON.stringify(s));});
+  await page.evaluate(key=>{const s=JSON.parse(localStorage.getItem(key));s.game.ap=0;localStorage.setItem(key,JSON.stringify(s));},scenarioSaveKey(blackwaterScenario));
   await page.reload();
   await expect(page.getByRole('button',{name:'◇ Přístav',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Další kolo',exact:true}).click();

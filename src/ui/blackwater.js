@@ -82,8 +82,8 @@ function renderBattle(){
  $('battleMonsterArt').dataset.damage=String(Math.max(0,(enemy?.hp||0)-combat.enemyHp));
  $('battleInvestigatorArt').dataset.damage=String(Math.max(0,investigator.hp-state.game.hp));
  $('battleMonsterArt').classList.toggle('wounded',Boolean(combat.playerDamage||combat.playerSanLoss));
- $('battleMonsterArt').style.backgroundImage='linear-gradient(0deg,#241a1a66,#241a1a44),url("'+storyArt.byLocationId[state.game.locationId]+'")';
- $('battleInvestigatorArt').style.backgroundImage='linear-gradient(0deg,#11261f77,#11261f44),url("'+storyArt.byLocationId[state.game.locationId]+'")';
+ $('battleMonsterArt').style.backgroundImage='linear-gradient(0deg,#3e1614cc,#130d10aa),url("'+storyArt.byLocationId[state.game.locationId]+'")';
+ $('battleInvestigatorArt').style.backgroundImage='linear-gradient(0deg,#123b2ac0,#122a28aa),url("'+storyArt.byLocationId[state.game.locationId]+'")';
  const report=combat.roll;
  const battleNarration={
   'enemy-drowned-sailor':{attack:'Námořník se zapotácí, voda se rozstříkne po prknech a pod kabátem zapraskají kosti.',escape:'Ustupuješ mezi mokré trámy. Za zády stále slyšíš jeho těžké, neexistující kroky.'},
@@ -91,7 +91,7 @@ function renderBattle(){
   'enemy-hollow-orderly':{attack:'Pod bílým pláštěm cosi zaskřípe. Obvazy se napnou, jako by pod nimi bylo víc než jedno tělo.',escape:'Zabouchneš za sebou dveře. Na druhé straně zůstane škrábání nehtů.'},
   'enemy-bell-keeper':{attack:'Každý zásah rozezní dutý tón. Ze stínů se sype prach a vzduch se zachvěje.',escape:'Zvuk zvonu tě pronásleduje ještě dlouho poté, co postava zmizí ve tmě.'}
  };
- const battleActionText=report?(combat.status==='defeated'?'Nepřítel se rozpadá do stínů. Střetnutí je vyhráno.':combat.status==='escaped'?'Podařilo se ti uniknout. Hrozba však nezmizela.':(battleNarration[combat.enemyId]?.[combat.lastMove||'attack']||battleNarration['enemy-drowned-sailor']).attack):'';
+ const battleActionText=report?(combat.status==='defeated'?'Nepřítel se rozpadá do stínů. Střetnutí je vyhráno.':combat.status==='escaped'?'Podařilo se ti uniknout. Hrozba však nezmizela.':(battleNarration[combat.enemyId]?.[combat.lastMove||'attack']||battleNarration['enemy-drowned-sailor'])[combat.lastMove||'attack']):'';
 
  $('battleReport').textContent=battleRolling?'Kostky se kutálejí…':report?('Hod '+combat.dice.join(' + ')+' · '+labels[report.key]+' · Ztráta zdraví '+combat.playerDamage+' · Ztráta příčetnosti '+combat.playerSanLoss):'Rozhodni se, zda budeš bojovat, nebo se pokusíš uniknout.';
  $('battleReport').classList.toggle('battle-rolling',battleRolling);

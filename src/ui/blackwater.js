@@ -11,6 +11,9 @@ import {mythEvents} from '../engine/myth.js';
 import {imageForCard,storyArt} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
+const portraitUrl=id=>new URL('../assets/portraits/'+id+'.svg',import.meta.url).href;
+const monsterPortraitId={'enemy-drowned-sailor':'drowned-sailor','enemy-fog-hound':'fog-hound','enemy-hollow-orderly':'hollow-orderly','enemy-bell-keeper':'bell-keeper'};
+
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
 let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false,journalOpen=false,rollTimer=null,battleRolling=false,pendingReward=null;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
@@ -73,10 +76,10 @@ function renderBattle(){
  const investigator=investigatorById[state.investigatorId],enemy=enemyDefinitions.find(e=>e.id===combat.enemyId);
  $('battleTitle').textContent=combat.status==='active'?'Tváří v tvář temnotě':'Střetnutí skončilo';
  $('battleFlavor').textContent=monsterFlavor[combat.enemyId]||'Něco se vynořilo ze stínů.';
- $('battleInvestigatorArt').textContent=investigatorGlyph[investigator.id];
+ $('battleInvestigatorArt').textContent='';$('battleInvestigatorArt').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
  $('battleInvestigatorName').textContent=investigator.name;
  $('battleInvestigatorStats').textContent='♥ '+state.game.hp+'/'+investigator.hp+' · ◈ '+state.game.san+'/'+investigator.san;
- $('battleMonsterArt').textContent=combat.enemyId==='enemy-fog-hound'?'♧':combat.enemyId==='enemy-bell-keeper'?'♢':'◆';
+ $('battleMonsterArt').textContent=combat.enemyId==='enemy-fog-hound'?'♧':combat.enemyId==='enemy-bell-keeper'?'♢':'◆';$('battleMonsterArt').style.backgroundImage='url("'+portraitUrl(monsterPortraitId[combat.enemyId]||'drowned-sailor')+'")';
  $('battleMonsterName').textContent=enemy?.name||combat.enemyId;
  $('battleMonsterStats').textContent='♥ '+combat.enemyHp+' · Obrana '+enemy?.defense+' · Výměna '+combat.exchange+'/3';
  $('battleMonsterArt').dataset.damage=String(Math.max(0,(enemy?.hp||0)-combat.enemyHp));
@@ -201,7 +204,7 @@ function resolveCard(card,choice){
 function render(){
  const view=publicBlackwater(state);
  $('setup').hidden=Boolean(state.investigatorId);$('game').hidden=!state.investigatorId;
- $('investigators').replaceChildren(...investigators.map(i=>{const card=button('',()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card');const portrait=document.createElement('span');portrait.className='selection-portrait';portrait.textContent=investigatorGlyph[i.id];const name=document.createElement('strong');name.textContent=i.name;const role=document.createElement('span');role.className='selection-role';role.textContent=i.role;const flavor=document.createElement('em');flavor.textContent=investigatorFlavor[i.id];const stats=document.createElement('span');stats.className='selection-stats';stats.textContent='♥ '+i.hp+'    ◈ '+i.san;const ability=document.createElement('small');ability.textContent=i.ability;card.append(portrait,name,role,flavor,stats,ability);return card;}));
+ $('investigators').replaceChildren(...investigators.map(i=>{const card=button('',()=>send('selectInvestigator',{investigatorId:i.id}),false,'investigator-card');const portrait=document.createElement('span');portrait.className='selection-portrait';portrait.textContent='';portrait.style.backgroundImage='url("'+portraitUrl(i.id)+'")';const name=document.createElement('strong');name.textContent=i.name;const role=document.createElement('span');role.className='selection-role';role.textContent=i.role;const flavor=document.createElement('em');flavor.textContent=investigatorFlavor[i.id];const stats=document.createElement('span');stats.className='selection-stats';stats.textContent='♥ '+i.hp+'    ◈ '+i.san;const ability=document.createElement('small');ability.textContent=i.ability;card.append(portrait,name,role,flavor,stats,ability);return card;}));
  if(!state.investigatorId){$('quickStats').replaceChildren();$('message').textContent='';return;}
  const investigator=investigatorById[state.investigatorId];
  $('investigatorName').textContent=investigator.name;$('investigatorRole').textContent=investigator.role+' · '+investigator.ability;
@@ -209,8 +212,8 @@ function render(){
  $('quickStats').replaceChildren(...[['♥',view.hp+'/'+investigator.hp,'Zdraví'],['◈',view.san+'/'+investigator.san,'Příčetnost'],['⚡',view.ap,'Akční body'],['◷',view.round+'/7','Kolo'],['☠',view.threat,'Hrozba'],['✧',view.ritual,'Rituál']].map(([symbol,value,label])=>{const el=document.createElement('span');el.className='quick-stat';el.title=label;el.textContent=symbol+' '+value;return el;}));
  $('characterTitle').textContent=investigator.name;
  $('characterFlavor').textContent=investigatorFlavor[investigator.id];
- $('characterGlyph').textContent=investigatorGlyph[investigator.id];
- $('miniPortrait').textContent=investigatorGlyph[investigator.id];
+ $('characterGlyph').textContent='';$('characterGlyph').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
+ $('miniPortrait').textContent='';$('miniPortrait').style.backgroundImage='url("'+portraitUrl(investigator.id)+'")';
  $('characterAbility').textContent=investigator.ability+(view.abilityUsed?' (Vyčerpána)':'');
  $('characterStats').textContent='♥ '+view.hp+'/'+investigator.hp+'   ◈ '+view.san+'/'+investigator.san+'   ⚡ '+view.ap;
  $('stats').replaceChildren(...stats.map(([name,value])=>{const el=document.createElement('div');el.className='stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=value;el.append(label,strong);return el;}));

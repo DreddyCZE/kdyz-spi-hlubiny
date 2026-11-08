@@ -4,15 +4,16 @@ const isId=v=>typeof v==='string'&&idPattern.test(v);
 const unique=a=>new Set(a).size===a.length;
 export const endingKinds=Object.freeze(['victory','costlyVictory','sacrifice','defeat']);
 export const supportedModules=Object.freeze(['scenario-clock','conditional-events']);
-export const conditionTypes=Object.freeze(['hasKnowledge','hasEvidence','flagEquals','clockAtLeast','clockBelow']);
+export const conditionTypes=Object.freeze(['hasKnowledge','hasEvidence','flagEquals','clockAtLeast','clockBelow','minKnowledgeCount']);
 export function validateScenario(def){
   const errors=[],err=(p,m)=>errors.push(p+': '+m);
   if(!def||typeof def!=='object'||Array.isArray(def))return ['scenario: expected object'];
-  for(const k of Object.keys(def))if(!['id','version','title','rules','modules','locations','clocks','endings'].includes(k))err(k,'unknown field');
+  for(const k of Object.keys(def))if(!['id','version','title','rules','modules','locations','clocks','endings','finaleLocationId'].includes(k))err(k,'unknown field');
   if(!isId(def.id))err('id','invalid ID');
   if(!Number.isSafeInteger(def.version)||def.version<1)err('version','positive integer required');
   if(typeof def.title!=='string'||!def.title.trim())err('title','nonempty title required');
   const rules=def.rules||{};
+  if(def.finaleLocationId!==undefined&&(!isId(def.finaleLocationId)||!def.locations?.includes(def.finaleLocationId)))err('finaleLocationId','must refer to a scenario location');
   if(!Number.isSafeInteger(rules.apPerRound)||rules.apPerRound<1||rules.apPerRound>10)err('rules.apPerRound','expected 1..10');
   if(!Number.isSafeInteger(rules.maxRounds)||rules.maxRounds<1||rules.maxRounds>100)err('rules.maxRounds','expected 1..100');
   if(!['manual','automatic'].includes(rules.deductionMode))err('rules.deductionMode','manual or automatic required');
@@ -36,8 +37,9 @@ export function validateScenario(def){
     if(!Array.isArray(e.conditions))err('endings['+i+'].conditions','array required');
     for(const [j,c] of (e.conditions||[]).entries()){
       const p='endings['+i+'].conditions['+j+']';
-      if(!conditionTypes.includes(c.type)||!isId(c.id))err(p,'invalid condition');
+      if(!conditionTypes.includes(c.type)||(c.type!=='minKnowledgeCount'&&!isId(c.id)))err(p,'invalid condition');
       if(['clockAtLeast','clockBelow'].includes(c.type)&&(!clockIds.includes(c.id)||!Number.isSafeInteger(c.value)))err(p,'invalid clock threshold');
+      if(c.type==='minKnowledgeCount'&&(!Array.isArray(c.ids)||!c.ids.length||!unique(c.ids)||c.ids.some(id=>!isId(id))||!Number.isSafeInteger(c.value)||c.value<1||c.value>c.ids.length))err(p,'invalid knowledge threshold');
       if(c.type==='flagEquals'&&!['boolean','number','string'].includes(typeof c.value))err(p,'scalar expected');
     }
   }
@@ -55,6 +57,7 @@ export function initialScenarioState(def){
 export function conditionSatisfied(c,state,scenario){
   switch(c.type){
     case 'hasKnowledge':return (state.knowledge||[]).includes(c.id);
+    case 'minKnowledgeCount':return c.ids.filter(id=>(state.knowledge||[]).includes(id)).length>=c.value;
     case 'hasEvidence':return (state.evidence||[]).includes(c.id);
     case 'flagEquals':return state.flags?.[c.id]===c.value;
     case 'clockAtLeast':return (scenario.clocks[c.id]??-1)>=c.value;

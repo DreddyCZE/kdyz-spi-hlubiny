@@ -12,6 +12,8 @@ test('Blackwater dog recruitment, ability cooldown and reload',async({page})=>{
  await expect(companions).toContainText('Pes se zastaví u vlhkých stop');
  await expect(companions.getByRole('button',{name:'Zachytit stopu · použito v tomto kole'})).toBeDisabled();
  await expect(page.locator('#log')).toContainText('Pes se zastaví u vlhkých stop');
+ const discovery=await page.evaluate(()=>Object.entries(localStorage).filter(([k])=>k.startsWith('hlubiny-scenario-v1-')).map(([,v])=>JSON.parse(v).game.flags['dog-scent-found']));
+ expect(discovery).toContain(true);
  await page.reload();
  await expect(companions).toContainText('Doprovází tě');
  await expect(page.locator('#log')).toContainText('Pes se zastaví u vlhkých stop');

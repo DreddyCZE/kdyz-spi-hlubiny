@@ -1,0 +1,61 @@
+// Deterministic, engine-level playthrough simulator. No UI, browser, or Blackwater assumptions.
+import {newScenarioSession,scenarioSessionTransition,scenarioSessionView} from './scenario-session.js';
+import {currentCard,explorationView} from './game.js';
+export function seededDice(seed=1){
+ let state=seed>>>0;
+ const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
+ return ()=>[1+Math.floor(random()*6),1+Math.floor(random()*6)];
+}
+export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,reroll=false}={}){
+ if(!Number.isSafeInteger(maxActions)||maxActions<1||maxActions>100000)throw new RangeError('maxActions');
+ const dice=seededDice(seed),trace=[];let session=newScenarioSession(def,data);
+ const dispatch=action=>{
+  const before=session;
+  session=scenarioSessionTransition(session,{...action,revision:session.game.revision},def,data);
+  if(session!==before)trace.push({type:action.type,round:session.game.round,ap:session.game.ap,locationId:session.game.locationId,endingId:session.scenario.endingId});
+  return session!==before;
+ };
+ for(let i=0;i<maxActions;i++){
+  const view=scenarioSessionView(session,def),game=session.game;
+  if(view.ending||game.ended)break;
+  if(view.availableEndings.length){
+   const ending=view.availableEndings.find(e=>e.kind==='victory')||view.availableEndings[0];
+   dispatch({type:'finishScenario',endingId:ending.id});continue;
+  }
+  if(game.round>def.rules.maxRounds)break;
+  if(view.pendingTest){dispatch({type:'acceptTest'});continue;}
+  const card=currentCard(game,data);
+  if(card&&game.result){dispatch({type:'next'});continue;}
+  if(card){
+   const choices=card.choices.filter(c=>c.available);
+   if(choices.length){
+    const choice=chooseChoice?.(choices,game,card) || choices[0];
+    if(!choices.some(c=>c.id===choice.id))throw new Error('Strategy chose unavailable choice');
+    if(!dispatch({type:'choose',choiceId:choice.id})){} // already-selected choice is a legal no-op
+    if(choice.test){
+     dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
+     if(reroll&&session.scenario.pendingTest&&session.game.san>=2)dispatch({type:'rerollTest',dice:dice()});
+     dispatch({type:'acceptTest'});
+    }else dispatch({type:'resolve',cardId:card.id,choiceId:choice.id});
+    continue;
+   }
+  }
+  if(game.ap>0&&!card&&explorationView(game,data).canDraw){dispatch({type:'draw'});continue;}
+  const locations=def.locations.filter(id=>id!==game.locationId&&game.unlockedLocations.includes(id));
+  const destination=game.ap>0&&(chooseLocation?.(locations,game,data)||locations.find(id=>data.cards.some(c=>c.locationId===id&&!Object.hasOwn(game.resolved,c.id))));
+  if(destination&&locations.includes(destination)&&dispatch({type:'move',locationId:destination}))continue;
+  if(!dispatch({type:'endRound'}))break;
+ }
+ return {seed,endingId:session.scenario.endingId,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,knowledge:[...session.game.knowledge],evidence:[...session.game.evidence],actions:trace.length,trace,exhausted:trace.length>=maxActions};
+}
+export function simulateBatch(def,data,{runs=100,seed=1,...options}={}){
+ if(!Number.isSafeInteger(runs)||runs<1||runs>10000)throw new RangeError('runs');
+ const outcomes={},samples=[];
+ for(let i=0;i<runs;i++){
+  const result=simulateScenario(def,data,{...options,seed:seed+i});
+  const key=result.endingId||'unfinished';
+  outcomes[key]=(outcomes[key]||0)+1;
+  if(samples.length<5)samples.push({...result,trace:undefined});
+ }
+ return {runs,seed,outcomes,samples};
+}

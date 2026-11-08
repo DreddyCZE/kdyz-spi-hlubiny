@@ -55,7 +55,7 @@ function render(){
   }));
   // Only public test parameters determine the reachable tiers; no hidden definitions.
   const preview=$('outcomes');
-  preview.hidden=!choice?.test||Boolean(result)||rolling;
+  preview.hidden=!choice?.test||Boolean(result)||rolling||Boolean(pending);
   preview.replaceChildren();
   if(!preview.hidden){
     const heading=document.createElement('p');heading.className='outcome-heading';heading.textContent='Možné následky · odhalí je až hod';

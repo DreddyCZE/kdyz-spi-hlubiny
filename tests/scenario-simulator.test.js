@@ -53,3 +53,10 @@ test('conditional reroll policy is reproducible and receives actual result tiers
  const b=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,reroll:({game,result})=>game.san>=5&&['failure','criticalFailure'].includes(result.key)});
  assert.deepEqual(a,b);
 });
+
+test('simulator can choose alternative ending without changing scenario rules',()=>{
+ const chooseEnding=endings=>endings.find(e=>e.kind==='sacrifice')||endings[0];
+ const result=simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,chooseEnding});
+ assert.ok(result.endingId===null||['voice-price','deep-answers','quiet-sea','broken-bell'].includes(result.endingId));
+ assert.deepEqual(result,simulateScenario(blackwaterScenario,content,{seed:42,maxActions:500,chooseEnding}));
+});

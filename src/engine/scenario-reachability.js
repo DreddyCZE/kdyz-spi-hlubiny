@@ -13,7 +13,7 @@ export function auditEvidenceSources(data){
 export function auditDeductionSources(data){
  const sources=auditEvidenceSources(data);
  const unavailable=data.refs.evidence.filter(id=>sources[id].length===0);
- const deductions=data.investigation.order.map(d=>{
+ const deductions=data.investigation.order.map(id=>{const d=data.investigation.deductions.find(x=>x.id===id);
   const needed=new Set();
   function visit(c){if(c.type==='hasEvidence')needed.add(c.id);for(const child of c.conditions||[])visit(child);if(c.condition)visit(c.condition);}
   visit(d.conditions);

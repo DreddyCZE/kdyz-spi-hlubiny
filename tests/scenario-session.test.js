@@ -29,7 +29,7 @@ test('stale revisions cannot replay a round or clock',()=>{
 test('ending is explicit and cannot be chosen without prerequisites',()=>{
  let s=newScenarioSession(def,content);
  assert.strictEqual(step(s,{type:'finishScenario',endingId:'quiet-sea'}),s);
- s={...s,game:{...s.game,knowledge:['knowledge-voice','knowledge-name','knowledge-body'],flags:{'signal-ready':true}}};
+ s={...s,game:{...s.game,locationId:'location-6',knowledge:['knowledge-voice','knowledge-name','knowledge-body'],flags:{'signal-ready':true}}};
  const done=step(s,{type:'finishScenario',endingId:'quiet-sea'});
  assert.equal(done.scenario.endingId,'quiet-sea');
  assert.strictEqual(step(done,{type:'endRound'}),done);

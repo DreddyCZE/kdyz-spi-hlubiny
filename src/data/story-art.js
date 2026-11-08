@@ -12,6 +12,7 @@ export function imageForCard(card, registry = storyArt) {
   if(registry===storyArt && card && Object.hasOwn(blackwaterArt.encounters,card.id))return blackwaterArt.encounters[card.id];
   return (card && registry.byCardId?.[card.id])
     || (card && registry.byLocationId?.[card.locationId])
+    || (card && registry===storyArt && blackwaterArt.locations[card.locationId])
     || registry.fallback;
 }
 

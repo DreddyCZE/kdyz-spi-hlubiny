@@ -36,7 +36,7 @@ export const blackwaterCompanionCards=[{
   {id:'bw-lighthouse-dog-ignore',label:'Pokračovat bez porovnání',apCost:0,
    outcomes:{success:{text:'Souvislost zůstane otevřená. Maják můžeš prozkoumat i bez psího vodítka.',effects:[]}}}
  ]
-,{
+},{
  id:'bw-cave-service-route',type:'encounter',locationId:'location-6',
  title:'Průchod pod skálou',
  description:'Příliv zaplavuje ústí jeskyně. Za zříceným ochozem vede stará servisní štola; druhá cesta pokračuje přes kluzké kameny přímo k dunění zvonu.',

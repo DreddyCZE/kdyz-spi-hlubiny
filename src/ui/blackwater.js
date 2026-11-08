@@ -81,9 +81,11 @@ function renderBattle(){
  $('battleMonsterStats').textContent='♥ '+combat.enemyHp+' · Obrana '+enemy?.defense+' · Výměna '+combat.exchange+'/3';
  $('battleMonsterArt').dataset.damage=String(Math.max(0,(enemy?.hp||0)-combat.enemyHp));
  $('battleInvestigatorArt').dataset.damage=String(Math.max(0,investigator.hp-state.game.hp));
- $('battleMonsterArt').classList.toggle('wounded',Boolean(combat.playerDamage||combat.playerSanLoss));
- $('battleMonsterArt').style.backgroundImage='linear-gradient(0deg,#3e1614cc,#130d10aa),url("'+storyArt.byLocationId[state.game.locationId]+'")';
- $('battleInvestigatorArt').style.backgroundImage='linear-gradient(0deg,#123b2ac0,#122a28aa),url("'+storyArt.byLocationId[state.game.locationId]+'")';
+ $('battleMonsterArt').classList.toggle('wounded',Boolean(combat.roll&&combat.lastMove==='attack'&&combat.roll.key!=='failure'&&combat.roll.key!=='criticalFailure'));
+ $('battleMonsterArt').dataset.enemy=combat.enemyId;
+ $('battleMonsterArt').style.backgroundImage='none';
+ $('battleInvestigatorArt').dataset.investigator=investigator.id;
+ $('battleInvestigatorArt').style.backgroundImage='none';
  const report=combat.roll;
  const battleNarration={
   'enemy-drowned-sailor':{attack:'Námořník se zapotácí, voda se rozstříkne po prknech a pod kabátem zapraskají kosti.',escape:'Ustupuješ mezi mokré trámy. Za zády stále slyšíš jeho těžké, neexistující kroky.'},
@@ -97,18 +99,19 @@ function renderBattle(){
  $('battleReport').classList.toggle('battle-rolling',battleRolling);
  $('battleReport').dataset.result=report?.key||'';
  $('battleReport').title=battleActionText;
+ $('battleReport').setAttribute('aria-label',battleActionText?$('battleReport').textContent+'. '+battleActionText:$('battleReport').textContent);
  $('battleDice').replaceChildren(...(battleRolling?['?','?']:combat.dice||[]).map(value=>{const die=document.createElement('span');die.className='battle-die'+(battleRolling?' spinning':'');die.textContent=value;return die;}));
  const makeToken=(symbol,cls,title)=>{const token=document.createElement('span');token.className='damage-token '+cls;token.textContent=symbol;token.title=title;return token;};
  $('battleMonsterWounds').replaceChildren(...Array.from({length:Math.max(0,(enemy?.hp||0)-combat.enemyHp)},()=>makeToken('✕','monster-wound','Zranění nepřítele')));
  $('battleInvestigatorWounds').replaceChildren(...Array.from({length:Math.max(0,investigator.hp-state.game.hp)},()=>makeToken('♥','investigator-damage','Ztracené zdraví')));
- $('battleTokens').textContent=battleActionText;
+ $('battleTokens').textContent=battleRolling?'Osud se právě rozhoduje…':battleActionText;
 
- $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>button((itemGlyph[id]||'✦')+' '+blackwaterItemById[id].name+' · '+blackwaterItemById[id].description,()=>send('useItem',{itemId:id}),id!=='bw-salt'&&combat.status==='active','battle-item')));
+ $('battleItems').replaceChildren(...state.game.inventory.filter(id=>blackwaterItemById[id]?.kind==='consumable').map(id=>button((itemGlyph[id]||'✦')+' '+blackwaterItemById[id].name+' · '+blackwaterItemById[id].description,()=>send('useItem',{itemId:id}),battleRolling||(id!=='bw-salt'&&combat.status==='active'),'battle-item')));
  if(!$('battleItems').children.length)$('battleItems').textContent='Žádné použitelné předměty.';
  $('battleActions').replaceChildren(...(combat.status==='active'?[
   button('⚔ Zaútočit · hod 2 kostkami',()=>rollCombat('attack'),battleRolling),
   button('➤ Pokusit se utéct · hod 2 kostkami',()=>rollCombat('escape'),battleRolling)
- ]:[button('Pokračovat →',()=>send('closeCombat'))]));
+ ]:[button('Pokračovat →',()=>send('closeCombat'),battleRolling)]));
  if(!dialog.open)dialog.showModal();
 }
 function rollCombat(move){

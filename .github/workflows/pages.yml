@@ -1,11 +1,15 @@
 name: Test and deploy Pages
 on:
   push:
-    branches: [main]
+    branches: [main, feature/m4-blackwater-scenario-design]
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
+# One lock covers source resolution, packaging AND deployment for every publisher.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
 jobs:
   test-build:
     runs-on: ubuntu-latest
@@ -16,7 +20,6 @@ jobs:
           node-version: 24
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: npm test
-      # System packages are installed only on the disposable GitHub-hosted runner.
       - run: node scripts/playwright.mjs install --with-deps chromium
       - name: Build and test in Chromium
         run: npm run test:e2e
@@ -28,13 +31,14 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 7
-      - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
-        with:
-          path: dist
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+  bundle:
+    if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/m4-blackwater-scenario-design')
     needs: test-build
+    uses: ./.github/workflows/blackwater-preview.yml
+    permissions:
+      contents: read
+  deploy:
+    needs: bundle
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -43,6 +47,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy
+      - uses: actions/deploy-pages@v4
         id: deployment
-        uses: actions/deploy-pages@v4

@@ -48,3 +48,5 @@ deductions.push(
   effects:[{type:'setFlag',id:'signal-ready',value:true}]},
 );
 export const investigationDefinitions = {evidence,knowledge,deductions};
+// The pre-scenario v4 game must not acquire scenario deductions when resumed.
+export const legacyInvestigationDefinitions={evidence,knowledge:knowledge.filter(k=>k.id==='blackwater-lighthouse-connection'),deductions:deductions.filter(d=>d.id==='blackwater-follow-the-route')};

@@ -4,21 +4,39 @@ import { imageForCard } from '../data/story-art.js';
 import { applyPresentation } from './presentation.js';
 import { renderMap } from './map.js';
 import { attributes,labels,currentCard,selectedChoice,visibleResult,rollDice,investigationView,explorationView } from '../engine/game.js';
-import { rewardNames } from '../engine/content.js';
-const {scenario:activeScenario,content,presentation,investigatorName,clockDisplayId}=activeScenarioPack;
-import { newScenarioSession,scenarioSessionTransition,scenarioSessionView } from '../engine/scenario-session.js';
-import { loadScenarioSession,saveScenarioSession } from '../engine/scenario-storage.js';
+import { rewardNames,legacyContent } from '../engine/content.js';
+import {newState,transition as legacyTransition} from '../engine/game.js';
+import {load as loadLegacy,save as saveLegacy,SAVE_KEY} from '../engine/storage.js';
+import {protectedSaveStorage} from '../engine/save-compatibility.js';
+import {mountSaveNotice} from './save-compatibility.js';
+const legacyMode=new URLSearchParams(location.search).get('mode')==='legacy';
+const {scenario:activeScenario,presentation,investigatorName,clockDisplayId}=activeScenarioPack;
+const content=legacyMode?legacyContent:activeScenarioPack.content;
+import { newScenarioSession,scenarioSessionTransition as scenarioTransition,scenarioSessionView as scenarioView } from '../engine/scenario-session.js';
+import { loadScenarioSession,saveScenarioSession,scenarioSaveKey } from '../engine/scenario-storage.js';
 import { createJournal } from './journal.js';
 const { map: scenarioMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
-let session=loadScenarioSession(storage,activeScenario,content),state=session.game,rolling=false,timer;
+mountSaveNotice(storage,legacyMode?'legacy':'scenario');
+document.getElementById('roundLimit').textContent=legacyMode?'7':String(activeScenario.rules.maxRounds);
+storage=protectedSaveStorage(storage,legacyMode?SAVE_KEY:scenarioSaveKey(activeScenario));
+const freshSession=()=>legacyMode?{game:newState(content),scenario:{}}:newScenarioSession(activeScenario,content);
+let session=legacyMode?{game:loadLegacy(storage,content),scenario:{}}:loadScenarioSession(storage,activeScenario,content),state=session.game,rolling=false,timer;
+function scenarioSessionTransition(s,action,def,data){
+ if(!legacyMode)return scenarioTransition(s,action,def,data);
+ const next=legacyTransition(s.game,{...action,type:action.type==='startTest'?'resolve':action.type},data);
+ return next===s.game?s:{...s,game:next};
+}
+function scenarioSessionView(s,def,data){
+ return legacyMode?{canAct:!s.game.ended,pendingTest:null,ending:null,companion:[],puzzles:[],availableEndings:[],clocks:[{id:clockDisplayId,label:'Rituál',current:s.game.ritual,max:8}]}:scenarioView(s,def,data);
+}
 const puzzleDrafts=new Map();
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
-function persist(){ $('saveStatus').textContent=saveScenarioSession(storage,session,activeScenario,content)?'':'Ukládání není dostupné. Hra pokračuje pouze v této záložce.'; }
+function persist(){ $('saveStatus').textContent=(legacyMode?saveLegacy(storage,state,content):saveScenarioSession(storage,session,activeScenario,content))?'':'Ukládání není dostupné nebo jsou původní data chráněna. Hra pokračuje pouze v této záložce.'; }
 function dispatch(action){if(rolling)return;session=scenarioSessionTransition(session,action,activeScenario,content);state=session.game;persist();render();}
 function render(){
   const focused=document.activeElement;
@@ -29,11 +47,12 @@ function render(){
   const pending=scene.pendingTest;
   const clock=scene.clocks.find(c=>c.id===clockDisplayId)||scene.clocks[0];
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
+  $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
   $('heroStats').textContent=`${investigatorName} · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
-  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,activeScenario.rules.deductionMode==='automatic');
+  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state,content),choice=selectedChoice(state,card);
   const result=visibleResult(state,content),deck=explorationView(state,content);
   $('deckName').textContent=deck.name;
@@ -211,7 +230,7 @@ $('endRound').onclick=()=>dispatch({type:'endRound',revision:state.revision});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');
-  session=newScenarioSession(activeScenario,content);state=session.game;puzzleDrafts.clear();persist();render();
+  session=freshSession();state=session.game;puzzleDrafts.clear();persist();render();
 };
 render();
 

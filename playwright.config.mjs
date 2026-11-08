@@ -19,7 +19,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: 'npm run build && node scripts/serve.mjs',
+    command: 'npm run build && npm run build:pages && node scripts/serve.mjs',
     url: baseURL,
     env: { PORT: port },
     reuseExistingServer: false,

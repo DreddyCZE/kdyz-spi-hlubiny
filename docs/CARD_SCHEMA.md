@@ -8,7 +8,7 @@ Zdrojové definice: [cards.js](../src/data/cards.js), [example-card.js](../src/d
 
 ID je neprázdný řetězec odpovídající `[a-z0-9][a-z0-9-]*`. ID karty a ID volby jsou každé globálně unikátní ve svém prostoru; nemění se při přejmenování textů nebo přesunu v poli. Původní ID `0-0` až `6-0` a `location-0` až `location-6` zůstávají. Volby mají ID například `0-0-choice-1`. Předměty a důkazy mají stabilní ID `reward-1` atd. v [registru](../src/data/catalog.js); jejich číslování se nesmí přegenerovat. UI převádí ID zpět na české názvy. Složené odměny M1 (například „Deník a přívěsek“) zůstávají jednou položkou, aby migrace neměnila jejich obsah.
 
-Složený předmět může mít v registru volitelné `evidenceIds`: pole unikátních existujících ID důkazů. Například `reward-1` („Deník a přívěsek“) obsahuje `reward-2` („Deník“). Obsah se neodvozuje z názvu. V M2.2 se informace zapíše do samostatné sbírky důkazů a zůstane známá i po odebrání předmětu. Registry se ověřují při načtení obsahu; starší uložené hry se bezpečně převádějí na v3. Souhrn inventáře nezobrazuje nesený složený předmět a jeho informace duplicitně, deník známé důkazy uvádí samostatně.
+Složený předmět může mít v registru volitelné `evidenceIds`: pole unikátních existujících ID důkazů. Například `reward-1` („Deník a přívěsek“) obsahuje `reward-2` („Deník“). Obsah se neodvozuje z názvu. V M2.2 se informace zapíše do samostatné sbírky důkazů a zůstane známá i po odebrání předmětu. Registry se ověřují při načtení obsahu; starší uložené hry se bezpečně převádějí na v4. Souhrn inventáře nezobrazuje nesený složený předmět a jeho informace duplicitně, deník známé důkazy uvádí samostatně.
 
 ## Karta
 

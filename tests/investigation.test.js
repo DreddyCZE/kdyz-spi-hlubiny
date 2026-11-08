@@ -144,9 +144,9 @@ test('information acquired from composite items survives their removal and reloa
   const storage=memory();assert.ok(save(storage,n));assert.deepEqual(load(storage),n);
 });
 test('M2.1 migration retains rewards and materializes composite information without deducing',()=>{
-  const old={...newState(),version:2,inventory:['reward-1']};for(const key of ['knowledge','deductions','unlockedCards','unlockedChoices'])delete old[key];
+  const old={...newState(),version:2,inventory:['reward-1']};for(const key of ['drawnCards','knowledge','deductions','unlockedCards','unlockedChoices'])delete old[key];
   const storage=memory(),raw=JSON.stringify(old);storage.setItem('hlubiny-v2',raw);const n=load(storage);
-  assert.equal(n.version,3);assert.deepEqual(n.inventory,['reward-1']);assert.ok(n.evidence.includes('reward-2'));assert.deepEqual(n.knowledge,[]);assert.deepEqual(n.deductions,{});assert.equal(storage.getItem('hlubiny-v2'),raw);
+  assert.equal(n.version,4);assert.deepEqual(n.inventory,['reward-1']);assert.ok(n.evidence.includes('reward-2'));assert.deepEqual(n.knowledge,[]);assert.deepEqual(n.deductions,{});assert.equal(storage.getItem('hlubiny-v2'),raw);
   assert.ok(validState(n));assert.equal(migrateV2({...old,evidence:null}),null);assert.equal(migrateV2({...old,knowledge:['injected']}),null);
 });
 test('forged investigation fields and corrupted v3 cannot fall back to earlier saves',()=>{
@@ -159,7 +159,7 @@ test('knowledge and unlock gates hide future choices/cards and become usable aft
   const definitions=structuredClone(investigationDefinitions);definitions.deductions[0].effects.push({type:'unlockCard',id:base.id},{type:'unlockChoice',id:base.choices[0].id});
   const data=createContent([base],definitions),s={...newState(),evidence:['reward-2','reward-5']};
   assert.equal(currentCard(s,data),null);
-  const n=transition(s,{type:'deduce',revision:0},data);assert.equal(currentCard(n,data).choices[0].available,true);
+  let n=transition(s,{type:'deduce',revision:0},data);n=transition(n,{type:'draw',revision:n.revision},data);assert.equal(currentCard(n,data).choices[0].available,true);
   const result=transition(n,{type:'resolve',revision:n.revision,cardId:base.id,choiceId:base.choices[0].id,dice:[6,6]},data);assert.ok(result.result);
 });
 
@@ -168,19 +168,19 @@ test('explicitly unlocked skipped cards remain reachable without replaying the r
   const later=structuredClone(content.cards[1]);
   const definitions=structuredClone(investigationDefinitions);definitions.deductions[0].effects.push({type:'unlockCard',id:locked.id});
   const data=createContent([locked,later],definitions);let s={...newState(),evidence:['reward-2','reward-5']};
-  assert.equal(currentCard(s,data).id,later.id);
+  s=transition(s,{type:'draw',revision:s.revision},data);assert.equal(currentCard(s,data).id,later.id);
   s=transition(s,{type:'resolve',revision:s.revision,cardId:later.id,choiceId:later.choices[0].id,dice:[6,6]},data);
   s=transition(s,{type:'next'},data);assert.equal(currentCard(s,data),null);
-  s=transition(s,{type:'deduce',revision:s.revision},data);assert.equal(currentCard(s,data).id,locked.id);
+  s=transition(s,{type:'deduce',revision:s.revision},data);s=transition(s,{type:'draw',revision:s.revision},data);assert.equal(currentCard(s,data).id,locked.id);
   s=transition(s,{type:'resolve',revision:s.revision,cardId:locked.id,choiceId:locked.choices[0].id,dice:[6,6]},data);
   s=transition(s,{type:'next'},data);assert.equal(currentCard(s,data),null);assert.equal(s.cursors['location-0'],2);
 });
 
-test('deduction clears a stale selected choice when unlocking changes the active card',()=>{
+test('deduction preserves the drawn card and selected choice when another card unlocks',()=>{
   const first=structuredClone(content.cards[0]),second=structuredClone(content.cards[1]);
   first.conditions=[{type:'cardUnlocked',id:first.id}];
   const definitions=structuredClone(investigationDefinitions);definitions.deductions[0].effects.push({type:'unlockCard',id:first.id});
   const data=createContent([first,second],definitions);let s={...newState(),evidence:['reward-2','reward-5']};
-  s=transition(s,{type:'choose',choiceId:second.choices[0].id},data);assert.equal(s.choiceId,second.choices[0].id);
-  s=transition(s,{type:'deduce',revision:s.revision},data);assert.equal(currentCard(s,data).id,first.id);assert.equal(s.choiceId,null);
+  s=transition(s,{type:'draw',revision:s.revision},data);s=transition(s,{type:'choose',choiceId:second.choices[0].id},data);assert.equal(s.choiceId,second.choices[0].id);
+  s=transition(s,{type:'deduce',revision:s.revision},data);assert.equal(currentCard(s,data).id,second.id);assert.equal(s.choiceId,second.choices[0].id);
 });

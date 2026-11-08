@@ -31,7 +31,11 @@ E2E příkaz sám sestaví hru a spustí vlastní server na portu 4174; nevyžad
 
 V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Workflow při PR spustí testy a build; po pushi do `main` navíc publikuje `dist`. Relativní adresy podporují cestu `/kdyz-spi-hlubiny/` bez zvláštní konfigurace. Samotný build nic nepublikuje. Reference budou dostupné pod `public/`.
 
-Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v3`. Platné uložené hry M1 (`hlubiny-v1`) a M2.1 (`hlubiny-v2`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
+Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v4`. Platné uložené hry M1 (`hlubiny-v1`), M2.1 (`hlubiny-v2`) a M2.2 (`hlubiny-v3`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
+
+## M3.2 – balíčky lokací
+
+Každá z původních sedmi lokací má vlastní tematický balíček. Hráč si kartu výslovně a bez AP dobírá v pevném pořadí definic; dosud nesplněné podmínky kartu odloží, nikoli odstraní. Vyřešené neopakovatelné karty se spotřebují, opakovatelné se vracejí až po vyčerpání ostatních dostupných karet. `drawnCards` a kurzory se ukládají spolu s výsledkem, takže obnovení stránky neprovede nový tah ani hod. Verze v4 migruje v1–v3. UI před dobráním zobrazuje jen téma a bezpečné souhrnné počty. [Návrh, migrace a ověření](docs/M3-2-EXPLORATION-DECKS.md).
 
 ## M3.0.2a – vizuální systém a ilustrovaná mapa
 

@@ -4,6 +4,7 @@ for(const viewport of [{width:1440,height:1000},{width:390,height:844},{width:32
     await page.setViewportSize(viewport);
     const mapResponse=page.waitForResponse(response=>new URL(response.url()).pathname==='/dist/src/assets/blackwater-map.webp');
     await page.goto('./');
+    await page.locator('#draw').click();
     const response=await mapResponse;
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toBe('image/webp');
@@ -24,7 +25,8 @@ for(const viewport of [{width:1440,height:1000},{width:390,height:844},{width:32
 
 test('jiný prezentační motiv mění pouze povolené tokeny',async({page})=>{
   await page.goto('./');
-  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v3'));
+    await page.locator('#draw').click();
+  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v4'));
   await page.evaluate(async()=>{
     const {applyPresentation}=await import('./src/ui/presentation.js');
     applyPresentation(document.documentElement,{id:'test-theme',theme:{'--color-surface':'#112233','--unknown-token':'bad'}});
@@ -32,6 +34,6 @@ test('jiný prezentační motiv mění pouze povolené tokeny',async({page})=>{
   await expect(page.locator('html')).toHaveAttribute('data-theme','test-theme');
   expect(await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--color-surface').trim())).toBe('#112233');
   expect(await page.evaluate(()=>document.documentElement.style.getPropertyValue('--unknown-token'))).toBe('');
-  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v4'))).toBe(saved);
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
 });

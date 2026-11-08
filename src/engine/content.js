@@ -1,5 +1,6 @@
 import { cards as migrated } from '../data/cards.js';
 import { exampleCard } from '../data/example-card.js';
+import { explorationDecks } from '../data/decks.js';
 import { locations } from '../data/locations.js';
 import { rewards, flags } from '../data/catalog.js';
 import { assertCards } from './schema.js';
@@ -26,7 +27,9 @@ export function createContent(cards, investigation = investigationDefinitions, o
     if(!location||!refs.locations.includes(location.id)||seen.has(location.id)||typeof location.name!=='string'||!location.name.trim())throw new Error(`locationMetadata[${i}]: očekáváno unikátní existující ID lokace a neprázdný název`);
     seen.add(location.id);locationsById[location.id]={id:location.id,name:location.name};
   });
+  const decksByLocation=Object.fromEntries(refs.locations.map(id=>[id,{locationId:id,name:locationsById[id].name+' · balíček',description:'Příběhy, setkání a stopy této lokace.'}]));
+  for(const meta of Object.hasOwn(overrides,'locations')?[]:explorationDecks)if(decksByLocation[meta.locationId])decksByLocation[meta.locationId]={...meta};
   const definitions=freeze(structuredClone(cards));
-  return Object.freeze({cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
+  return Object.freeze({decksByLocation:freeze(decksByLocation),cards:definitions,byId:Object.freeze(Object.fromEntries(definitions.map(c=>[c.id,c]))),investigation:model,refs:freeze(structuredClone(refs)),locationsById:freeze(locationsById)});
 }
 export const content=createContent([...migrated,exampleCard]);

@@ -4,6 +4,7 @@ for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
   test(`mapa, přehledy a reload ${viewport.width}`, async ({page},testInfo)=>{
     await page.setViewportSize(viewport);
     await page.goto('./');
+    await page.locator('#draw').click();
     const points=page.locator('#places button');
     await expect(points).toHaveCount(7);
     await expect(page.locator('[aria-current="location"]')).toContainText('Přístav');
@@ -40,6 +41,7 @@ for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
 
 test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.evaluate(async()=>{
     const {newState}=await import('./src/engine/game.js');
     const {save}=await import('./src/engine/storage.js');
@@ -51,7 +53,7 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
   await expect(locked).toHaveClass(/locked/);
   await page.getByRole('button',{name:'◇ Staré město',exact:true}).click();
   await expect(page.locator('#ap')).toHaveText('2');
-  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('hlubiny-v3'));s.ap=0;localStorage.setItem('hlubiny-v3',JSON.stringify(s));});
+  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('hlubiny-v4'));s.ap=0;localStorage.setItem('hlubiny-v4',JSON.stringify(s));});
   await page.reload();
   await expect(page.getByRole('button',{name:'◇ Přístav',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Další kolo',exact:true}).click();
@@ -63,6 +65,7 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
 
 test('scénář bez mapy má čitelný seznam a vlastní názvy',async({page})=>{
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.evaluate(async()=>{
     const {renderMap}=await import('./src/ui/map.js');
     renderMap(document.getElementById('places'),[{id:'room',name:'Čítárna'}],null,{locationId:'elsewhere',unlockedLocations:['room'],ap:1,ended:false},false,()=>{});
@@ -73,6 +76,7 @@ test('scénář bez mapy má čitelný seznam a vlastní názvy',async({page})=>
 
 test('reset během hodu zruší animaci a zachová nový save',async({page})=>{
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.clock.install();
   await page.locator('#roll').click();
   await expect(page.locator('#reveal')).toBeEmpty();
@@ -83,12 +87,13 @@ test('reset během hodu zruší animaci a zachová nový save',async({page})=>{
   await expect(page.locator('#reveal')).toBeEmpty();
   await page.reload();
   await expect(page.locator('#ap')).toHaveText('3');
-  await expect(page.locator('#roll')).toBeEnabled();
+  await expect(page.locator('#draw')).toBeEnabled();
 });
 
 test('omezený pohyb odhalí výsledek bez animace a výběr zachová focus',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.goto('./');
+    await page.locator('#draw').click();
   const choice=page.locator('#choices button').first();
   await choice.focus();
   await page.keyboard.press('Enter');
@@ -100,31 +105,33 @@ test('omezený pohyb odhalí výsledek bez animace a výběr zachová focus',asy
 
 test('konec hry zakáže hod i po reloadu a nezmění uložený stav',async({page})=>{
   await page.goto('./');
+    await page.locator('#draw').click();
   await expect(page.locator('#roll')).toBeEnabled();
   // Reach the deadline through real actions with an unresolved card still present.
   for(let i=0;i<7;i++)await page.locator('#endRound').click();
   await expect(page.locator('#gameStatus')).toContainText('Konec scénáře');
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#roll')).toBeDisabled();
-  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v3'));
+  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v4'));
   await page.reload();
   await expect(page.locator('#roll')).toBeDisabled();
   // Even a synthetic click cannot perform another action.
   await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v4'))).toBe(saved);
   await expect(page.locator('#reveal')).toBeEmpty();
 });
 
 test('reload během animace okamžitě odhalí již uložený hod bez opakování',async({page})=>{
   await page.addInitScript(()=>{Math.random=()=>0.5;});
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.clock.install();
   await page.clock.pauseAt(new Date());
   await page.locator('#roll').click();
   await expect(page.locator('#die1')).toHaveText('?');
   await expect(page.locator('#reveal')).toBeEmpty();
   await expect(page.locator('#log')).toBeEmpty();
-  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v3'));
+  const saved=await page.evaluate(()=>localStorage.getItem('hlubiny-v4'));
   const state=JSON.parse(saved);
   expect(state.result.dice).toEqual([4,4]);
   expect(state.result.key).toBe('success');
@@ -139,13 +146,14 @@ test('reload během animace okamžitě odhalí již uložený hod bez opakován�
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#roll')).toBeDisabled();
   await page.locator('#roll').dispatchEvent('click');
-  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  expect(await page.evaluate(()=>localStorage.getItem('hlubiny-v4'))).toBe(saved);
 });
 
 for(const width of [320,390,1440]){
   test(`mapové body: ovládání a rozměry při ${width} px`,async({page},testInfo)=>{
     await page.setViewportSize({width,height:844});
     await page.goto('./');
+    await page.locator('#draw').click();
     const report=[];
     for(let index=0;index<7;index++){
       if(index>0){

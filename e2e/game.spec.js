@@ -6,6 +6,7 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   // Deterministic 4+4; exercise the real browser UI without replacing game logic.
   await page.addInitScript(() => { Math.random = () => 0.5; });
   await page.goto('./');
+    await page.locator('#draw').click();
   await expect(page.getByRole('heading', { name: 'KDYŽ SPÍ HLUBINY', exact: true })).toBeVisible();
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#ap')).toHaveText('3');
@@ -28,15 +29,16 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#sum')).toHaveText('4 + 4 + 2 + 0 = 10 proti obtížnosti 8');
   await expect(page.locator('#inventory')).toHaveText('Deník');
-  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v3'));
+  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v4'));
   await page.reload();
   await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v4'))).toBe(saved);
   await page.screenshot({ path: testInfo.outputPath('game-after-reload.png'), fullPage: true, animations: 'disabled' });
-  await page.getByRole('button', { name: 'Další karta', exact: true }).click();
+  await page.getByRole('button', { name: 'Pokračovat', exact: true }).click();
+      await page.locator('#draw').click();
   await expect(page.locator('#cardTitle')).toHaveText('Muž z mlhy');
   await expect(page.locator('#reveal')).toBeEmpty();
   expect(errors).toEqual([]);
@@ -50,6 +52,7 @@ for (const { label, random, reward } of [
   test(`porovnání poznámky s deníkem po odměně: ${label}`, async ({ page }) => {
     await page.addInitScript(value => { Math.random = () => value; }, random);
     await page.goto('./');
+    await page.locator('#draw').click();
     await page.clock.install();
     for (const title of ['Ztracená loď', 'Muž z mlhy']) {
       await expect(page.locator('#cardTitle')).toHaveText(title);
@@ -57,7 +60,8 @@ for (const { label, random, reward } of [
       await page.clock.fastForward(1000);
       await expect(page.locator('#reveal')).toBeVisible();
       if (title === 'Ztracená loď') await expect(page.locator('#inventory')).toHaveText(reward);
-      await page.getByRole('button', { name: 'Další karta', exact: true }).click();
+      await page.getByRole('button', { name: 'Pokračovat', exact: true }).click();
+      await page.locator('#draw').click();
     }
     // Reload before the decision to cover the saved composite item in the actual UI.
     await page.reload();

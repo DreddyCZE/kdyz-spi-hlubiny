@@ -91,7 +91,7 @@ function renderBattle(){
   'enemy-hollow-orderly':{attack:'Pod bílým pláštěm cosi zaskřípe. Obvazy se napnou, jako by pod nimi bylo víc než jedno tělo.',escape:'Zabouchneš za sebou dveře. Na druhé straně zůstane škrábání nehtů.'},
   'enemy-bell-keeper':{attack:'Každý zásah rozezní dutý tón. Ze stínů se sype prach a vzduch se zachvěje.',escape:'Zvuk zvonu tě pronásleduje ještě dlouho poté, co postava zmizí ve tmě.'}
  };
- const battleActionText=report?(combat.status==='defeated'?'Nepřítel se rozpadá do stínů. Střetnutí je vyhráno.':combat.status==='escaped'?'Podařilo se ti uniknout. Hrozba však nezmizela.':(battleNarration[combat.enemyId]?.[combat.lastMove||'attack']||battleNarration['enemy-drowned-sailor'])[combat.lastMove||'attack']):'';
+ const battleActionText=report?(combat.status==='defeated'?'Nepřítel se rozpadá do stínů. Střetnutí je vyhráno.':combat.status==='escaped'?'Podařilo se ti uniknout. Hrozba však nezmizela.':(battleNarration[combat.enemyId]?.[combat.lastMove||'attack']||battleNarration['enemy-drowned-sailor'].attack)):'';
 
  $('battleReport').textContent=battleRolling?'Kostky se kutálejí…':report?('Hod '+combat.dice.join(' + ')+' · '+labels[report.key]+' · Ztráta zdraví '+combat.playerDamage+' · Ztráta příčetnosti '+combat.playerSanLoss):'Rozhodni se, zda budeš bojovat, nebo se pokusíš uniknout.';
  $('battleReport').classList.toggle('battle-rolling',battleRolling);

@@ -26,6 +26,11 @@ const mythGlyphs={'myth-bell':'♢','myth-fog':'≋','myth-knock':'⌂','myth-ho
 function mythEffectText(event){return event.effects.map(effect=>effect.type==='modifyRitual'?'Rituál +'+effect.amount:effect.type==='modifyThreat'?'Hrozba +'+effect.amount:effect.type==='spawnEnemy'?'Nový nepřítel: '+enemyName(effect.enemyId):'Událost').join(' · ');}
 function showMythCard(event,index){
  $('mythGlyph').textContent=mythGlyphs[event.id]||'✦';
+ // Use an existing painted WebP scene as a temporary illustrated myth-card background.
+ // A dedicated artwork can replace it without changing game state or myth rules.
+ const mythScenes={'myth-bell':'location-5','myth-fog':'location-0','myth-knock':'location-1','myth-hound':'location-4','myth-lantern':'location-5','myth-orderly':'location-3'};
+ const scene=storyArt.byLocationId[mythScenes[event.id]||'location-0'];
+ $('mythIllustration').style.backgroundImage='linear-gradient(0deg,#06171480,#06171412),url("'+scene+'")';
  $('mythCardNumber').textContent='UDÁLOST '+index+' / FÁZE MÝTU';
  $('mythCardTitle').textContent=event.title;
  $('mythCardText').textContent=event.text;
@@ -39,6 +44,7 @@ function showMythHistory(){
   if(!event)return document.createTextNode('');
   const card=document.createElement('article');card.className='myth-discard-card';
   const symbol=document.createElement('span');symbol.className='myth-discard-glyph';symbol.textContent=mythGlyphs[id]||'✦';
+  symbol.style.backgroundImage='linear-gradient(0deg,#07181488,#07181422),url("'+(storyArt.byLocationId[({'myth-bell':'location-5','myth-fog':'location-0','myth-knock':'location-1','myth-hound':'location-4','myth-lantern':'location-5','myth-orderly':'location-3'})[id]||'location-0']||storyArt.fallback)+'")';
   const heading=document.createElement('h3');heading.textContent=(index+1)+'. '+event.title;
   const story=document.createElement('p');story.textContent=event.text;
   const effect=document.createElement('small');effect.textContent=mythEffectText(event);

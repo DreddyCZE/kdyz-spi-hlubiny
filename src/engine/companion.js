@@ -19,11 +19,12 @@ export function validateCompanion(def){
  let active=0,passive=0;
  for(const [i,a] of (Array.isArray(def.abilities)?def.abilities:[]).entries()){
   if(!record(a)){fail('abilities['+i+']','expected object');continue;}
-  for(const key of Object.keys(a))if(!['id','name','type','trigger','uses','text'].includes(key))fail('abilities['+i+'].'+key,'unknown field');
+  for(const key of Object.keys(a))if(!['id','name','type','trigger','uses','text','discoveryFlagId'].includes(key))fail('abilities['+i+'].'+key,'unknown field');
   if(!validId(a.id)||typeof a.name!=='string'||!a.name.trim()||typeof a.text!=='string'||!a.text.trim())fail('abilities['+i+']','invalid identity or text');
   if(a.type==='active')active++;else if(a.type==='passive')passive++;else fail('abilities['+i+'].type','invalid');
   if(!['exploration','investigation','danger'].includes(a.trigger))fail('abilities['+i+'].trigger','invalid');
   if(a.uses!==(a.type==='active'?'oncePerRound':'passive'))fail('abilities['+i+'].uses','invalid');
+  if(a.discoveryFlagId!==undefined&&(a.type!=='active'||!validId(a.discoveryFlagId)))fail('abilities['+i+'].discoveryFlagId','active ability requires valid flag');
  }
  if(active>1||passive>1)fail('abilities','at most one active and one passive');
  return errors;

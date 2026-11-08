@@ -24,6 +24,9 @@ import { createJournal } from './journal.js';
 const { map: scenarioMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
+$('investigatorName').textContent=investigatorName;
+const portrait=blackwaterImage('investigators','occultist');
+if(portrait)$('investigatorPortrait').style.backgroundImage=`url("${new URL(portrait,document.baseURI).href}")`;
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 mountSaveNotice(storage,legacyMode?'legacy':'scenario');
 document.getElementById('roundLimit').textContent=legacyMode?'7':String(activeScenario.rules.maxRounds);
@@ -55,7 +58,7 @@ function render(){
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
-  $('heroStats').textContent=`${investigatorName} · Výzkumnice · HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
+  $('heroStats').textContent=`HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');

@@ -40,3 +40,26 @@ test('second scenario can use a different schedule without hardcoded Blackwater'
  s=scenarioSessionTransition(s,{type:'endRound',revision:s.game.revision},other,content);
  assert.equal(s.scenario.clocks.countdown,1);
 });
+
+test('D3 companion actions are revision guarded, optional and do not consume AP',()=>{
+ const companion={id:'dog',name:'Pes',kind:'animal',availability:{locationId:'location-0'},abilities:[{id:'scent',name:'Stopa',type:'active',trigger:'exploration',uses:'oncePerRound',text:'Pes zachytil pach.'}]};
+ const data={...content,companions:[companion]};
+ let session=newScenarioSession(def,data);
+ const initialAp=session.game.ap;
+ const before=scenarioSessionView(session,def,data);
+ assert.equal(before.companion[0].recruitable,true);
+ session=scenarioSessionTransition(session,{type:'recruitCompanion',companionId:'dog',revision:session.game.revision},def,data);
+ assert.equal(session.scenario.companion.activeId,'dog');
+ assert.equal(session.game.ap,initialAp);
+ const stale=scenarioSessionTransition(session,{type:'dismissCompanion',revision:0},def,data);
+ assert.strictEqual(stale,session);
+ const used=scenarioSessionTransition(session,{type:'useCompanionAbility',abilityId:'scent',trigger:'exploration',revision:session.game.revision},def,data);
+ assert.equal(used.scenario.companion.usedRoundByAbility.scent,1);
+ assert.equal(used.game.ap,initialAp);
+ assert.strictEqual(scenarioSessionTransition(used,{type:'useCompanionAbility',abilityId:'scent',trigger:'exploration',revision:used.game.revision},def,data),used);
+ assert.equal(scenarioSessionView(used,def,data).companion[0].active.abilities[0].available,false);
+ const later=scenarioSessionTransition(used,{type:'endRound',revision:used.game.revision},def,data);
+ assert.equal(scenarioSessionView(later,def,data).companion[0].active.abilities[0].available,true);
+ const dismissed=scenarioSessionTransition(later,{type:'dismissCompanion',revision:later.game.revision},def,data);
+ assert.equal(dismissed.scenario.companion.activeId,null);
+});

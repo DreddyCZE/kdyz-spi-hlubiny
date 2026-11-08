@@ -1,3 +1,4 @@
+import {saveBlackwater,loadBlackwater,clearBlackwater} from '../engine/blackwater-storage.js';
 import {newBlackwaterGame,blackwaterTransition,publicBlackwater,blackwaterContent} from '../engine/blackwater.js';
 import {investigators,investigatorById} from '../data/blackwater-investigators.js';
 import {blackwaterItemById} from '../data/blackwater-items.js';
@@ -7,21 +8,22 @@ import {blackwaterMap} from '../data/map.js';
 import {locations} from '../data/locations.js';
 import {imageForCard} from '../data/story-art.js';
 const $=id=>document.getElementById(id);
-let state=newBlackwaterGame(),rolling=false;
+let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
+let state=loadBlackwater(storage)||newBlackwaterGame(),rolling=false;
 const enemyName=id=>enemyDefinitions.find(e=>e.id===id)?.name||id;
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
  if(rolling)return false;
  const next=blackwaterTransition(state,{type,revision:state.revision,...rest});
  if(next===state){$('message').textContent='Akce nyní není dostupná.';return false;}
- state=next;$('message').textContent='';render();return true;
+ state=next;saveBlackwater(storage,state);$('message').textContent='';render();return true;
 }
 function resolveCard(card,choice){
  if(rolling)return;
  const dice=choice.test?rollDice():null;
  const next=blackwaterTransition(state,{type:'resolve',revision:state.revision,cardId:card.id,choiceId:choice.id,...(dice?{dice}:{})});
  if(next===state){$('message').textContent='Rozhodnutí nelze provést.';return;}
- state=next;
+ state=next;saveBlackwater(storage,state);
  if(!dice){render();return;}
  rolling=true;render();
  const diceBox=$('dice');diceBox.hidden=false;diceBox.classList.add('rolling');
@@ -78,4 +80,5 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='Scénář skončil. Temnota zvítězila.';
 }
+$('reset').onclick=()=>{if(!window.confirm('Začít novou hru? Současný postup se smaže.'))return;clearBlackwater(storage);state=newBlackwaterGame();rolling=false;render();};
 $('draw').onclick=()=>send('draw');$('next').onclick=()=>send('next');$('endRound').onclick=()=>send('endRound');$('ability').onclick=()=>send('useAbility');render();

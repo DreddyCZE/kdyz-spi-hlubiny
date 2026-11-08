@@ -91,3 +91,40 @@ main{max-width:1740px;padding:10px 22px 28px}
 .map-point.reachable{background:#3b4c37;border:2px solid #e6c78b;box-shadow:0 0 0 3px #b8a36b33,0 3px 9px #000c}
 .map-point:disabled:not(.active){opacity:.67}
 .map-point.active{border:2px solid #fff0b7;box-shadow:0 0 0 5px #d9bc6b88,0 0 20px #e3c67a}
+
+/* Tabletop components, not a dashboard. */
+.deck-strip{justify-content:flex-start;gap:14px}
+.deck-strip>div:nth-child(2){flex:1}
+.deck-token{flex:0 0 66px;height:89px;border:3px double #b79a65;border-radius:5px;background:radial-gradient(circle,#354b42,#142824 70%);box-shadow:3px 4px 0 #0a1715,6px 7px 0 #947e5b,8px 9px 0 #0a1715;display:flex!important;flex-direction:column;align-items:center;justify-content:center;color:#e5c88d;transform:rotate(-4deg)}
+.deck-token span{font-size:29px}.deck-token small{font:7px system-ui;letter-spacing:.08em}
+.story-card{position:relative;transform-origin:top center;transition:transform .25s,box-shadow .25s}
+.story-card:not(.unrevealed){animation:card-appear .55s ease-out}
+@keyframes card-appear{from{opacity:.4;transform:perspective(900px) rotateY(-12deg) translateY(10px)}to{opacity:1;transform:perspective(900px) rotateY(0) translateY(0)}}
+.story-art{position:relative;overflow:hidden}
+.card-back{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:radial-gradient(circle at center,#3b554b,#162c2a 67%,#101d1d);border:12px solid #806e4b;outline:2px solid #d0b47c;outline-offset:-18px;color:#e8d4a4;box-shadow:inset 0 0 50px #000a}
+.card-back span{font-size:65px;line-height:1}.card-back strong{letter-spacing:.3em;font:700 18px Georgia}.card-back small{font:10px system-ui;letter-spacing:.18em}
+.story-card.unrevealed .story-body{padding:14px 20px}
+.story-card.unrevealed .story-body h3,.story-card.unrevealed .story-body>p:not(.eyebrow){display:none}
+.story-card.unrevealed .story-body #next{display:none}
+.story-card.unrevealed .story-body .eyebrow{margin:0}
+.player-head{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #4b5a4c;padding-bottom:7px}
+.player-head span{font:700 11px system-ui;letter-spacing:.15em;color:#c6ad78}
+.player-head button{padding:5px 10px;font:12px system-ui}
+.side-panel{grid-template-columns:minmax(240px,1fr) minmax(180px,.7fr) minmax(260px,1.1fr)}
+.side-panel>h2{grid-column:1;grid-row:2}
+.side-panel>#investigatorRole{grid-column:1;grid-row:3}
+.side-panel>#ability{grid-column:1;grid-row:4}
+.side-panel #stats{grid-column:3;grid-row:2/5;align-self:center;margin:0;grid-template-columns:repeat(3,minmax(0,1fr))}
+.side-panel>.subpanel:nth-of-type(1){grid-column:2;grid-row:2/5}
+.side-panel>.subpanel.expandable{display:none}
+.side-panel.journal-open>.subpanel.expandable{display:block;grid-column:auto;grid-row:auto;border-left:0;border-top:1px solid #506052;padding-top:12px}
+.side-panel.journal-open>.subpanel:nth-of-type(2){grid-column:1/3;grid-row:5}
+.side-panel.journal-open>.subpanel:nth-of-type(3){grid-column:3;grid-row:5}
+.combat-stage{position:relative;margin:12px 0;padding:16px;border:2px solid #b27b66;background:radial-gradient(circle at 30% 0%,#4a2d2a,#1b2424 80%);box-shadow:0 9px 26px #0008}
+.combat-heading{display:flex;align-items:center;justify-content:space-between;color:#e8b99a;font:700 12px system-ui;letter-spacing:.12em}
+.combat-heading button{padding:3px 9px;font-size:20px}
+.combat-stage #combat{padding:8px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.combat-stage #combat p{width:100%;font-size:18px}
+@media(max-width:1100px){.side-panel{grid-template-columns:1fr 1fr}.side-panel #stats{grid-column:1/-1;grid-row:5}.side-panel>.subpanel:nth-of-type(1){grid-column:2;grid-row:2/5}.side-panel.journal-open>.subpanel:nth-of-type(2){grid-column:1;grid-row:6}.side-panel.journal-open>.subpanel:nth-of-type(3){grid-column:2;grid-row:6}}
+@media(max-width:780px){.side-panel{display:grid;grid-template-columns:1fr 1fr}.side-panel .player-head{grid-column:1/-1}.side-panel #stats{grid-column:1/-1;grid-row:auto}.side-panel>.subpanel:nth-of-type(1){grid-column:2;grid-row:2/5}.side-panel.journal-open>.subpanel:nth-of-type(2),.side-panel.journal-open>.subpanel:nth-of-type(3){grid-column:1/-1;grid-row:auto}.deck-token{flex-basis:50px;height:72px}.deck-token small{font-size:6px}}
+@media(prefers-reduced-motion:reduce){.story-card:not(.unrevealed){animation:none}}

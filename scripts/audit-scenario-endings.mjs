@@ -9,6 +9,6 @@ const results={};
 for(const kind of goals){
  const chooseEnding=endings=>endings.find(e=>e.kind===kind)||endings.find(e=>e.kind==='victory')||endings[0];
  const batch=simulateBatch(scenario,content,{runs,seed,maxActions:500,...strategy,chooseEnding});
- results[kind]={outcomes:batch.outcomes,unfinishedReasons:batch.unfinishedReasons,exhausted:batch.exhausted,knowledgeCounts:batch.knowledgeCounts,knowledgeRoundStats:batch.knowledgeRoundStats,locationVisits:batch.locationVisits,endingRoundStats:batch.endingRoundStats};
+ results[kind]={outcomes:batch.outcomes,unfinishedReasons:batch.unfinishedReasons,exhausted:batch.exhausted,knowledgeCounts:batch.knowledgeCounts,evidenceCounts:batch.evidenceCounts,knowledgeRoundStats:batch.knowledgeRoundStats,locationVisits:batch.locationVisits,endingRoundStats:batch.endingRoundStats};
 }
 console.log(JSON.stringify({scenarioId:scenario.id,runs,seed,results},null,2));

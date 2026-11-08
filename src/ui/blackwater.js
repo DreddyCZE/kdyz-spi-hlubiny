@@ -50,6 +50,7 @@ function render(){
  $('characterTitle').textContent=investigator.name;
  $('characterFlavor').textContent=investigatorFlavor[investigator.id];
  $('characterGlyph').textContent=investigatorGlyph[investigator.id];
+ $('miniPortrait').textContent=investigatorGlyph[investigator.id];
  $('characterAbility').textContent=investigator.ability+(view.abilityUsed?' (Vyčerpána)':'');
  $('characterStats').textContent='♥ '+view.hp+'/'+investigator.hp+'   ◈ '+view.san+'/'+investigator.san+'   ⚡ '+view.ap;
  $('stats').replaceChildren(...stats.map(([name,value])=>{const el=document.createElement('div');el.className='stat';const label=document.createElement('span');label.textContent=name;const strong=document.createElement('strong');strong.textContent=value;el.append(label,strong);return el;}));

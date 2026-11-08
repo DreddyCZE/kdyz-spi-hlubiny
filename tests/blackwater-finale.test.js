@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blackwaterScenario as def} from '../src/data/blackwater-scenario.js';
-import {content} from '../src/engine/content.js';
+import {blackwaterContent as content} from '../src/engine/content.js';
 import {deduce} from '../src/engine/investigation.js';
 import {newScenarioSession,scenarioSessionTransition,scenarioSessionView} from '../src/engine/scenario-session.js';
 const allEvidence=['reward-2','reward-5','reward-7','reward-9','reward-10','reward-11','reward-12','reward-14','reward-16'];

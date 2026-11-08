@@ -25,3 +25,18 @@ test('scenario dice confirmation, persistence and reload',async({page})=>{
  }
  expect(errors).toEqual([]);
 });
+
+test('next round advances scenario clock and persists after reload',async({page})=>{
+ await page.goto('./');
+ const before=Number(await page.locator('#round').textContent());
+
+ await page.locator('#endRound').click();
+ await expect(page.locator('#round')).toHaveText(String(before+1));
+ await expect(page.locator('#ap')).toHaveText('3');
+ const key=await page.evaluate(()=>Object.keys(localStorage).find(k=>k.startsWith('hlubiny-scenario-v1-')));
+ expect(key).toBeTruthy();
+ const saved=await page.evaluate(k=>localStorage.getItem(k),key);
+ await page.reload();
+ await expect(page.locator('#round')).toHaveText(String(before+1));
+ expect(await page.evaluate(k=>localStorage.getItem(k),key)).toBe(saved);
+});

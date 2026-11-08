@@ -148,7 +148,6 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 /* Map and story stay visible together, with the card receiving more reading space. */
 @media(min-width:1101px) {
   .layout { grid-template-columns: minmax(0,1.25fr) minmax(390px,1fr); gap: clamp(12px,1.4vw,24px); }
-  .places.mapped { aspect-ratio: 1.65; }
   .card { padding: clamp(18px,2vw,32px); }
   .card h2 { font-size: clamp(1.45rem,2vw,2rem); }
   .investigator-bar > button { min-height: 78px; }

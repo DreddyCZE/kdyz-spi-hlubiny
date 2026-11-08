@@ -20,6 +20,7 @@ test('recruitment requires conditions and only one active companion',()=>{
 });
 test('active abilities can be used once per round, passive ability has no action',()=>{
  const active=recruitCompanion(dog,initialCompanionState(),{locationId:'location-1',evidence:['reward-10']});
+ assert.equal(companionView(dog,active,1).abilities[0].text,null);
  assert.equal(useCompanionAbility(dog,active,'scent','danger',1),null);
  assert.equal(useCompanionAbility(dog,active,'warning','danger',1),null);
  const used=useCompanionAbility(dog,active,'scent','exploration',1);

@@ -2,6 +2,7 @@ import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
 import {validatePuzzle} from './puzzle.js';
+import {validateCompanion} from './companion.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
 export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
@@ -37,6 +38,16 @@ export function validScenarioSession(s,def,data){
    if(p.status==='blocked'&&(d.attempts.mode!=='limited'||p.attempts!==d.attempts.max))return false;
    if(p.status==='solved'&&p.attempts===0)return false;
   }
+ }
+ if(c.companion!==undefined){
+  const companion=c.companion;
+  if(!companion||typeof companion!=='object'||Array.isArray(companion)||!Object.hasOwn(companion,'activeId')||!Object.hasOwn(companion,'usedRoundByAbility'))return false;
+  const definitions=(data.companions||[]).filter(d=>!validateCompanion(d).length);
+  const active=definitions.find(d=>d.id===companion.activeId);
+  if(companion.activeId!==null&&!active)return false;
+  const used=companion.usedRoundByAbility;
+  if(!used||typeof used!=='object'||Array.isArray(used)||(!active&&Object.keys(used).length))return false;
+  if(active&&Object.entries(used).some(([id,round])=>!active.abilities.some(a=>a.id===id&&a.type==='active')||!Number.isSafeInteger(round)||round<1||round>g.round))return false;
  }
  if(c.endingId!==null&&!def.endings.some(e=>e.id===c.endingId))return false;
  if(g.round>def.rules.maxRounds&&!c.endingId)return false;

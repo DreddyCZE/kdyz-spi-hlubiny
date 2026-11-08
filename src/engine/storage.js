@@ -1,14 +1,14 @@
-import { newState, evaluate, attributes, isEnded, currentCard, deck } from './game.js';
+import { newState, evaluate, attributes, isEnded, currentCard, deck, meetsConditions } from './game.js';
 import { content } from './content.js';
 import { rewards } from '../data/catalog.js';
 import { isRecord } from './schema.js';
 import { rememberEvidence } from './investigation.js';
-export const SAVE_KEY='hlubiny-v3';
+export const SAVE_KEY='hlubiny-v4';
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const uniqueIDs=(a,allowed)=>Array.isArray(a)&&a.length<=allowed.length&&new Set(a).size===a.length&&a.every(id=>allowed.includes(id));
 export function validState(s,data=content){
   const catalog=data.refs;
-  if(!isRecord(s)||s.version!==3||Object.keys(s).sort().join()!==Object.keys(newState(data)).sort().join())return false;
+  if(!isRecord(s)||s.version!==4||Object.keys(s).sort().join()!==Object.keys(newState(data)).sort().join())return false;
   if(!Number.isSafeInteger(s.revision)||s.revision<0||!catalog.locations.includes(s.locationId))return false;
   for(const [k,max] of Object.entries({round:7,ap:3,hp:6,san:8,threat:10,ritual:8}))if(!Number.isInteger(s[k])||s[k]<(k==='round'?1:0)||s[k]>max)return false;
   if(typeof s.ended!=='boolean'||s.ended!==isEnded(s))return false;
@@ -24,6 +24,7 @@ export function validState(s,data=content){
   if(!isRecord(s.flags)||!Object.entries(s.flags).every(([id,v])=>catalog.flags.includes(id)&&(typeof v==='boolean'||typeof v==='string'&&v.length<1000||Number.isFinite(v))))return false;
   if(!Array.isArray(s.log)||s.log.length>100||!s.log.every(t=>typeof t==='string'&&t.length<2000))return false;
   if(!isRecord(s.cursors)||!Object.entries(s.cursors).every(([id,n])=>catalog.locations.includes(id)&&Number.isInteger(n)&&n>=0&&n<=deck({...s,locationId:id},data).length))return false;
+  if(!isRecord(s.drawnCards)||!Object.entries(s.drawnCards).every(([locationId,id])=>catalog.locations.includes(locationId)&&Object.hasOwn(data.byId,id)&&data.byId[id].locationId===locationId))return false;
   if(!isRecord(s.resolved))return false;
   for(const [id,r] of Object.entries(s.resolved)){
     const c=Object.hasOwn(data.byId,id)?data.byId[id]:null;
@@ -36,7 +37,7 @@ export function validState(s,data=content){
   }
   const card=currentCard(s,data);
   if(s.choiceId!==null&&(!card||!data.byId[card.id].choices.some(o=>o.id===s.choiceId)))return false;
-  return s.result===null||Boolean(card&&same(s.result,s.resolved[card.id]));
+  return s.result===null?!Boolean(card&&s.resolved[card.id]):Boolean(card&&same(s.result,s.resolved[card.id]));
 }
 // M1 keys remain untouched. Validate all converted values before using a migrated state.
 export function migrateV1(old){
@@ -57,22 +58,41 @@ export function migrateV1(old){
     if(r.index!==index||r.total!==evaluated.total)return null;
     s.resolved[id]={...evaluated,cardId:id,choiceId:o.id,revision:++s.revision};
   }
-  const c=currentCard(s);if(old.choice<0||old.choice>1)return null;
+  restoreLegacyDraws(s);const c=currentCard(s);if(old.choice<0||old.choice>1)return null;
   s.choiceId=c?.choices[old.choice]?.id||null;
   if(old.result!==null){if(!c||!same(old.result,old.resolved[c.id]))return null;s.result=s.resolved[c.id];}
   rememberEvidence(s,content.investigation.itemEvidence);
   return validState(s)?s:null;
 }
 export function migrateV2(old,data=content){
-  const added=['knowledge','deductions','unlockedCards','unlockedChoices'];
+  const added=['drawnCards','knowledge','deductions','unlockedCards','unlockedChoices'];
   if(!isRecord(old)||old.version!==2||!Array.isArray(old.inventory)||!Array.isArray(old.evidence)||Object.keys(old).sort().join()!==Object.keys(newState(data)).filter(k=>!added.includes(k)).sort().join())return null;
-  const s=rememberEvidence({...newState(data),...structuredClone(old),version:3},data.investigation.itemEvidence);
-  return validState(s,data)?s:null;
+  const s=rememberEvidence({...newState(data),...structuredClone(old),version:4},data.investigation.itemEvidence);
+  restoreLegacyDraws(s,data);return validState(s,data)?s:null;
+}
+// Preserve cards already exposed by v1-v3, including results pinned after changed conditions.
+function restoreLegacyDraws(s,data=content){
+  for(const locationId of data.refs.locations){
+    if(locationId!==s.locationId&&!Object.hasOwn(s.cursors,locationId)&&!data.cards.some(c=>c.locationId===locationId&&Object.hasOwn(s.resolved,c.id)))continue;
+    const local={...s,locationId},cards=deck(local,data),cursor=s.cursors[locationId]||0;
+    const pinned=locationId===s.locationId&&s.result&&data.byId[s.result.cardId];
+    const c=pinned||cards.slice(0,cursor).find(c=>s.unlockedCards.includes(c.id)&&!Object.hasOwn(s.resolved,c.id)&&meetsConditions(local,c.conditions,data))
+      ||cards.slice(cursor).find(c=>meetsConditions(local,c.conditions,data));
+    if(c){s.drawnCards[locationId]=c.id;if(c.repeatable&&!pinned)delete s.resolved[c.id];}
+  }
+  const current=s.drawnCards[s.locationId];if(current&&s.resolved[current])s.result=s.resolved[current];
+}
+export function migrateV3(old,data=content){
+  if(!isRecord(old)||old.version!==3||Object.keys(old).sort().join()!==Object.keys(newState(data)).filter(k=>k!=='drawnCards').sort().join())return null;
+  const s={...structuredClone(old),version:4,drawnCards:{}};
+  try{restoreLegacyDraws(s,data);return validState(s,data)?s:null;}catch{return null;}
 }
 export function load(storage,data=content){
   try{
     const raw=storage.getItem(SAVE_KEY);
     if(raw!==null){if(raw.length>100000)return newState(data);const s=JSON.parse(raw);return validState(s,data)?s:newState(data);}
+    const v3=storage.getItem('hlubiny-v3');
+    if(v3!==null)return v3.length<=100000?migrateV3(JSON.parse(v3),data)||newState(data):newState(data);
     const previous=storage.getItem('hlubiny-v2');
     if(previous!==null)return previous.length<=100000?migrateV2(JSON.parse(previous),data)||newState(data):newState(data);
     const legacy=storage.getItem('hlubiny-v1');

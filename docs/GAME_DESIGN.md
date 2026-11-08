@@ -20,7 +20,7 @@ UI ukládá zaplacené rozhodnutí a výsledek před kosmetickou animací. Běhe
 
 ## Uložený stav
 
-Verze 3 používá klíč `hlubiny-v3` a bezpečně migruje M1/v1 i M2.1/v2. Nové sbírky a ledger dedukcí jsou validované, informace ze složených předmětů zůstávají známé nezávisle na fyzickém inventáři. Převod nespouští dedukce a zachová původní klíče. Schéma, rozsahy, registry ID, kurzory, konec hry a přepočet uložených hodů se nadále kontrolují. Viz [ENGINE.md](ENGINE.md).
+Verze 4 používá klíč `hlubiny-v4` a bezpečně migruje M1/v1 i M2.1/v2 a M2.2/v3. Stav obsahuje také právě dobranou kartu podle lokace; stabilní pořadí a výsledek se po reloadu nemění. Převod nespouští dedukce a zachová původní klíče. Schéma, rozsahy, registry ID, kurzory, konec hry a přepočet uložených hodů se nadále kontrolují. Viz [ENGINE.md](ENGINE.md) a [M3.2](M3-2-EXPLORATION-DECKS.md).
 
 ## Ověření a další milník
 

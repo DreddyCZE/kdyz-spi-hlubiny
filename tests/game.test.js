@@ -9,10 +9,13 @@ import {validateCards,assertCards,outcomeKeys} from '../src/engine/schema.js';
 import {cards} from '../src/data/cards.js';
 import {exampleCard} from '../src/data/example-card.js';
 
-function resolve(s,dice=[6,6],choiceId=selectedChoice(s)?.id,data=content){
+function draw(s,data=content){return act(s,{type:'draw',revision:s.revision},data);}
+function advance(s,data=content){return draw(act(s,{type:'next'},data),data);}
+function resolve(s,dice=[6,6],choiceId,data=content){
+  s=draw(s,data);choiceId??=selectedChoice(s,currentCard(s,data))?.id;
   return act(s,{type:'resolve',revision:s.revision,cardId:currentCard(s,data)?.id,choiceId,dice},data);
 }
-function exampleState(){return {...newState(),cursors:{'location-0':2}};}
+function exampleState(){return {...newState(),drawnCards:{'location-0':'harbor-note'},cursors:{'location-0':2}};}
 function memory(){const values=new Map();return {values,getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)};}
 test('six outcomes, thresholds and natural critical priority',()=>{
   for(const [a,b,bonus,diff,key] of [[6,6,-20,99,'criticalSuccess'],[1,1,20,2,'criticalFailure'],[4,4,3,8,'greatSuccess'],[3,3,2,8,'success'],[2,2,2,8,'partialSuccess'],[1,2,1,8,'failure']])assert.equal(evaluate(a,b,bonus,diff).key,key);
@@ -25,15 +28,15 @@ test('M1 moves and AP limits remain immutable',()=>{
   const locked={...s,unlockedLocations:['location-0']};assert.equal(act(locked,{type:'move',locationId:'location-1'}),locked);
 });
 test('combined HP/SAN loss, single payment and duplicate protection',()=>{
-  const initial=newState(),s=resolve(initial,[1,1]);assert.equal(s.hp,4);assert.equal(s.san,7);assert.equal(s.ap,2);
+  const initial=draw(newState()),s=resolve(initial,[1,1]);assert.equal(s.hp,4);assert.equal(s.san,7);assert.equal(s.ap,2);
   assert.equal(resolve(s),s);assert.equal(initial.hp,6);
   assert.equal(act(s,{type:'choose',choiceId:'0-0-choice-2'}),s);
 });
 test('nonrepeatable cards remain resolved across travel, reload and rounds',()=>{
   let s=resolve(newState());s=act(s,{type:'move',locationId:'location-1'});s=act(s,{type:'move',locationId:'location-0'});s=act(s,{type:'endRound'});
   const storage=memory();assert.ok(save(storage,s));s=load(storage);assert.equal(resolve(s),s);
-  s=act(s,{type:'next'});assert.equal(currentCard(s).title,'Muž z mlhy');s=resolve(s);s=act(s,{type:'next'});
-  assert.equal(currentCard(s).id,'harbor-note');s=resolve(s,undefined,'harbor-note-leave');s=act(s,{type:'next'});assert.equal(currentCard(s),null);
+  s=advance(s);assert.equal(currentCard(s).title,'Muž z mlhy');s=resolve(s);s=advance(s);
+  assert.equal(currentCard(s).id,'harbor-note');s=resolve(s,undefined,'harbor-note-leave');s=advance(s);assert.equal(currentCard(s),null);
 });
 test('seven rounds, AP restoration, ritual deadline and all terminal thresholds',()=>{
   let s=newState();for(let i=0;i<6;i++)s=act(s,{type:'endRound'});assert.equal(s.round,7);assert.equal(s.ap,3);assert.equal(s.ended,false);
@@ -65,26 +68,26 @@ test('choice-specific costs, conditions, modifier and testless decisions',()=>{
   const poor={...s,ap:1};assert.equal(resolve(poor,[6,6],'harbor-note-study'),poor);
 });
 test('public metadata has no hidden outcomes; only achieved result is projected',()=>{
-  const s=newState(),view=currentCard(s);assert.equal(visibleResult(s),null);
+  const s=draw(newState()),view=currentCard(s);assert.equal(visibleResult(s),null);
   assert.ok(!JSON.stringify(view).includes('outcomes'));assert.ok(!JSON.stringify(view).includes('Najdeš deník'));
   const r=visibleResult(resolve(s,[1,1]));assert.ok(r.text.includes('2 HP a 1 SAN'));assert.ok(!('effects'in r));assert.ok(!('outcomes'in r));
 });
 test('repeatable cards require next and a fresh revision; stale queued requests cannot reward',()=>{
-  const c=structuredClone(cards[0]);c.repeatable=true;const data=createContent([c]);let s=newState();
+  const c=structuredClone(cards[0]);c.repeatable=true;const data=createContent([c]);let s=draw(newState(),data);
   const request={type:'resolve',revision:s.revision,cardId:c.id,choiceId:c.choices[0].id,dice:[6,6]};
   s=act(s,request,data);assert.equal(act(s,request,data),s);assert.equal(resolve(s,[6,6],c.choices[0].id,data),s);
-  s=act(s,{type:'next'},data);assert.equal(visibleResult(s,data),null);assert.equal(act(s,request,data),s);
+  s=advance(s,data);assert.equal(visibleResult(s,data),null);assert.equal(act(s,request,data),s);
   const n=resolve(s,[6,6],c.choices[0].id,data);assert.equal(n.ap,1);assert.equal(n.inventory.length,1);
 });
 test('card conditions gate presentation and execution, results stay pinned when effects change conditions',()=>{
   const c=structuredClone(exampleCard);c.conditions=[{type:'flagEquals',id:'harbor-note-read',value:false}];
   const data=createContent([c]),s=newState();assert.equal(currentCard(s,data),null);
-  const ready={...s,flags:{'harbor-note-read':false},evidence:['reward-2']};
+  const ready=draw({...s,flags:{'harbor-note-read':false},evidence:['reward-2']},data);
   const n=resolve(ready,undefined,'harbor-note-copy',data);assert.ok(currentCard(n,data));assert.ok(visibleResult(n,data));
 });
 test('failed effect precondition rolls back AP and all preceding effects',()=>{
   const c=structuredClone(exampleCard);c.choices[0].apCost=1;c.choices[0].outcomes.success.effects=[{type:'addEvidence',id:'harbor-note-copy'},{type:'removeItem',id:catalog.items[0]}];
-  const data=createContent([c]),s=newState();assert.equal(resolve(s,undefined,c.choices[0].id,data),s);
+  const data=createContent([c]),s=draw(newState(),data);assert.equal(resolve(s,undefined,c.choices[0].id,data),s);
 });
 test('invalid card definitions rejected with concrete paths',()=>{
   const badMutations=[c=>c.id='',c=>c.type='combat',c=>c.locationId='nowhere',c=>c.repeatable='no',c=>c.conditions=[{type:'eval',value:'true'}],c=>c.choices[0].apCost=-1,c=>c.choices[0].test.attribute='bad',c=>c.choices[0].test.modifier='1',c=>delete c.choices[0].outcomes.criticalSuccess,c=>c.choices[0].outcomes.success.effects=[{type:'modifyStat',stat:'gold',amount:1}],c=>c.choices[0].outcomes.success.effects=[{type:'addEvidence',id:'bad'}],c=>c.choices[0].conditions=[{type:'minRound',round:0}],c=>c.choices[0].test=null,c=>c.choices[0].outcomes.success=null,c=>c.choices[0].outcomes.success.effects=[{type:'setFlag',id:'harbor-note-read',value:{}}]];
@@ -134,7 +137,7 @@ test('M1 saves migrate to stable IDs without mutating their source key',()=>{
   const old={version:1,place:0,round:1,ap:2,threat:2,ritual:1,hp:6,san:8,inventory:['Deník a přívěsek'],indices:{},choice:0,resolved:{},result:null,ended:false,log:['M1']};
   const r={dice:[6,6],total:14,index:0,cardId:'0-0',choice:0};old.resolved['0-0']=r;old.result=r;
   const storage=memory(),raw=JSON.stringify(old);storage.setItem('hlubiny-v1',raw);const s=load(storage);
-  assert.equal(s.version,3);assert.equal(s.result.key,'criticalSuccess');assert.equal(s.inventory[0],'reward-1');assert.equal(resolve(s),s);assert.equal(storage.getItem('hlubiny-v1'),raw);assert.ok(save(storage,s));
+  assert.equal(s.version,4);assert.equal(s.result.key,'criticalSuccess');assert.equal(s.inventory[0],'reward-1');assert.equal(resolve(s),s);assert.equal(storage.getItem('hlubiny-v1'),raw);assert.ok(save(storage,s));
   old.result.total=999;assert.equal(migrateV1(old),null);
 });
 
@@ -143,7 +146,7 @@ test('diary comparison accepts ordinary, great and critical boat rewards after s
     let s=resolve(newState(),dice);assert.equal(s.result.key,key);
     const storage=memory();assert.ok(save(storage,s));s=load(storage);
     // Inspect the example using only its cursor; keep the actual earned rewards.
-    s={...s,cursors:{'location-0':2},choiceId:null,result:null};
+    s={...s,cursors:{'location-0':2},drawnCards:{'location-0':'harbor-note'},choiceId:null,result:null};
     const choice=currentCard(s).choices.find(o=>o.id==='harbor-note-copy');
     assert.equal(choice.available,true,key);
     const copied=resolve(s,undefined,choice.id);assert.ok(copied.evidence.includes('harbor-note-copy'));assert.equal(copied.ap,s.ap-1);

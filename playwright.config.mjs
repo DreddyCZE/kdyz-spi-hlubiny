@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
+const port=process.env.E2E_PORT||'4174';
+const baseURL=`http://127.0.0.1:${port}/dist/`;
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -9,7 +11,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
   use: {
-    baseURL: 'http://127.0.0.1:4174/dist/',
+    baseURL,
     browserName: 'chromium',
     headless: true,
     viewport: { width: 1280, height: 900 },
@@ -18,8 +20,8 @@ export default defineConfig({
   },
   webServer: {
     command: 'npm run build && node scripts/serve.mjs',
-    url: 'http://127.0.0.1:4174/dist/',
-    env: { PORT: '4174' },
+    url: baseURL,
+    env: { PORT: port },
     reuseExistingServer: false,
     timeout: 30_000,
   },

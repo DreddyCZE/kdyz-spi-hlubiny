@@ -318,7 +318,7 @@ export const cards = [
   },
   {
     "id": "1-0",
-    "type": "encounter",
+    "type": "evidence",
     "locationId": "location-1",
     "title": "Obálka pod prahem",
     "description": "Na konci ulice stojí dům, jehož okna někdo zazdil zevnitř. Pod prahem leží obálka s tvým jménem.",
@@ -461,7 +461,7 @@ export const cards = [
   },
   {
     "id": "2-0",
-    "type": "encounter",
+    "type": "item",
     "locationId": "location-2",
     "title": "Zakázaný katalog",
     "description": "Knihovník zmizel. V katalogu někdo označil svazek, který podle záznamů nikdy neexistoval.",
@@ -920,7 +920,7 @@ export const cards = [
   },
   {
     "id": "5-0",
-    "type": "encounter",
+    "type": "event",
     "locationId": "location-5",
     "title": "Schodiště pod světlem",
     "description": "Pod vrstvou soli nacházíš servisní dvířka. Zespodu proudí teplý vzduch a ozývá se zvonění.",
@@ -1081,7 +1081,7 @@ export const cards = [
   },
   {
     "id": "6-0",
-    "type": "encounter",
+    "type": "item",
     "locationId": "location-6",
     "title": "Dech podzemního moře",
     "description": "Voda v jezírku stoupá proti gravitaci. Na kameni leží kovový předmět vydávající slabé světlo.",

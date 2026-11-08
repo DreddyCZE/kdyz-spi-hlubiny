@@ -28,9 +28,9 @@ Jde o řízení UI, nikoli utajení zdrojového kódu statické aplikace před D
 
 ## Uložený stav a migrace
 
-Verze **3**, klíč `hlubiny-v3`. Nové položky jsou `knowledge`, `deductions`, `unlockedCards`, `unlockedChoices`. Znalosti a odemčení jsou unikátní pole registrovaných ID. Ledger musí mít kladné bezpečné čítače, nejvýše 1 u neopakovatelné dedukce; potvrzuje se i přítomnost trvalých přidělených znalostí/odemčení. Příznaky mohou později změnit jiné akce, proto se jejich historická hodnota nepřepočítává.
+Verze **4**, klíč `hlubiny-v4`. Proti v3 přidává `drawnCards`, mapu právě dobrané karty pro každou navštívenou lokaci. Kurzory dál určují stabilní pořadí; dobrání nevolá náhodný generátor. Vyřešený výsledek, karta a zaplacená akce se ukládají atomicky, takže reload nevyhodnotí kartu znovu.
 
-Načtení preferuje v3. Pokud chybí, převede platné M2.1 v2; pokud i v2 chybí, převede M1 v1. Převod zachová AP, kola, ukazatele, inventář a výsledky karet, u M2.1 také revizi. Doplní prázdné nové sbírky a informace ze složených předmětů. Žádná dedukce ani její efekty se při převodu nespustí. Původní klíče zůstanou nedotčené; v3 se uloží při další explicitní akci.
+Načtení preferuje v4. Pokud chybí, převede platnou v3, poté v2 nebo M1 v1. Migrace rekonstruuje dosud otevřenou kartu z výsledku a kurzoru, zachová původní klíč a nepřepíše jej. Převod zachová AP, kola, inventář a výsledky karet, doplní sbírky i informace ze složených předmětů, ale nespustí dedukce ani efekty. Dříve neprozkoumané lokace se předem nedobírají.
 
 Vadná přítomná novější verze se nenahrazuje starší rozehranou hrou. Neplatný či příliš velký stav zahájí novou hru. Chyba úložiště je zachycená a UI pokračuje v paměti s upozorněním. Výsledkové texty a efekty se vždy berou z validovaných definic, nikdy z uložené hry.
 

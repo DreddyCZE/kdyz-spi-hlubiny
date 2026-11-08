@@ -134,3 +134,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .outcome-slot:nth-of-type(3n+2) { background: #9b713b33; }
 .outcome-slot:nth-of-type(3n) { background: #8b3c3933; }
 @media(max-width:420px) { .outcome-preview { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+
+.deck-summary { margin: 0 0 1rem; padding: .8rem; border: 1px solid var(--color-border, #56645e); border-radius: .4rem; }
+.deck-summary h3 { margin: 0; } .deck-summary p { margin: .5rem 0; overflow-wrap: anywhere; }
+.deck-summary button { max-width: 100%; }

@@ -4,6 +4,7 @@ import { storyArt } from '../src/data/story-art.js';
 
 test('story artwork resolves as an actual local WebP asset', async ({ page }) => {
   await page.goto('./');
+    await page.locator('#draw').click();
   const art = page.locator('#cardArt');
   await expect(art).toBeVisible();
   const background = await art.evaluate(el => getComputedStyle(el).backgroundImage);
@@ -20,6 +21,7 @@ test('story artwork resolves as an actual local WebP asset', async ({ page }) =>
 test('story art and outcome placeholders never disclose consequence text before roll', async ({ page }) => {
   await page.addInitScript(() => { Math.random = () => .5; });
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.clock.install();
   await expect(page.locator('#cardArt')).toBeVisible();
   const first = page.locator('#choices button:not([disabled])').first();
@@ -51,6 +53,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
   test(`story card responsive layout ${viewport.width}px`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('./');
+    await page.locator('#draw').click();
     const art = page.locator('#cardArt');
     await expect(art).toBeVisible();
     const bounds = await art.boundingBox();
@@ -66,6 +69,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
 
  test('all registered artwork decodes below the Pages subdirectory', async ({ page }) => {
   await page.goto('./');
+    await page.locator('#draw').click();
   for (const path of new Set([storyArt.fallback, ...Object.values(storyArt.byCardId)])) {
     const response = await page.request.get(new URL(path, page.url()).href);
     expect(response.status()).toBe(200);
@@ -85,6 +89,7 @@ test('reduced motion, keyboard focus and immediate persisted result', async ({ p
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.addInitScript(() => { Math.random = () => .5; });
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.locator('#choices button').first().focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('#choices button').first()).toBeFocused();
@@ -93,16 +98,18 @@ test('reduced motion, keyboard focus and immediate persisted result', async ({ p
   await page.locator('#roll').focus();
   await page.keyboard.press('Enter');
   await expect(page.locator('#reveal')).toBeVisible();
-  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v3'));
+  const saved = await page.evaluate(() => localStorage.getItem('hlubiny-v4'));
   await page.reload();
   await expect(page.locator('#reveal')).toBeVisible();
   await expect(page.locator('#roll')).toBeDisabled();
-  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v3'))).toBe(saved);
+  expect(await page.evaluate(() => localStorage.getItem('hlubiny-v4'))).toBe(saved);
 });
 
 test('actual Old Town choice has five reachable tiers rather than six', async ({ page }) => {
   await page.goto('./');
+    await page.locator('#draw').click();
   await page.locator('[data-location-id="location-1"]').click();
+  await page.locator('#draw').click();
   await expect(page.locator('#cardTitle')).toHaveText('Obálka pod prahem');
   await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(5);
   await page.locator('#choices button').nth(1).click();

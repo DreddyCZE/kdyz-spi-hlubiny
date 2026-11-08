@@ -3,17 +3,28 @@ import { attributes } from './schema.js';
 import { conditionMet, deduce, publicInvestigation, rememberEvidence } from './investigation.js';
 export { attributes } from './schema.js';
 export const labels={criticalSuccess:'Kritický úspěch',greatSuccess:'Velký úspěch',success:'Úspěch',partialSuccess:'Částečný úspěch',failure:'Neúspěch',criticalFailure:'Kritické selhání'};
-export function newState(data=content){return {version:3,revision:0,locationId:data.refs.locations[0],round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[],evidence:[],knowledge:[],deductions:{},unlockedCards:[],unlockedChoices:[],flags:{},unlockedLocations:[...data.refs.locations],cursors:{},choiceId:null,resolved:{},result:null,ended:false,log:['Vyšetřování začíná. Rozhodni, co uděláš.']};}
+export function newState(data=content){return {version:4,drawnCards:{},revision:0,locationId:data.refs.locations[0],round:1,ap:3,threat:2,ritual:1,hp:6,san:8,inventory:[],evidence:[],knowledge:[],deductions:{},unlockedCards:[],unlockedChoices:[],flags:{},unlockedLocations:[...data.refs.locations],cursors:{},choiceId:null,resolved:{},result:null,ended:false,log:['Vyšetřování začíná. Rozhodni, co uděláš.']};}
 export function meetsConditions(s,conditions=[],data=content){return conditions.every(c=>conditionMet(s,c,data.investigation.itemEvidence));}
 export function investigationView(s,data=content){return publicInvestigation(s,data.investigation);}
 export function deck(s,data=content){return data.cards.filter(c=>c.locationId===s.locationId);}
-function activeDefinition(s,data=content){
-  const pinned=s.result&&data.byId[s.result.cardId];
-  if(pinned?.locationId===s.locationId)return pinned;
+// Stable scenario order; conditional cards stay deferred rather than being discarded.
+function nextDefinition(s,data=content){
   const cards=deck(s,data),cursor=s.cursors[s.locationId]||0;
-  // An explicit unlock can make a previously skipped card reachable without rewinding the deck.
-  return cards.slice(0,cursor).find(c=>s.unlockedCards.includes(c.id)&&!Object.hasOwn(s.resolved,c.id)&&meetsConditions(s,c.conditions,data))
-    ||cards.slice(cursor).find(c=>meetsConditions(s,c.conditions,data))||null;
+  const eligible=c=>!Object.hasOwn(s.resolved,c.id)&&meetsConditions(s,c.conditions,data);
+  return cards.slice(0,cursor).find(eligible)||cards.slice(cursor).find(eligible)
+    ||[...cards.slice(cursor),...cards.slice(0,cursor)].find(c=>c.repeatable&&meetsConditions(s,c.conditions,data))||null;
+}
+function activeDefinition(s,data=content){
+  const id=s.drawnCards[s.locationId],card=id&&data.byId[id];
+  return card?.locationId===s.locationId?card:null;
+}
+export function explorationView(s,data=content){
+  const cards=deck(s,data),remaining=cards.filter(c=>c.repeatable||!Object.hasOwn(s.resolved,c.id));
+  const available=remaining.filter(c=>meetsConditions(s,c.conditions,data)).length;
+  const metadata=data.decksByLocation[s.locationId];
+  return {name:metadata.name,description:metadata.description,available,deferred:remaining.length-available,
+    consumed:cards.filter(c=>!c.repeatable&&Object.hasOwn(s.resolved,c.id)).length,
+    canDraw:!s.ended&&!activeDefinition(s,data)&&available>0};
 }
 export function canChoose(s,c,o,data=content){return !s.ended&&!s.result&&(c.repeatable||!s.resolved[c.id])&&meetsConditions(s,c.conditions,data)&&meetsConditions(s,o.conditions,data)&&s.ap>=o.apCost;}
 export function currentCard(s,data=content){
@@ -62,11 +73,17 @@ export function transition(state,action,data=content){
     case 'deduce':{
       if(action.revision!==s.revision)return state;
       const next=deduce(s,data.investigation);if(next===s)return state;
-      s=next;if(!s.result&&activeDefinition(s,data)?.id!==c?.id)s.choiceId=null;break;
+      s=next;break;
+    }
+    case 'draw':{
+      if(action.revision!==s.revision||activeDefinition(s,data))return state;
+      const drawn=nextDefinition(s,data);if(!drawn)return state;
+      if(drawn.repeatable)delete s.resolved[drawn.id];
+      s.drawnCards[s.locationId]=drawn.id;s.choiceId=null;s.result=s.resolved[drawn.id]&&!drawn.repeatable?s.resolved[drawn.id]:null;break;
     }
     case 'move':
       if(!data.refs.locations.includes(action.locationId)||!s.unlockedLocations.includes(action.locationId)||action.locationId===s.locationId||s.ap<1)return state;
-      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=null;s.log.unshift('Přesun: '+data.locationsById[s.locationId].name);break;
+      s.ap--;s.locationId=action.locationId;s.choiceId=null;s.result=s.resolved[s.drawnCards[s.locationId]]||null;s.log.unshift('Přesun: '+data.locationsById[s.locationId].name);break;
     case 'choose':
       if(!c||!c.choices.some(o=>o.id===action.choiceId&&canChoose(s,c,o,data)))return state;
       s.choiceId=action.choiceId;break;
@@ -79,8 +96,8 @@ export function transition(state,action,data=content){
       s.ap-=o.apCost;s.choiceId=o.id;s.result={...r,cardId:c.id,choiceId:o.id,revision:state.revision+1};s.resolved[c.id]=s.result;s.log.unshift(c.title+': '+labels[r.key]);break;
     }
     case 'next':{
-      if(!c||!s.resolved[c.id])return state;
-      const index=deck(s,data).findIndex(card=>card.id===c.id);s.cursors[s.locationId]=c.repeatable?index:Math.max(s.cursors[s.locationId]||0,index+1);s.choiceId=null;s.result=null;break;
+      if(!c||!s.result||!s.resolved[c.id])return state;
+      const index=deck(s,data).findIndex(card=>card.id===c.id);s.cursors[s.locationId]=c.repeatable?index+1:Math.max(s.cursors[s.locationId]||0,index+1);delete s.drawnCards[s.locationId];s.choiceId=null;s.result=null;break;
     }
     case 'endRound':
       if(s.round<7){s.round++;s.ap=3;}else s.ap=0;

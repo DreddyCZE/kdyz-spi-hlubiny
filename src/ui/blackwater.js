@@ -8,7 +8,7 @@ import {blackwaterMap} from '../data/map.js';
 import {blackwaterRoutes} from '../engine/blackwater-map.js';
 import {locations} from '../data/locations.js';
 import {mythEvents} from '../engine/myth.js';
-import {imageForCard} from '../data/story-art.js';
+import {imageForCard,storyArt} from '../data/story-art.js';
 import {rewards} from '../data/catalog.js';
 const $=id=>document.getElementById(id);
 let storage;try{storage=window.localStorage;}catch{/* Private browsing may block storage. */}
@@ -44,15 +44,22 @@ function showMythHistory(){
  if(!ids.length)$('mythHistoryCards').textContent='Zatím nebyla odhalena žádná karta mýtu.';
  $('mythHistoryDialog').showModal();
 }
-let transitionTimer=null;
-function showTransition(kind,title,description,symbol,autoDismiss=false){
- if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}
+const locationArrival={
+ 'location-0':'Slaná voda naráží do prázdných mol. Lana vržou v nárazech větru, ačkoli žádná loď neodplouvá. Pod prkny cosi třikrát udeří do pilířů. Pak přístav znovu ztichne.',
+ 'location-1':'Úzké ulice starého města jsou prázdné. Za zataženými závěsy se mihne světlo, které vzápětí zhasne. Z dálky se ozve zvon, ale nikdo nedokáže určit, odkud přichází.',
+ 'location-2':'Vysoká okna knihovny odrážejí zataženou oblohu. Mezi regály voní prach a mokrý papír. Na čtenářském stole leží rozevřený svazek, jako by od něj někdo právě odešel.',
+ 'location-3':'Za železnou branou ústavu se ozývají kroky, které nepatří žádnému viditelnému člověku. V jednom okně se objeví bledá tvář. Když vzhlédneš podruhé, zůstává jen prázdné sklo.',
+ 'location-4':'Hřbitovní brána se otevírá s táhlým skřípěním. Na některých náhrobcích jsou čerstvé květiny, přestože se sem obyvatelé po setmění neodvažují. Zem pod nohama je podivně teplá.',
+ 'location-5':'Maják se tyčí nad černou vodou. Jeho paprsek přejíždí po hladině, ačkoli přívod elektřiny byl před lety odpojen. Z vrcholu schodiště se ozývá pomalé, pravidelné klepání.',
+ 'location-6':'Příliv na okamžik ustoupí a odhalí vstup do jeskyní. Skály jsou hladké jako vyleštěný kámen. Z temnoty vane vzduch páchnoucí solí a něčím mnohem starším než samotné město.'
+};
+function showTransition(kind,title,description,symbol,artUrl=null){
  const dialog=$('transitionDialog');
  $('transitionKicker').textContent=kind;$('transitionTitle').textContent=title;
  $('transitionText').textContent=description;$('transitionSymbol').textContent=symbol;
+ $('transitionArtwork').style.backgroundImage=artUrl?'linear-gradient(0deg,#08171499,#08171410),url("'+artUrl+'")':'none';
  dialog.dataset.kind=kind;
  if(!dialog.open)dialog.showModal();
- if(autoDismiss)transitionTimer=window.setTimeout(()=>{transitionTimer=null;if(dialog.open)dialog.close();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?250:1350);
 }
 function button(label,action,disabled=false,cls=''){const b=document.createElement('button');b.textContent=label;b.disabled=disabled;b.className=cls;b.onclick=action;return b;}
 function send(type,rest={}){
@@ -62,7 +69,7 @@ function send(type,rest={}){
  const previousMythCount=state.myth.history.length;
  const previousLocation=state.game.locationId;
  state=next;saveBlackwater(storage,state);$('message').textContent='';render();
- if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,place.description,locationGlyph[place.id]||'✦',true);}
+ if(type==='move'&&state.game.locationId!==previousLocation){const place=locations.find(loc=>loc.id===state.game.locationId);if(place)showTransition('NOVÁ LOKACE',place.name,locationArrival[place.id]||place.description,locationGlyph[place.id]||'✦',storyArt.byLocationId[place.id]);}
  if(type==='startCombat'&&state.combat){showTransition('NEBEZPEČÍ · STŘETNUTÍ',enemyName(state.combat.enemyId),'Něco se vynořilo z mlhy. Připrav se na boj nebo útěk.','⚔');}
  if(type==='endRound'&&state.myth.history.length>previousMythCount){const event=mythEvents.find(e=>e.id===state.myth.history.at(-1));if(event)showMythCard(event,state.myth.history.length);}
  return true;
@@ -186,8 +193,8 @@ function render(){
  $('log').replaceChildren(...state.game.log.slice(0,12).map(entry=>{const p=document.createElement('p');p.textContent=entry;return p;}));
  if(view.ended)$('message').textContent='';
 }
-$('transitionContinue').onclick=()=>{$('transitionDialog').close();if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}};
-$('transitionDialog').addEventListener('close',()=>{if(transitionTimer){window.clearTimeout(transitionTimer);transitionTimer=null;}});
+$('transitionContinue').onclick=()=>$('transitionDialog').close();
+
 $('mythConfirm').onclick=()=>$('mythDialog').close();
 $('mythHistoryOpen').onclick=showMythHistory;
 $('mythHistoryClose').onclick=()=>$('mythHistoryDialog').close();

@@ -20,7 +20,7 @@ export function combatTurn(state,action,dice) {
   if(!enemy) throw new Error('Unknown enemy');
   const test=evaluate(...dice,action==='attack'?attributes['SÍ']:attributes['OB'],action==='attack'?enemy.defense:enemy.escapeDifficulty);
   const exchange=state.exchange+1;
-  const result={...state,exchange,roll:test,dice:[...dice],playerDamage:0,playerSanLoss:0};
+  const result={...state,exchange,lastMove:action,roll:test,dice:[...dice],playerDamage:0,playerSanLoss:0};
   const damage=()=>{
     if(enemy.attack.stat==='hp')result.playerDamage+=enemy.attack.amount;
     else result.playerSanLoss+=enemy.attack.amount;

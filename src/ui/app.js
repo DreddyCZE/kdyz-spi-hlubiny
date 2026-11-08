@@ -25,6 +25,7 @@ const { map: scenarioMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
 $('investigatorName').textContent=investigatorName;
+// The original occultist illustration is atmospheric art, not a selectable class.
 const portrait=blackwaterImage('investigators','occultist');
 if(portrait)$('investigatorPortrait').style.backgroundImage=`url("${new URL(portrait,document.baseURI).href}")`;
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}

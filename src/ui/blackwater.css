@@ -425,3 +425,13 @@ main{max-width:1660px;padding:5px 14px 18px}
 .transition-dialog[data-kind^="NEBEZPEČÍ"] .transition-symbol{color:#e4a391}
 @keyframes scene-in{from{opacity:0;transform:translateY(15px) scale(.85);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @media(prefers-reduced-motion:reduce){.transition-symbol{animation:none}}
+
+/* Travel cards stay open until the player has read and confirmed them. */
+.transition-dialog{width:min(92vw,590px)}
+.transition-scene{padding:15px 17px 22px}
+.transition-artwork{height:clamp(160px,30vh,270px);display:grid;place-items:center;background-color:#21392f;background-size:cover;background-position:center;border:6px double #bda16d;box-shadow:inset 0 0 45px #081614;margin-bottom:18px;position:relative}
+.transition-artwork::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#0b201cb3);pointer-events:none}
+.transition-artwork .transition-symbol{position:relative;z-index:1;align-self:end;margin-bottom:5px;font:40px Georgia;text-shadow:0 3px 12px #000,0 0 14px #000}
+.transition-scene>p:not(.eyebrow){max-width:490px;font-size:17px;line-height:1.55}
+.transition-scene button{min-width:175px;font-weight:700}
+@media(max-width:540px){.transition-artwork{height:170px}.transition-scene>p:not(.eyebrow){font-size:15px}}

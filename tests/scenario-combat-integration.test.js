@@ -19,22 +19,23 @@ test('U3: starting equipment is isolated from legacy inventory and persists',()=
 });
 test('U3: combat consumes AP, uses dice, blocks exploration and survives save validation',()=>{
  let s=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'sailor'});
- s=act(s,'startCombat',{enemyId:'enemy-drowned-sailor'});
+ s={...s,game:{...s.game,locationId:'location-2'}};
+ s=act(s,'startCombat',{enemyId:'enemy-fog-hound'});
  assert.equal(s.game.ap,2);
  assert.equal(s.scenario.combat.status,'active');
  assert.equal(scenarioSessionView(s,def,data).canAct,false);
  assert.strictEqual(act(s,'endRound'),s);
  assert.equal(validScenarioSession(s,def,data),true);
  s=act(s,'combatTurn',{move:'attack',dice:[6,6]});
- assert.equal(s.scenario.combat.enemyHp,1);
+ assert.equal(s.scenario.combat.enemyHp,0);
  assert.equal(validScenarioSession(s,def,data),true);
- s=act(s,'combatTurn',{move:'attack',dice:[6,6]});
  assert.equal(s.scenario.combat.status,'defeated');
  assert.equal(scenarioSessionView(s,def,data).canAct,true);
  assert.equal(validScenarioSession(s,def,data),true);
 });
 test('U3: invalid combat dice cannot advance combat',()=>{
  let s=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'detective'});
+ s={...s,game:{...s.game,locationId:'location-2'}};
  s=act(s,'startCombat',{enemyId:'enemy-fog-hound'});
  assert.strictEqual(act(s,'combatTurn',{move:'attack',dice:[0,9]}),s);
 });

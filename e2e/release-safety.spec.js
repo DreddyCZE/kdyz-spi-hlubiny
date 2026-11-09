@@ -11,12 +11,13 @@ const initial=newScenarioSession(pack.scenario,pack.content);
 const scenario=scenarioSessionTransition(initial,{type:'endRound',revision:initial.game.revision},pack.scenario,pack.content);
 const values=[legacy,old,scenario].map(v=>JSON.stringify(v));
 async function seed(page,entries){await page.addInitScript(entries=>{if(!sessionStorage.getItem('save-fixture')){for(const [key,value] of entries)localStorage.setItem(key,value);sessionStorage.setItem('save-fixture','yes');}},entries);}
+const chooseScenario=async page=>{const b=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});if(await b.isVisible())await b.click();};
 const saved=page=>page.evaluate(keys=>keys.map(k=>localStorage.getItem(k)),keys);
 for(const selected of [[],[0],[1],[2],[0,1,2]])test('release entry safely handles save formats '+JSON.stringify(selected),async({page})=>{
  await seed(page,selected.map(i=>[keys[i],values[i]]));await page.goto('/site/index.html');
  const before=await saved(page),panel=page.locator('#save-compatibility');await expect(panel).toBeVisible();
  for(const i of selected)await expect(panel).toContainText(['Původní hra: nalezena','Ilustrovaný Blackwater: nalezena','Nový scénář: nalezena'][i]);
- await page.locator('#endRound').click();const after=await saved(page);
+ await chooseScenario(page);await page.locator('#endRound').click();const after=await saved(page);
  for(const i of [0,1])expect(after[i]).toBe(before[i]);expect(after[2]).not.toBeNull();
  await page.reload();expect(await saved(page)).toEqual(after);
  await page.goto('/site/preview/index.html');expect(await saved(page)).toEqual(after);await expect(page.locator('#round')).toHaveText(String(JSON.parse(after[2]).game.round));
@@ -36,7 +37,7 @@ for(const mode of ['scenario','legacy','blackwater'])test('corrupt '+mode+' data
  const invalid=['{broken','{}','null'];await seed(page,keys.map((k,i)=>[k,invalid[i]]));
  await page.goto(mode==='blackwater'?'/site/preview/blackwater.html':'/site/preview/index.html'+(mode==='legacy'?'?mode=legacy':''));
  await expect(page.locator('#save-compatibility')).toContainText('poškozená');
- if(mode==='blackwater')await page.getByRole('button',{name:/^Detektiv /}).click();else await page.locator('#endRound').click();
+ if(mode==='blackwater')await page.getByRole('button',{name:/^Detektiv /}).click();else {if(mode==='scenario')await chooseScenario(page);await page.locator('#endRound').click();}
  expect(await saved(page)).toEqual(invalid);
  page.once('dialog',dialog=>dialog.accept());await page.locator('#reset').click();expect(await saved(page)).toEqual(invalid);
  await page.reload();expect(await saved(page)).toEqual(invalid);
@@ -44,7 +45,7 @@ for(const mode of ['scenario','legacy','blackwater'])test('corrupt '+mode+' data
 for(const path of ['/site/index.html','/site/preview/index.html','/site/preview/blackwater.html'])test('combined Pages artifact serves '+path,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
  await page.goto(path);await expect(page.locator('#save-compatibility')).toBeVisible();
- if(path.endsWith('blackwater.html')){await page.getByRole('button',{name:/^Detektiv /}).click();await expect(page.locator('#game')).toBeVisible();}else{await page.locator('#draw').click();await expect(page.locator('#choices button').first()).toBeVisible();}
+ if(path.endsWith('blackwater.html')){await page.getByRole('button',{name:/^Detektiv /}).click();await expect(page.locator('#game')).toBeVisible();}else{await chooseScenario(page);await page.locator('#draw').click();await expect(page.locator('#choices button').first()).toBeVisible();}
  const imagePaths=await page.evaluate(()=>[...document.styleSheets].length);expect(imagePaths).toBeGreaterThan(0);expect(errors).toEqual([]);
  const manifest=await page.request.get('/site/pages-build.json');expect(manifest.ok()).toBe(true);expect((await manifest.json()).rootSha).toMatch(/^[0-9a-f]{40}$/);
 });

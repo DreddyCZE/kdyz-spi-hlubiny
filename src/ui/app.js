@@ -1,3 +1,6 @@
+import {enemies} from '../engine/combat.js';
+import {renderRules} from './rules.js';
+import {investigators} from '../engine/scenario-investigators.js';
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
 import { imageForCard, blackwaterImage } from '../data/story-art.js';
@@ -24,6 +27,7 @@ import { createJournal } from './journal.js';
 const { map: scenarioMap, locations } = presentation;
 applyPresentation(document.documentElement, presentation);
 const $=id=>document.getElementById(id);
+renderRules($('rules-panel'),{legacy:legacyMode,rounds:legacyMode?7:activeScenario.rules.maxRounds,ap:legacyMode?3:activeScenario.rules.apPerRound,automaticDeductions:activeScenario.rules.deductionMode==='automatic'});
 $('investigatorName').textContent=investigatorName;
 // The original occultist illustration is atmospheric art, not a selectable class.
 const portrait=blackwaterImage('investigators','occultist');
@@ -43,6 +47,10 @@ function scenarioSessionView(s,def,data){
  return legacyMode?{canAct:!s.game.ended,pendingTest:null,ending:null,companion:[],puzzles:[],availableEndings:[],clocks:[{id:clockDisplayId,label:'Rituál',current:s.game.ritual,max:8}]}:scenarioView(s,def,data);
 }
 const puzzleDrafts=new Map();
+const equipmentActions=document.createElement('section');equipmentActions.className='scenario-feature';equipmentActions.setAttribute('aria-label','Výbava vyšetřovatele');$('cardStory').before(equipmentActions);
+const combatActions=document.createElement('section');combatActions.className='scenario-feature';combatActions.setAttribute('aria-label','Taktický souboj');$('cardStory').before(combatActions);
+const investigatorSetup=document.createElement('section');investigatorSetup.className='scenario-feature';investigatorSetup.setAttribute('aria-label','Výběr vyšetřovatele');$('cardStory').before(investigatorSetup);
+const investigatorAbility=document.createElement('section');investigatorAbility.className='scenario-feature';investigatorAbility.setAttribute('aria-label','Schopnost vyšetřovatele');$('cardStory').before(investigatorAbility);
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
@@ -54,12 +62,36 @@ function render(){
   const mapFocus=focused?.dataset.locationId;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
+  investigatorSetup.hidden=legacyMode||scene.investigatorId!==null;
+  investigatorSetup.replaceChildren();
+  if(!investigatorSetup.hidden){for(const hero of investigators){investigatorSetup.append(button(`${hero.name} · HP ${hero.hp} / SAN ${hero.san} · ${hero.ability}`,()=>dispatch({type:'selectInvestigator',revision:state.revision,investigatorId:hero.id}),false,'investigator-card'));}}
+  equipmentActions.replaceChildren();
+  const equipmentNames={'bw-bandage':'Obvaz · obnovit 2 HP','bw-salt':'Sůl · snížit hrozbu','bw-laudanum':'Laudanum · obnovit 2 SAN','bw-revolver':'Revolver · +1 k útoku'};
+  for(const id of scene.equipment||[]){equipmentActions.append(id==='bw-revolver'?document.createTextNode(equipmentNames[id]):button(equipmentNames[id],()=>dispatch({type:'useEquipment',revision:state.revision,itemId:id}),!scene.canAct||!!scene.pendingTest));}
+  combatActions.replaceChildren();
+  if(scene.combat?.status==='active'){
+    const enemy=enemies.find(e=>e.id===scene.combat.enemyId);
+    const title=document.createElement('p');title.textContent='Souboj: '+enemy.name+' · HP '+scene.combat.enemyHp+'/'+enemy.hp+' · výměna '+scene.combat.exchange+'/3';combatActions.append(title);
+    for(const move of ['attack','escape'])combatActions.append(button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>dispatch({type:'combatTurn',revision:state.revision,move,dice:rollDice()})));
+  }else{
+    if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
+      if(!legacyMode&&scene.canAct&&state.ap>=1){
+      for(const encounter of scene.availableEncounters)combatActions.append(button('Střetnutí: '+encounter.name+' · 1 AP',()=>dispatch({type:'startCombat',revision:state.revision,enemyId:encounter.enemyId})));
+    }
+  }
+  investigatorAbility.replaceChildren();
+  if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}
+  $('investigatorName').textContent=scene.investigator?.name||investigatorName;
+  $('investigatorRole').textContent=scene.investigator?scene.investigator.role+' · hlavní scénář':'Výzkumnice · hlavní scénář';
+  const selectedPortrait=blackwaterImage('investigators',scene.investigator?.id||'occultist');
+  $('investigatorPortrait').style.backgroundImage=selectedPortrait?`url("${new URL(selectedPortrait,document.baseURI).href}")`:'';
+  $('investigatorPortrait').setAttribute('aria-label',scene.investigator?'Portrét: '+scene.investigator.name:'Atmosférická ilustrace vyšetřovatelky');
   const pending=scene.pendingTest;
   const clock=scene.clocks.find(c=>c.id===clockDisplayId)||scene.clocks[0];
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
-  $('heroStats').textContent=`HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
+  $('heroStats').textContent=`HP ${state.hp}/${scene.investigator?.hp||6} · SAN ${state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');

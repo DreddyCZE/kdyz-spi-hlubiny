@@ -4,13 +4,14 @@ import {blackwaterScenario as def} from '../src/data/blackwater-scenario.js';
 import {content} from '../src/engine/content.js';
 import {newScenarioSession,scenarioSessionTransition,scenarioSessionView} from '../src/engine/scenario-session.js';
 const step=(s,a)=>scenarioSessionTransition(s,{...a,revision:s.game.revision},def,content);
+const ready=(scenario=def,data=content)=>{const s=newScenarioSession(scenario,data);return scenarioSessionTransition(s,{type:'selectInvestigator',investigatorId:'detective',revision:s.game.revision},scenario,data);};
 test('opt-in session starts independently from legacy',()=>{
  const s=newScenarioSession(def,content);
  assert.equal(s.game.round,1);assert.equal(s.game.ap,3);assert.equal(s.scenario.clocks['tide-bells'],1);
  assert.equal(scenarioSessionView(s,def).ending,null);
 });
 test('rounds advance to twelve without legacy ritual tick',()=>{
- let s=newScenarioSession(def,content);
+ let s=ready();
  for(let i=1;i<=12;i++){
   s=step(s,{type:'endRound'});
   assert.equal(s.game.round,i+1);
@@ -22,7 +23,7 @@ test('rounds advance to twelve without legacy ritual tick',()=>{
  assert.strictEqual(step(s,{type:'endRound'}),s);
 });
 test('stale revisions cannot replay a round or clock',()=>{
- const s=newScenarioSession(def,content);
+ const s=ready();
  const next=step(s,{type:'endRound'});
  assert.strictEqual(scenarioSessionTransition(next,{type:'endRound',revision:s.game.revision},def,content),next);
 });
@@ -36,7 +37,7 @@ test('ending is explicit and cannot be chosen without prerequisites',()=>{
 });
 test('second scenario can use a different schedule without hardcoded Blackwater',()=>{
  const other={...def,id:'other-story',clocks:[{id:'countdown',label:'Hodiny',max:3,initial:0,milestones:[{round:2,value:1}]}],endings:[]};
- let s=newScenarioSession(other,content);
+ let s=ready(other);
  s=scenarioSessionTransition(s,{type:'endRound',revision:s.game.revision},other,content);
  assert.equal(s.scenario.clocks.countdown,1);
 });
@@ -44,7 +45,7 @@ test('second scenario can use a different schedule without hardcoded Blackwater'
 test('D3 companion actions are revision guarded, optional and do not consume AP',()=>{
  const companion={id:'dog',name:'Pes',kind:'animal',availability:{locationId:'location-0'},abilities:[{id:'scent',name:'Stopa',type:'active',trigger:'exploration',uses:'oncePerRound',text:'Pes zachytil pach.'}]};
  const data={...content,companions:[companion]};
- let session=newScenarioSession(def,data);
+ let session=ready(def,data);
  const initialAp=session.game.ap;
  const before=scenarioSessionView(session,def,data);
  assert.equal(before.companion[0].recruitable,true);

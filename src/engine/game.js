@@ -48,10 +48,10 @@ export function evaluate(a,b,bonus,difficulty){
 }
 export function rollDice(random=Math.random){return [1+Math.floor(random()*6),1+Math.floor(random()*6)];}
 const clamp=(n,max)=>Math.max(0,Math.min(max,n));
-export function applyEffects(state,effects,data=content){
+export function applyEffects(state,effects,data=content,limits={hp:6,san:8}){
   const s=rememberEvidence(structuredClone(state),data.investigation.itemEvidence);
   for(const e of effects){switch(e.type){
-    case 'modifyStat':s[e.stat]=clamp(s[e.stat]+e.amount,e.stat==='hp'?6:8);break;
+    case 'modifyStat':s[e.stat]=clamp(s[e.stat]+e.amount,e.stat==='hp'?limits.hp:limits.san);break;
     case 'modifyThreat':s.threat=clamp(s.threat+e.amount,10);break;
     case 'modifyRitual':s.ritual=clamp(s.ritual+e.amount,8);break;
     case 'addItem':if(!s.inventory.includes(e.id))s.inventory.push(e.id);rememberEvidence(s,data.investigation.itemEvidence);break;
@@ -92,7 +92,7 @@ export function transition(state,action,data=content,rules={}){
       const o=c.choices.find(o=>o.id===action.choiceId);if(!o||!canChoose(s,c,o,data))return state;
       let r={dice:null,total:null,key:'success'};
       if(o.test){if(!Array.isArray(action.dice)||action.dice.length!==2)return state;try{r=evaluate(...action.dice,attributes[o.test.attribute]+(o.test.modifier||0),o.test.difficulty);}catch{return state;}}
-      s=applyEffects(s,o.outcomes[r.key].effects,data);if(!s)return state;
+      s=applyEffects(s,o.outcomes[r.key].effects,data,rules.statLimits||{hp:6,san:8});if(!s)return state;
       s.ap-=o.apCost;s.choiceId=o.id;s.result={...r,cardId:c.id,choiceId:o.id,revision:state.revision+1};s.resolved[c.id]=s.result;s.log.unshift(c.title+': '+labels[r.key]);break;
     }
     case 'next':{

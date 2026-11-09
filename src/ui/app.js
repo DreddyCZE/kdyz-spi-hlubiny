@@ -1,3 +1,4 @@
+import {investigators} from '../engine/scenario-investigators.js';
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
 import { imageForCard, blackwaterImage } from '../data/story-art.js';
@@ -43,6 +44,8 @@ function scenarioSessionView(s,def,data){
  return legacyMode?{canAct:!s.game.ended,pendingTest:null,ending:null,companion:[],puzzles:[],availableEndings:[],clocks:[{id:clockDisplayId,label:'Rituál',current:s.game.ritual,max:8}]}:scenarioView(s,def,data);
 }
 const puzzleDrafts=new Map();
+const investigatorSetup=document.createElement('section');investigatorSetup.className='scenario-feature';investigatorSetup.setAttribute('aria-label','Výběr vyšetřovatele');$('cardStory').before(investigatorSetup);
+const investigatorAbility=document.createElement('section');investigatorAbility.className='scenario-feature';investigatorAbility.setAttribute('aria-label','Schopnost vyšetřovatele');$('cardStory').before(investigatorAbility);
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
@@ -54,12 +57,18 @@ function render(){
   const mapFocus=focused?.dataset.locationId;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
+  investigatorSetup.hidden=legacyMode||scene.investigatorId!==null;
+  investigatorSetup.replaceChildren();
+  if(!investigatorSetup.hidden){for(const hero of investigators){investigatorSetup.append(button(`${hero.name} · HP ${hero.hp} / SAN ${hero.san} · ${hero.ability}`,()=>dispatch({type:'selectInvestigator',revision:state.revision,investigatorId:hero.id}),false,'investigator-card'));}}
+  investigatorAbility.replaceChildren();
+  if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}
+  $('investigatorName').textContent=scene.investigator?.name||investigatorName;
   const pending=scene.pendingTest;
   const clock=scene.clocks.find(c=>c.id===clockDisplayId)||scene.clocks[0];
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
-  $('heroStats').textContent=`HP ${state.hp}/6 · SAN ${state.san}/8 · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
+  $('heroStats').textContent=`HP ${state.hp}/${scene.investigator?.hp||6} · SAN ${state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');

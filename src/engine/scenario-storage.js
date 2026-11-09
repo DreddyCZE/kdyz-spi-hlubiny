@@ -1,3 +1,4 @@
+import {investigatorById} from './scenario-investigators.js';
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
@@ -8,12 +9,17 @@ export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
  const g=s.game,c=s.scenario;
+ const hero=s.investigatorId===undefined||s.investigatorId===null?null:investigatorById[s.investigatorId];
+ if(s.investigatorId!==undefined&&s.investigatorId!==null&&!hero)return false;
+ if(s.abilityUsed!==undefined&&typeof s.abilityUsed!=='boolean')return false;
+ if(s.investigatorId===null&&(g.revision!==0||s.abilityUsed))return false;
+ if(hero&&(g.hp>hero.hp||g.san>hero.san))return false;
  if(c.schemaVersion!==1||c.scenarioId!==def.id||c.scenarioVersion!==def.version)return false;
  if(!Number.isSafeInteger(g.round)||g.round<1||g.round>def.rules.maxRounds+1)return false;
- if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound)return false;
+ if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound+(hero?.id==='detective'?1:0))return false;
  if(g.round>def.rules.maxRounds&&g.ap!==0)return false;
  // Reuse the strict legacy validator with only the scenario-specific range and ritual exception.
- const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
+ const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),hp:Math.min(g.hp,6),san:Math.min(g.san,8),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
  if(g.ended!==legacy.ended)return false;
  if(!validState(legacy,data))return false;
  if(!c.clocks||Object.keys(c.clocks).length!==def.clocks.length)return false;

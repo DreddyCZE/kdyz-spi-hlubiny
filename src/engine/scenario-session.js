@@ -25,6 +25,8 @@ export function scenarioSessionTransition(session,action,def,data){
   if(action.type==='selectInvestigator')return action.revision===session.game.revision?selectScenarioInvestigator(session,action.investigatorId):session;
   if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision?activateScenarioAbility(session):session;
   const game=session.game,sc=session.scenario;
+  const hero=investigatorById[session.investigatorId];
+  const scenarioRules={...def.rules,scenarioClock:true,...(hero?{statLimits:{hp:hero.hp,san:hero.san}}:{})};
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
 
@@ -89,7 +91,7 @@ export function scenarioSessionTransition(session,action,def,data){
     const first=score(pending.firstDice,choice.test);
     const second=pending.secondDice?score(pending.secondDice,choice.test):null;
     const winner=second&&tiers.indexOf(second.key)>tiers.indexOf(first.key)?pending.secondDice:pending.firstDice;
-    const nextGame=legacyTransition(game,{type:'resolve',revision:game.revision,cardId:pending.cardId,choiceId:pending.choiceId,dice:winner},data,{...def.rules,scenarioClock:true});
+    const nextGame=legacyTransition(game,{type:'resolve',revision:game.revision,cardId:pending.cardId,choiceId:pending.choiceId,dice:winner},data,scenarioRules);
     if(nextGame===game)return session;
     return {...session,game:autoDeductions(nextGame,def,data),scenario:{...sc,pendingTest:null}};
   }
@@ -105,7 +107,7 @@ export function scenarioSessionTransition(session,action,def,data){
     const nextRound=game.round+1;
     const nextGame=game.round===def.rules.maxRounds
       ? {...game,round:nextRound,ap:0,revision:game.revision+1,log:['Čas vypršel.',...game.log].slice(0,100)}
-      : legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
+      : legacyTransition(game,action,data,scenarioRules);
     if(nextGame===game)return session;
     let nextSc=sc;
     // Seven tolls, triggered once each at scenario-specific milestones.
@@ -120,7 +122,7 @@ export function scenarioSessionTransition(session,action,def,data){
     return {...session,game:nextGame,scenario:nextSc};
   }
   if(action.type==='resolve'&&currentCard(game,data)?.choices.some(c=>c.id===action.choiceId&&c.test))return session;
-  const nextGame=legacyTransition(game,action,data,{...def.rules,scenarioClock:true});
+  const nextGame=legacyTransition(game,action,data,scenarioRules);
   if(nextGame===game)return session;
   // HP/SAN/threat remain lethal; the scenario clock replaces legacy ritual defeat.
   return {...session,game:autoDeductions(nextGame,def,data)};

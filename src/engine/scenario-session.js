@@ -26,7 +26,6 @@ export function scenarioSessionTransition(session,action,def,data){
   if(session.scenario.combat?.status==='active'&&!['combatTurn'].includes(action.type))return session;
   if(action.type==='selectInvestigator')return action.revision===session.game.revision?selectScenarioInvestigator(session,action.investigatorId):session;
   if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision&&session.scenario.combat?.status!=='active'?activateScenarioAbility(session):session;
-  if(session.investigatorId===null)return session;
   const game=session.game,sc=session.scenario;
   const hero=investigatorById[session.investigatorId];
   const scenarioRules={...def.rules,scenarioClock:true,...(hero?{statLimits:{hp:hero.hp,san:hero.san}}:{})};

@@ -16,10 +16,12 @@ export function validScenarioSession(s,def,data){
  if(s.investigatorId===null&&(g.revision!==0||s.abilityUsed))return false;
  if(hero&&(g.hp>hero.hp||g.san>hero.san))return false;
  if(c.equipment!==undefined&&(!Array.isArray(c.equipment)||new Set(c.equipment).size!==c.equipment.length||c.equipment.some(id=>!['bw-bandage','bw-salt','bw-laudanum','bw-revolver'].includes(id))))return false;
+ if(c.encounteredEnemyIds!==undefined&&(!Array.isArray(c.encounteredEnemyIds)||new Set(c.encounteredEnemyIds).size!==c.encounteredEnemyIds.length||c.encounteredEnemyIds.some(id=>!enemies.some(e=>e.id===id))))return false;
  if(c.combat!==undefined){
   const combat=c.combat,enemy=enemies.find(e=>e.id===combat?.enemyId);
   if(!enemy||!Number.isSafeInteger(combat.enemyHp)||combat.enemyHp<0||combat.enemyHp>enemy.hp||!Number.isSafeInteger(combat.exchange)||combat.exchange<0||combat.exchange>3||!['active','defeated','escaped'].includes(combat.status))return false;
   if(combat.status==='defeated'&&combat.enemyHp!==0)return false;
+  if(c.encounteredEnemyIds&&!c.encounteredEnemyIds.includes(combat.enemyId))return false;
  }
  if(c.schemaVersion!==1||c.scenarioId!==def.id||c.scenarioVersion!==def.version)return false;
  if(!Number.isSafeInteger(g.round)||g.round<1||g.round>def.rules.maxRounds+1)return false;

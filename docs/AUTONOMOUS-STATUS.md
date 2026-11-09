@@ -44,3 +44,14 @@ První Chromium běh: 69/73, čtyři selhání byla stará očekávání počtu 
 - Vizuálně zkontrolován skutečný snímek mobilního průchodu v šířce 320 px. Žádný zásah do public ani commit build výstupů.
 
 Při stabilizaci #21 opraveny také puzzle/mapové fixture bez vybrané postavy, původní očekávání pevného jména a reset test, který nově správně provede opětovný výběr postavy. Odstraněna pouze redundantní druhá volba postavy s čekáním na timeout; původní beforeEach postavu vybírá dál.
+
+## GitHub a nasazení
+
+- Implementační commity: `8177e19`, `9462585`. Zachována i historie převzaté větve.
+- Aktualizovaný [PR #21](https://github.com/DreddyCZE/kdyz-spi-hlubiny/pull/21) prošel [CI 42667083806](https://github.com/DreddyCZE/kdyz-spi-hlubiny/actions/runs/42667083806) a byl sloučen do `feature/unified-blackwater-ui`, merge `a3180c0`. Také integrační CI `42667588323` prošlo.
+- [PR #19](https://github.com/DreddyCZE/kdyz-spi-hlubiny/pull/19) má aktualizovaný rozsah a zůstává otevřený do main. Main nebyl změněn.
+- Ověřený `9462585` byl fast-forwardem publikován přes existující preview větev. [Pages workflow 42667598850](https://github.com/DreddyCZE/kdyz-spi-hlubiny/actions/runs/42667598850) úspěšně dokončil testy, sestavení i deploy.
+- [Funkční preview](https://dreddycze.github.io/kdyz-spi-hlubiny/preview/). Veřejný `pages-build.json` potvrzuje `rootSha=097f05d1e326202b09e06b447f7ac122196f0e37`, `previewSha=9462585821d2bfe4e6326a2625f523116f4e50d6`. Ověřeno HTTP 200 pro vstup, nové moduly pravidel/konfliktu/setkání i portrét. Kořen zůstal na původní verzi.
+- Žádný nový duplicitní PR. #20 a #16 zůstávají samostatné otevřené návrhy; nebyly nekriticky přidány k integraci.
+
+Další konkrétní implementační krok: dopracovat D5 (zbývající dvě hádanky včetně skutečných zdrojů indicií, alternativních cest a příběhových důsledků), pak onboarding a pasivní schopnosti. Finální D7 vyžaduje také lidský playtest; dosavadní automatické průchody ho nenahrazují. Celá roadmapa není dokončena.

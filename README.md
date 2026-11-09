@@ -1,6 +1,8 @@
 # Když spí hlubiny
 
-Atmosférická karetní webová hra o vyšetřování u moře. Zachovává Eleanor Whitmore, sedm lokací a osm karet z prototypu 0.3. Herní aplikace nemá externí runtime knihovny; Node.js 22 nebo novější. Pro E2E testy se instalují vývojové závislosti a samostatné Chromium.
+Atmosférická karetní webová hra o vyšetřování u moře. Hlavní scénář Zvony pod přílivem má dvanáct kol, sedm lokací, výběr tří vyšetřovatelů, důkazy a znalosti, volitelného pomocníka, hádanku, konflikty a několik zakončení. Původní sedmikolová hra a ilustrovaný režim zůstávají samostatné kvůli kompatibilitě uložených pozic. Herní aplikace nemá externí runtime knihovny; Node.js 22 nebo novější. Pro E2E testy se instalují vývojové závislosti a samostatné Chromium.
+
+Ověřená implementace, výsledky testů a dosud nedokončené úkoly: [aktuální stav vývoje](docs/AUTONOMOUS-STATUS.md). Tato verze není dokončením celé roadmapy.
 
 ```sh
 npm run dev

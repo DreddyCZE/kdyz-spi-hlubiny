@@ -25,18 +25,19 @@ export function scenarioSessionTransition(session,action,def,data){
   if(session.scenario.endingId)return session;
   if(session.scenario.combat?.status==='active'&&!['combatTurn'].includes(action.type))return session;
   if(action.type==='selectInvestigator')return action.revision===session.game.revision?selectScenarioInvestigator(session,action.investigatorId):session;
-  if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision?activateScenarioAbility(session):session;
+  if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision&&session.scenario.combat?.status!=='active'?activateScenarioAbility(session):session;
+  if(session.investigatorId===null)return session;
   const game=session.game,sc=session.scenario;
   const hero=investigatorById[session.investigatorId];
   const scenarioRules={...def.rules,scenarioClock:true,...(hero?{statLimits:{hp:hero.hp,san:hero.san}}:{})};
   const pending=sc.pendingTest||null;
   if(action.type==='startCombat'){
     const enemy=enemies.find(e=>e.id===action.enemyId);
-    if(action.revision!==game.revision||!enemy||game.ended||sc.combat||game.ap<1||pending||session.investigatorId===null)return session;
+    if(action.revision!==game.revision||!enemy||game.ended||sc.combat||game.ap<1||pending||!({'location-2':'enemy-fog-hound','location-4':'enemy-hollow-orderly','location-6':'enemy-bell-keeper'}[game.locationId]===enemy.id))return session;
     return {...session,game:{...game,ap:game.ap-1,revision:game.revision+1},scenario:{...sc,combat:startCombat(enemy.id)}};
   }
   if(action.type==='combatTurn'){
-    if(action.revision!==game.revision||sc.combat?.status!=='active'||!diceValid(action.dice))return session;
+    if(action.revision!==game.revision||game.ended||sc.combat?.status!=='active'||!diceValid(action.dice))return session;
     let result;
     try{result=combatTurn(sc.combat,action.move,action.dice,sc.equipment?.includes('bw-revolver')?1:0);}catch{return session;}
     const next={...game,revision:game.revision+1,hp:Math.max(0,game.hp-result.playerDamage),san:Math.max(0,game.san-result.playerSanLoss)};
@@ -45,7 +46,7 @@ export function scenarioSessionTransition(session,action,def,data){
     return {...session,game:next,scenario:{...sc,combat:result}};
   }
   if(action.type==='useEquipment'){
-    if(action.revision!==game.revision||game.ended||pending||sc.combat?.status==='active'||!sc.equipment?.includes(action.itemId))return session;
+    if(action.revision!==game.revision||game.ended||pending||game.round>def.rules.maxRounds||sc.combat?.status==='active'||!sc.equipment?.includes(action.itemId))return session;
     const next={...game,revision:game.revision+1};
     if(action.itemId==='bw-bandage'){if(game.hp>= (investigatorById[session.investigatorId]?.hp||6))return session;next.hp=Math.min(investigatorById[session.investigatorId]?.hp||6,game.hp+2);}
     else if(action.itemId==='bw-laudanum'){if(game.san>=(investigatorById[session.investigatorId]?.san||8))return session;next.san=Math.min(investigatorById[session.investigatorId]?.san||8,game.san+2);}

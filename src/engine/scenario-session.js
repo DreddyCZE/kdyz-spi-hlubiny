@@ -1,3 +1,4 @@
+import {selectScenarioInvestigator,activateScenarioAbility,investigatorById} from './scenario-investigators.js';
 // Opt-in P1 adapter. Legacy engine and its save format remain unchanged.
 import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes} from './game.js';
 import {initialScenarioState,advanceClock,availableEndings,chooseEnding} from './scenario.js';
@@ -7,7 +8,7 @@ import {initialCompanionState,validateCompanion,companionAvailable,recruitCompan
 export function newScenarioSession(def,data){
   const game=newState(data);
   game.ap=def.rules.apPerRound;
-  return {schemaVersion:1,game,scenario:{...initialScenarioState(def),puzzles:{},companion:initialCompanionState()}};
+  return {schemaVersion:1,investigatorId:null,abilityUsed:false,game,scenario:{...initialScenarioState(def),puzzles:{},companion:initialCompanionState()}};
 }
 const tiers=['criticalFailure','failure','partialSuccess','success','greatSuccess','criticalSuccess'];
 const diceValid=d=>Array.isArray(d)&&d.length===2&&d.every(n=>Number.isInteger(n)&&n>=1&&n<=6);
@@ -21,9 +22,12 @@ function autoDeductions(game,def,data){
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
+  if(action.type==='selectInvestigator')return action.revision===session.game.revision?selectScenarioInvestigator(session,action.investigatorId):session;
+  if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision?activateScenarioAbility(session):session;
   const game=session.game,sc=session.scenario;
   const pending=sc.pendingTest||null;
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
+  if(session.investigatorId===null)return session;
   if(action.type==='deduce'&&def.rules.deductionMode==='automatic')return session;
   // D3 companion transitions are revision guarded and never consume AP.
   if(['recruitCompanion','dismissCompanion','useCompanionAbility'].includes(action.type)){
@@ -122,7 +126,7 @@ export function scenarioSessionTransition(session,action,def,data){
   return {...session,game:autoDeductions(nextGame,def,data)};
 }
 export function scenarioSessionView(session,def,data={}){
-  return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,
+  return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,investigatorId:session.investigatorId??null,investigator:investigatorById[session.investigatorId]||null,abilityUsed:session.abilityUsed===true,
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,

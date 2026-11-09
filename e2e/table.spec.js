@@ -1,6 +1,13 @@
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
 import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 
 for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
   test(`mapa, přehledy a reload ${viewport.width}`, async ({page},testInfo)=>{

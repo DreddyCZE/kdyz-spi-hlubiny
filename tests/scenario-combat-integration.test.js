@@ -39,3 +39,21 @@ test('U3: invalid combat dice cannot advance combat',()=>{
  s=act(s,'startCombat',{enemyId:'enemy-fog-hound'});
  assert.strictEqual(act(s,'combatTurn',{move:'attack',dice:[0,9]}),s);
 });
+
+test('U3: class consumables change stats and cannot be reused',()=>{
+ let occultist=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'occultist'});
+ occultist={...occultist,game:{...occultist.game,san:6}};
+ const healed=act(occultist,'useEquipment',{itemId:'bw-laudanum'});
+ assert.equal(healed.game.san,8);
+ assert.equal(healed.scenario.equipment.includes('bw-laudanum'),false);
+ assert.strictEqual(act(healed,'useEquipment',{itemId:'bw-laudanum'}),healed);
+ let detective=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'detective'});
+ const salted=act(detective,'useEquipment',{itemId:'bw-salt'});
+ assert.equal(salted.game.threat,detective.game.threat-1);
+ assert.equal(validScenarioSession(salted,def,data),true);
+});
+test('U3: combat cannot be forged outside encounter locations',()=>{
+ const s=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'detective'});
+ assert.strictEqual(act(s,'startCombat',{enemyId:'enemy-bell-keeper'}),s);
+ assert.strictEqual(act(s,'startCombat',{enemyId:'enemy-drowned-sailor'}),s);
+});

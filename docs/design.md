@@ -40,3 +40,9 @@ Revize PR #3 odděluje rozsah obecných podmínek kol od délky prvního scéná
 Toulavý pes zůstává bezplatným volitelným společníkem; jeho stopa ani příznak `cave-service-route-used` nejsou podmínkou zakončení. U karty Sůl na schodech je nyní možné odejít za 0 AP: hráč s již zaznamenanou stopou nemusí před porovnáním podstoupit další test. Nová volba nic neodemyká a neuděluje odměnu. Jednorázový neúspěch v Průchodu pod skálou neslibuje neexistující opakování; vyšetřování pokračuje v ostatních lokacích.
 
 Nevyřešená podmíněná karta není veřejně promítána ani přijata z uložené pozice bez splněných podmínek. Již vyhodnocené karty zůstávají dostupné pro zobrazení dosaženého výsledku. Formát save a pravidla legacy hry se nemění.
+
+## D4 – pilot konfliktu na kartě
+
+Hlídač u řetězu je jednorázové volitelné setkání v přístavním balíčku scénáře. Nabízí boj (SÍ), útěk (OB), vyjednávání (VŮ) a využití navijáku (VN), každý za 1 AP. Šest výsledků každé volby má explicitní efekty. Způsob řešení a zpřístupnění zadního mola se zaznamenají příznaky; nejsou podmínkou hlavní cesty ani zakončení. Neúspěch umožňuje pokračovat v ostatních lokacích. Nulové HP/SAN zůstávají porážkou; návrat vyřazené postavy dosud implementován není. Legacy obsah se nemění. Nové definice používají existující save schema a staré stabilní ID zůstávají zachované.
+
+Regrese ověřují čtyři přístupy s šesti předanými dvojicemi kostek, atomickou cenu a následek, odmítnutí opakovaného potvrzení, reload před i po výsledku, veřejnou projekci a dosažitelnost skutečným dobíráním.

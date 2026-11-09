@@ -15,7 +15,7 @@ for(const width of [1440,390,320])test(`explicit deck draw, keyboard, privacy an
  await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
  await page.addInitScript(()=>{Math.random=()=>.5;});await page.goto('./');
  const hidden=async(known=[])=>{const html=await page.locator('body').innerHTML();for(const c of content.cards.filter(c=>!known.includes(c.id))){expect(html).not.toContain(c.title);expect(html).not.toContain(c.description);}expect(html).not.toContain('addEvidence');};
- await hidden();await expect(page.locator('#deckName')).toHaveText('Mlžná mola');await expect(page.locator('#deckCounts')).toContainText('Dostupné: 5');
+ await hidden();await expect(page.locator('#deckName')).toHaveText('Mlžná mola');await expect(page.locator('#deckCounts')).toContainText('Dostupné: 6');
  await expect(page.locator('#roll')).toBeDisabled();await expect(page.locator('#next')).toBeDisabled();
  await page.screenshot({path:testInfo.outputPath(`deck-${width}.png`),fullPage:true});
  await page.reload();await hidden();await page.locator('#draw').focus();await page.keyboard.press('Enter');
@@ -23,7 +23,7 @@ for(const width of [1440,390,320])test(`explicit deck draw, keyboard, privacy an
  for(const c of content.cards.slice(1))expect(await page.locator('body').innerHTML()).not.toContain(c.title);
  await page.reload();await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
  await resolveDrawn(page);await page.locator('#next').click();
- await expect(page.locator('#draw')).toBeFocused();await hidden(['0-0']);await expect(page.locator('#deckCounts')).toContainText('Dostupné: 4');
+ await expect(page.locator('#draw')).toBeFocused();await hidden(['0-0']);await expect(page.locator('#deckCounts')).toContainText('Dostupné: 5');
  const saved=await page.evaluate(key=>localStorage.getItem(key),saveKey);await page.reload();await hidden(['0-0']);expect(await page.evaluate(key=>localStorage.getItem(key),saveKey)).toBe(saved);
  await page.locator('#draw').click();await expect(page.locator('#cardTitle')).toHaveText('Muž z mlhy');await expect(page.locator('#ap')).toHaveText('2');
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
@@ -38,10 +38,10 @@ test('resolved cards reduce available deck count without creating a dead-end',as
   await resolveDrawn(page);
   await page.locator('#next').click();
  }
- await expect(page.locator('#deckCounts')).toContainText('Dostupné: 2');
+ await expect(page.locator('#deckCounts')).toContainText('Dostupné: 3');
  await expect(page.locator('#deckCounts')).toContainText('Vyřešené: 3');
  await expect(page.locator('#draw')).toBeEnabled();
  await page.reload();
- await expect(page.locator('#deckCounts')).toContainText('Dostupné: 2');
+ await expect(page.locator('#deckCounts')).toContainText('Dostupné: 3');
  await expect(page.locator('#draw')).toBeEnabled();
 });

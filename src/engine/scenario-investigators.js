@@ -4,7 +4,10 @@ export function selectScenarioInvestigator(session,id){
  const hero=Object.hasOwn(investigatorById,id)?investigatorById[id]:null;
  if(!hero||session.investigatorId!==null||session.game.revision!==0||session.game.round!==1||session.scenario.endingId)return session;
  const game=structuredClone(session.game);
- game.hp=hero.hp;game.san=hero.san;// Illustrated-mode item IDs are not in the scenario catalog; do not inject invalid items.game.revision++;
+ game.hp=hero.hp;
+ game.san=hero.san;
+ // Illustrated-mode item IDs are not in the scenario catalog.
+ game.revision++;
  return {...session,investigatorId:id,abilityUsed:false,game};
 }
 export function activateScenarioAbility(session){

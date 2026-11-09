@@ -1,3 +1,4 @@
+import {startCombat,combatTurn,enemies} from './combat.js';
 import {selectScenarioInvestigator,activateScenarioAbility,investigatorById} from './scenario-investigators.js';
 // Opt-in P1 adapter. Legacy engine and its save format remain unchanged.
 import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes} from './game.js';
@@ -22,12 +23,36 @@ function autoDeductions(game,def,data){
 export function scenarioSessionTransition(session,action,def,data){
   if(!session||session.schemaVersion!==1||session.scenario.scenarioId!==def.id||session.scenario.scenarioVersion!==def.version)return session;
   if(session.scenario.endingId)return session;
+  if(session.scenario.combat?.status==='active'&&!['combatTurn'].includes(action.type))return session;
   if(action.type==='selectInvestigator')return action.revision===session.game.revision?selectScenarioInvestigator(session,action.investigatorId):session;
   if(action.type==='useInvestigatorAbility')return action.revision===session.game.revision?activateScenarioAbility(session):session;
   const game=session.game,sc=session.scenario;
   const hero=investigatorById[session.investigatorId];
   const scenarioRules={...def.rules,scenarioClock:true,...(hero?{statLimits:{hp:hero.hp,san:hero.san}}:{})};
   const pending=sc.pendingTest||null;
+  if(action.type==='startCombat'){
+    const enemy=enemies.find(e=>e.id===action.enemyId);
+    if(action.revision!==game.revision||!enemy||game.ended||sc.combat||game.ap<1||pending||session.investigatorId===null)return session;
+    return {...session,game:{...game,ap:game.ap-1,revision:game.revision+1},scenario:{...sc,combat:startCombat(enemy.id)}};
+  }
+  if(action.type==='combatTurn'){
+    if(action.revision!==game.revision||sc.combat?.status!=='active'||!diceValid(action.dice))return session;
+    let result;
+    try{result=combatTurn(sc.combat,action.move,action.dice,sc.equipment?.includes('bw-revolver')?1:0);}catch{return session;}
+    const next={...game,revision:game.revision+1,hp:Math.max(0,game.hp-result.playerDamage),san:Math.max(0,game.san-result.playerSanLoss)};
+    next.ended=next.hp===0||next.san===0||next.threat===10;
+    next.log=[enemies.find(e=>e.id===result.enemyId).name+': '+(result.status==='defeated'?'poražen':result.status==='escaped'?'únik':'souboj pokračuje'),...game.log].slice(0,100);
+    return {...session,game:next,scenario:{...sc,combat:result}};
+  }
+  if(action.type==='useEquipment'){
+    if(action.revision!==game.revision||game.ended||pending||sc.combat?.status==='active'||!sc.equipment?.includes(action.itemId))return session;
+    const next={...game,revision:game.revision+1};
+    if(action.itemId==='bw-bandage'){if(game.hp>= (investigatorById[session.investigatorId]?.hp||6))return session;next.hp=Math.min(investigatorById[session.investigatorId]?.hp||6,game.hp+2);}
+    else if(action.itemId==='bw-laudanum'){if(game.san>=(investigatorById[session.investigatorId]?.san||8))return session;next.san=Math.min(investigatorById[session.investigatorId]?.san||8,game.san+2);}
+    else if(action.itemId==='bw-salt'){next.threat=Math.max(0,game.threat-1);}
+    else return session;
+    return {...session,game:next,scenario:{...sc,equipment:sc.equipment.filter(id=>id!==action.itemId)}};
+  }
   if(pending&&!['rerollTest','acceptTest'].includes(action.type))return session;
 
   if(action.type==='deduce'&&def.rules.deductionMode==='automatic')return session;
@@ -132,8 +157,9 @@ export function scenarioSessionView(session,def,data={}){
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,
+    equipment:session.scenario.equipment||[],combat:session.scenario.combat||null,
     companion:(Array.isArray(data.companions)?data.companions:[]).filter(d=>!validateCompanion(d).length).map(d=>({id:d.id,name:d.name,kind:d.kind,recruitable:!session.scenario.companion?.activeId&&companionAvailable(d,session.game),active:companionView(d,session.scenario.companion||initialCompanionState(),session.game.round)})),
     puzzles:(Array.isArray(data.puzzles)?data.puzzles:[]).filter(p=>!validatePuzzle(p).length&&p.locationId===session.game.locationId).map(p=>puzzleView(p,session.scenario.puzzles?.[p.id],session.game)),
     availableEndings:session.game.ended||session.game.round>def.rules.maxRounds||session.scenario.pendingTest||(def.finaleLocationId&&session.game.locationId!==def.finaleLocationId)?[]:availableEndings(def,session.game,session.scenario).filter(e=>e.kind!=='defeat').map(e=>({id:e.id,title:e.title,kind:e.kind})),
-    canAct:session.investigatorId!==null&&!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};
+    canAct:session.investigatorId!==null&&session.scenario.combat?.status!=='active'&&!session.game.ended&&!session.scenario.endingId&&session.game.round<=def.rules.maxRounds};
 }

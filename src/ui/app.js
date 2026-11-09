@@ -71,11 +71,13 @@ function render(){
     const enemy=enemies.find(e=>e.id===scene.combat.enemyId);
     const title=document.createElement('p');title.textContent='Souboj: '+enemy.name+' · HP '+scene.combat.enemyHp+'/'+enemy.hp+' · výměna '+scene.combat.exchange+'/3';combatActions.append(title);
     for(const move of ['attack','escape'])combatActions.append(button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>dispatch({type:'combatTurn',revision:state.revision,move,dice:rollDice()})));
-  }else if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
-  else if(!legacyMode&&scene.canAct&&state.ap>=1&&['location-2','location-4','location-6'].includes(state.locationId)){
+  }else{
+    if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
+    if(!legacyMode&&scene.canAct&&state.ap>=1&&['location-2','location-4','location-6'].includes(state.locationId)){
     const enemyId=({'location-2':'enemy-fog-hound','location-4':'enemy-hollow-orderly','location-6':'enemy-bell-keeper'})[state.locationId];
     const enemy=enemies.find(e=>e.id===enemyId);
-    combatActions.append(button('Střetnutí: '+enemy.name+' · 1 AP',()=>dispatch({type:'startCombat',revision:state.revision,enemyId})));
+    if(!scene.encounteredEnemyIds.includes(enemyId))combatActions.append(button('Střetnutí: '+enemy.name+' · 1 AP',()=>dispatch({type:'startCombat',revision:state.revision,enemyId})));
+    }
   }
   investigatorAbility.replaceChildren();
   if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}

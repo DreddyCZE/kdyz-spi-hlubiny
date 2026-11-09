@@ -14,6 +14,7 @@ async function resolveDrawn(page){
 for(const width of [1440,390,320])test(`explicit deck draw, keyboard, privacy and reload ${width}px`,async({page},testInfo)=>{
  await page.setViewportSize({width,height:900});await page.emulateMedia({reducedMotion:'reduce'});
  await page.addInitScript(()=>{Math.random=()=>.5;});await page.goto('./');
+ await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').first().click({timeout:5000}).catch(async error=>{if(await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').count())throw error;});
  const hidden=async(known=[])=>{const html=await page.locator('body').innerHTML();for(const c of content.cards.filter(c=>!known.includes(c.id))){expect(html).not.toContain(c.title);expect(html).not.toContain(c.description);}expect(html).not.toContain('addEvidence');};
  await hidden();await expect(page.locator('#deckName')).toHaveText('Mlžná mola');await expect(page.locator('#deckCounts')).toContainText('Dostupné: 5');
  await expect(page.locator('#roll')).toBeDisabled();await expect(page.locator('#next')).toBeDisabled();
@@ -33,6 +34,7 @@ test('resolved cards reduce available deck count without creating a dead-end',as
  await page.emulateMedia({reducedMotion:'reduce'});
  await page.addInitScript(()=>{Math.random=()=>.5;});
  await page.goto('./');
+ await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').first().click({timeout:5000}).catch(async error=>{if(await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').count())throw error;});
  for(let i=0;i<3;i++){
   await page.locator('#draw').click();
   await resolveDrawn(page);

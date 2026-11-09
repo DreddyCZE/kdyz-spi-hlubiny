@@ -1,3 +1,5 @@
+import {enemies} from './combat.js';
+import {investigatorById} from './scenario-investigators.js';
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
@@ -8,12 +10,28 @@ export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
  const g=s.game,c=s.scenario;
+ const hero=Object.hasOwn(investigatorById,s.investigatorId)?investigatorById[s.investigatorId]:null;
+ if(s.investigatorId!==undefined&&s.investigatorId!==null&&!hero)return false;
+ if(s.abilityUsed!==undefined&&typeof s.abilityUsed!=='boolean')return false;
+ // Null investigator is valid for headless/legacy scenario journeys; the UI gates player actions.
+ if(s.investigatorId===null&&s.abilityUsed)return false;
+ if(!Number.isSafeInteger(g.hp)||g.hp<0||g.hp>(hero?.hp??6)||!Number.isSafeInteger(g.san)||g.san<0||g.san>(hero?.san??8))return false;
+ if(c.equipment!==undefined&&(!Array.isArray(c.equipment)||new Set(c.equipment).size!==c.equipment.length||c.equipment.some(id=>!['bw-bandage','bw-salt','bw-laudanum','bw-revolver'].includes(id))))return false;
+ if(c.encounteredEnemyIds!==undefined&&(!Array.isArray(c.encounteredEnemyIds)||new Set(c.encounteredEnemyIds).size!==c.encounteredEnemyIds.length||c.encounteredEnemyIds.some(id=>!enemies.some(e=>e.id===id))))return false;
+ if(c.combat!==undefined){
+  const combat=c.combat,enemy=enemies.find(e=>e.id===combat?.enemyId);
+  if(!enemy||!Number.isSafeInteger(combat.enemyHp)||combat.enemyHp<0||combat.enemyHp>enemy.hp||!Number.isSafeInteger(combat.exchange)||combat.exchange<0||combat.exchange>3||!['active','defeated','escaped'].includes(combat.status))return false;
+  if(combat.status==='defeated'&&combat.enemyHp!==0)return false;
+  if(combat.status==='active'&&(combat.enemyHp===0||combat.exchange===3))return false;
+  if(combat.status==='escaped'&&combat.enemyHp===0)return false;
+  if(c.encounteredEnemyIds&&!c.encounteredEnemyIds.includes(combat.enemyId))return false;
+ }
  if(c.schemaVersion!==1||c.scenarioId!==def.id||c.scenarioVersion!==def.version)return false;
  if(!Number.isSafeInteger(g.round)||g.round<1||g.round>def.rules.maxRounds+1)return false;
- if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound)return false;
+ if(!Number.isSafeInteger(g.ap)||g.ap<0||g.ap>def.rules.apPerRound+(hero?.id==='detective'?1:0))return false;
  if(g.round>def.rules.maxRounds&&g.ap!==0)return false;
  // Reuse the strict legacy validator with only the scenario-specific range and ritual exception.
- const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
+ const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),hp:Math.min(g.hp,6),san:Math.min(g.san,8),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
  if(g.ended!==legacy.ended)return false;
  if(!validState(legacy,data))return false;
  if(!c.clocks||Object.keys(c.clocks).length!==def.clocks.length)return false;

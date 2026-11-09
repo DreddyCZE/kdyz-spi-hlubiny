@@ -46,3 +46,11 @@ Nevyřešená podmíněná karta není veřejně promítána ani přijata z ulo�
 Hlídač u řetězu je jednorázové volitelné setkání v přístavním balíčku scénáře. Nabízí boj (SÍ), útěk (OB), vyjednávání (VŮ) a využití navijáku (VN), každý za 1 AP. Šest výsledků každé volby má explicitní efekty. Způsob řešení a zpřístupnění zadního mola se zaznamenají příznaky; nejsou podmínkou hlavní cesty ani zakončení. Neúspěch umožňuje pokračovat v ostatních lokacích. Nulové HP/SAN zůstávají porážkou; návrat vyřazené postavy dosud implementován není. Legacy obsah se nemění. Nové definice používají existující save schema a staré stabilní ID zůstávají zachované.
 
 Regrese ověřují čtyři přístupy s šesti předanými dvojicemi kostek, atomickou cenu a následek, odmítnutí opakovaného potvrzení, reload před i po výsledku, veřejnou projekci a dosažitelnost skutečným dobíráním.
+
+## Integrace U2/U3 a kompatibilita
+
+Scénářový režim přebírá výběr tří postav, jejich limity HP/SAN, jednorázové schopnosti, oddělenou výbavu a nepovinná střetnutí. Základní atributy testů zůstávají společné. Starší rozehrané pozice bez identity postavy pokračují s původními limity; nedochází k přepisu identity ani herní historie. Jen nedotčená nová session nabízí výběr. Umístění protivníků je definováno v obsahu scénáře, ne v obecném přechodu ani v DOM.
+
+## D6 – veřejná pravidla
+
+Přehled Jak se hraje je dostupný klávesnicí i před výběrem postavy. Používá délku a AP aktivního scénáře, pro původní režim popisuje sedm kol a původní porážku. Nečte tabulky následků, podmínky zakončení ani řešení hádanek. Otevření i zavření je čistě prezentační a neukládá žádnou změnu hry. Pravidla uvádějí aktuální sdílené atributy, skutečné efekty vybavení a maximálně tři bojové výměny; neslibují dosud nepřipojený mýtus ani návrat vyřazené postavy.

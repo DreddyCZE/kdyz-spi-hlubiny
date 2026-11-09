@@ -1,5 +1,7 @@
 # Roadmap k hratelnému Blackwater (M4–M7)
 
+> Historický plán. Aktuální audit implementace, překryvů větví a zbývající práce je v [AUTONOMOUS-STATUS.md](AUTONOMOUS-STATUS.md). Níže uvedená výchozí realita předchází scénářovému frameworku a integraci U2/U3; není aktuálním seznamem chybějících funkcí.
+
 ## Aktuální realita
 - Default hra a save v4 jsou stabilní; M4 karty jsou samostatný balíček, zatím bez voliče scénářů.
 - Izolované moduly `combat.js` a `myth.js` mají unit testy, **nejsou připojené k UI ani k ukládání**.

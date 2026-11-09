@@ -13,8 +13,9 @@
 <main>
 <header class="top">
 <div>
-<div class="eyebrow">Světlo z hlubin · karetní vyšetřování</div>
-<h1>KDYŽ SPÍ HLUBINY</h1>
+<div class="eyebrow">KDYŽ SPÍ HLUBINY · KAPITOLA I</div>
+<h1>Zvony pod přílivem</h1>
+<p class="edition">Blackwater · ilustrované vyšetřování · scénářový engine</p>
 </div>
 <div class="stats" aria-label="Stav hry">
 <span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / <span id="roundLimit">12</span></span></span>
@@ -25,10 +26,11 @@
 <span class="stat" data-stat="ap" data-symbol="◆"><span class="token-icon" aria-hidden="true">◆</span><span>AP</span><span class="value"><b id="ap"></b> / 3</span></span>
 </div>
 </header>
+<nav class="game-modes" aria-label="Herní režimy"><span class="game-modes-current" aria-current="page">● Hlavní scénář · hádanky, dedukce a společník</span><a href="./blackwater.html">Ilustrovaný původní režim ↗</a><a href="./index.html?mode=legacy">Původní karetní hra ↗</a></nav>
 <div class="layout">
 <section class="map-panel" aria-label="Mapa scénáře">
 <div class="map-heading">
-<div class="eyebrow">Pobřežní vyšetřování</div>
+<div class="eyebrow">ILUSTROVANÁ MAPA MĚSTA · 1926</div>
 <h2 id="mapTitle">
 </h2>
 <p>Přesun do jiné lokace stojí 1 AP.</p>
@@ -47,7 +49,7 @@
 </p>
 </div>
 </section>
-<section class="card" aria-labelledby="cardTitle">
+<section class="card" aria-labelledby="cardTitle" id="storyPanel">
 <section class="deck-summary" aria-label="Balíček lokace">
 <h3 id="deckName"></h3><p id="deckDescription"></p><p id="deckCounts" role="status"></p>
 <button class="primary" id="draw">Dobrat kartu</button>
@@ -92,6 +94,7 @@
 <button data-symbol="▤" data-panel="investigation-journal" data-focus="journal-knowledge"><span class="component-icon" aria-hidden="true">▤</span>Znalosti</button>
 <button data-symbol="⌘" data-panel="investigation-journal" data-focus="journal-deductions"><span class="component-icon" aria-hidden="true">⌘</span>Dedukce</button>
 <button data-symbol="✎" data-panel="history"><span class="component-icon" aria-hidden="true">✎</span>Herní záznam</button>
+<button data-panel="rules-panel">Jak se hraje</button>
 <div class="actions">
 <button id="endRound">Další kolo</button>
 <button id="reset">Nová hra</button>
@@ -103,6 +106,7 @@
 <button id="closeDetails" class="close">Zavřít přehled</button>
 <section id="investigator" class="detail-panel" hidden>
 <h2>Vyšetřovatel</h2>
+<div class="investigator-profile"><div id="investigatorPortrait" class="investigator-portrait" role="img" aria-label="Atmosférická ilustrace vyšetřovatelky"></div><div><strong id="investigatorName"></strong><p id="investigatorRole">Výzkumnice · hlavní scénář</p></div></div>
 <div id="heroStats">
 </div>
 </section>
@@ -116,6 +120,7 @@
 <div id="log" role="log" aria-live="polite">
 </div>
 </section>
+<section id="rules-panel" class="detail-panel" hidden></section>
 </dialog>
 </main>
 <script type="module" src="./src/ui/app.js">

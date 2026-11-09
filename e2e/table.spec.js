@@ -1,6 +1,13 @@
 import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
 import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 import { test, expect } from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 
 for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
   test(`mapa, přehledy a reload ${viewport.width}`, async ({page},testInfo)=>{
@@ -18,7 +25,7 @@ for (const viewport of [{width:1440,height:1000},{width:390,height:844}]) {
     await expect(page.locator('#ap')).toHaveText('2');
     await page.getByRole('button',{name:'Vyšetřovatel',exact:true}).click();
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.locator('#heroStats')).toContainText('Eleanor Whitmore');
+    await expect(page.locator('#investigatorName')).toHaveText('Detektiv');
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button',{name:'Vyšetřovatel',exact:true})).toBeFocused();
     await page.getByRole('button',{name:'Deník · důkazy',exact:true}).click();
@@ -46,10 +53,11 @@ test('zamčené body, žádné AP a konec hry blokují přesun',async({page})=>{
     await page.locator('#draw').click();
   await page.evaluate(async()=>{
     const {activeScenarioPack}=await import('./src/data/scenario-registry.js');
-    const {newScenarioSession}=await import('./src/engine/scenario-session.js');
+    const {newScenarioSession,scenarioSessionTransition}=await import('./src/engine/scenario-session.js');
     const {saveScenarioSession}=await import('./src/engine/scenario-storage.js');
     const {scenario,content}=activeScenarioPack;
-    const session=newScenarioSession(scenario,content);
+    const initial=newScenarioSession(scenario,content);
+    const session=scenarioSessionTransition(initial,{type:'selectInvestigator',investigatorId:'detective',revision:0},scenario,content);
     session.game.unlockedLocations=['location-0','location-1'];
     if(!saveScenarioSession(localStorage,session,scenario,content))throw Error('Scenario save rejected');
   });
@@ -89,6 +97,8 @@ test('reset během hodu zruší animaci a zachová nový save',async({page})=>{
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#reset').click();
   await page.clock.fastForward(1100);
+  await expect(page.locator('#draw')).toBeDisabled();
+  await page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/}).click();
   await expect(page.locator('#ap')).toHaveText('3');
   await expect(page.locator('#reveal')).toBeEmpty();
   await page.reload();

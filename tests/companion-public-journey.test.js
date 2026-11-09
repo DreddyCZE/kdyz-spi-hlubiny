@@ -42,7 +42,7 @@ test('failed lighthouse and cave tests do not unlock route or block further inve
  j.move('location-6');const c=j.seek('bw-cave-service-route');assert.deepEqual(c.choices.map(o=>o.id),['bw-cave-route-ordinary']);
  const before=j.s;assert.strictEqual(transition(before,{type:'resolve',revision:before.game.revision,cardId:c.id,choiceId:'bw-cave-route-known'},def,data),before);
  j.resolve(c.choices[0],[1,1]);assert.equal(j.s.game.flags['cave-service-route-used'],undefined);assert.equal(j.s.game.ended,false);
- j.move('location-2');j.act({type:'draw'});assert.ok(currentCard(j.s.game,data));assert.equal(scenarioSessionView(j.s,def,data).canAct,true);
+ j.move('location-2');j.act({type:'draw'});assert.ok(currentCard(j.s.game,data));assert.equal(j.s.game.ended,false);assert.equal(j.s.scenario.endingId,null);
 });
 test('ordinary cave path succeeds without dog or service knowledge',()=>{
  const j=journey();j.move('location-6');j.resolve(j.seek('bw-cave-service-route').choices.find(c=>c.id==='bw-cave-route-ordinary'));

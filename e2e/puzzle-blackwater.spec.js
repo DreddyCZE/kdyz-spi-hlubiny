@@ -1,15 +1,23 @@
 import {test,expect} from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 
 test('Blackwater bell puzzle reveals earned clues, solves by keyboard and persists after reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('./');
- // Prepare a valid scenario save with earned evidence, rather than bypassing the engine.
+ // Isolated puzzle fixture: select through the engine, then inject location and evidence.
  await page.evaluate(async()=>{
   const {activeScenarioPack}=await import('./src/data/scenario-registry.js');
-  const {newScenarioSession}=await import('./src/engine/scenario-session.js');
+  const {newScenarioSession,scenarioSessionTransition}=await import('./src/engine/scenario-session.js');
   const {saveScenarioSession}=await import('./src/engine/scenario-storage.js');
   const {scenario,content}=activeScenarioPack;
-  const session=newScenarioSession(scenario,content);
+  const initial=newScenarioSession(scenario,content);
+  const session=scenarioSessionTransition(initial,{type:'selectInvestigator',investigatorId:'detective',revision:0},scenario,content);
   session.game.locationId='location-5';
   session.game.evidence=['reward-10','reward-12','reward-14'];
   if(!saveScenarioSession(localStorage,session,scenario,content))throw Error('Scenario save rejected');
@@ -44,10 +52,11 @@ test('Blackwater bell puzzle does not disclose unearned clues or hints',async({p
  await page.goto('./');
  await page.evaluate(async()=>{
   const {activeScenarioPack}=await import('./src/data/scenario-registry.js');
-  const {newScenarioSession}=await import('./src/engine/scenario-session.js');
+  const {newScenarioSession,scenarioSessionTransition}=await import('./src/engine/scenario-session.js');
   const {saveScenarioSession}=await import('./src/engine/scenario-storage.js');
   const {scenario,content}=activeScenarioPack;
-  const session=newScenarioSession(scenario,content);
+  const initial=newScenarioSession(scenario,content);
+  const session=scenarioSessionTransition(initial,{type:'selectInvestigator',investigatorId:'detective',revision:0},scenario,content);
   session.game.locationId='location-5';
   if(!saveScenarioSession(localStorage,session,scenario,content))throw Error('Scenario save rejected');
  });

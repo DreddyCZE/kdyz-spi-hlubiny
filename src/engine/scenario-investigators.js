@@ -9,10 +9,14 @@ export function selectScenarioInvestigator(session,id){
 }
 export function activateScenarioAbility(session){
  const hero=investigatorById[session.investigatorId],game=session.game;
- if(!hero||session.abilityUsed||game.ended||session.scenario.endingId)return session;
+ if(!hero||session.abilityUsed||game.ended||session.scenario.endingId||session.scenario.pendingTest)return session;
  const next={...game,revision:game.revision+1};
  if(hero.id==='detective')next.ap=Math.min(4,game.ap+1);
- else if(hero.id==='occultist')next.ritual=Math.max(0,game.ritual-1);
+ else if(hero.id==='occultist'){
+  const clockId=Object.keys(session.scenario.clocks)[0];
+  if(!clockId||session.scenario.clocks[clockId]===0)return session;
+  return {...session,game:{...next,log:[hero.name+': zvony na okamžik umlkly.',...game.log].slice(0,100)},scenario:{...session.scenario,clocks:{...session.scenario.clocks,[clockId]:session.scenario.clocks[clockId]-1}},abilityUsed:true};
+ }
  else if(hero.id==='sailor'){
   if(game.hp>=hero.hp)return session;
   next.hp=Math.min(hero.hp,game.hp+2);

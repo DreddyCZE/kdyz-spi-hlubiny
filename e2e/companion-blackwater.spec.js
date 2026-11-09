@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 test('Blackwater dog recruitment, ability cooldown and reload',async({page})=>{
  await page.goto('./');
+ await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').first().click({timeout:5000}).catch(async error=>{if(await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').count())throw error;});
  await expect(page.locator('#scenario-companions')).toBeEmpty();
  await page.getByRole('button',{name:'◇ Staré město',exact:true}).click();
  const companions=page.locator('#scenario-companions');

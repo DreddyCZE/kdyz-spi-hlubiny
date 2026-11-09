@@ -1,4 +1,11 @@
 import {test,expect} from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 
 test('Blackwater bell puzzle reveals earned clues, solves by keyboard and persists after reload',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

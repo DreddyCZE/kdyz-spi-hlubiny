@@ -31,3 +31,17 @@ test('U2: old scenario saves without investigator fields remain valid',()=>{
  const old={schemaVersion:s.schemaVersion,game:s.game,scenario:s.scenario};
  assert.equal(validScenarioSession(old,def,data),true);
 });
+
+test('U2: occultist slows the scenario clock, not the obsolete ritual',()=>{
+ const selected=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'occultist'});
+ const used=act(selected,'useInvestigatorAbility');
+ assert.equal(used.scenario.clocks['tide-bells'],0);
+ assert.equal(used.game.ritual,selected.game.ritual);
+});
+test('U2: scenario stat effects honor class maximum and legacy cap stays six/eight',async()=>{
+ const {applyEffects,newState}=await import('../src/engine/game.js');
+ const base=newState(data);
+ assert.equal(applyEffects({...base,hp:5},[{type:'modifyStat',stat:'hp',amount:4}],data,{hp:7,san:7}).hp,7);
+ assert.equal(applyEffects({...base,san:8},[{type:'modifyStat',stat:'san',amount:4}],data,{hp:5,san:9}).san,9);
+ assert.equal(applyEffects(base,[{type:'modifyStat',stat:'hp',amount:4}],data).hp,6);
+});

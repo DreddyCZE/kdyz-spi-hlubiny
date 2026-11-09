@@ -57,3 +57,17 @@ test('U3: combat cannot be forged outside encounter locations',()=>{
  assert.strictEqual(act(s,'startCombat',{enemyId:'enemy-bell-keeper'}),s);
  assert.strictEqual(act(s,'startCombat',{enemyId:'enemy-drowned-sailor'}),s);
 });
+
+test('U3: encounter history permits the next location but prevents replay',()=>{
+ let s=act(newScenarioSession(def,data),'selectInvestigator',{investigatorId:'sailor'});
+ s={...s,game:{...s.game,locationId:'location-2'}};
+ s=act(s,'startCombat',{enemyId:'enemy-fog-hound'});
+ s=act(s,'combatTurn',{move:'attack',dice:[6,6]});
+ assert.equal(s.scenario.combat.status,'defeated');
+ assert.strictEqual(act(s,'startCombat',{enemyId:'enemy-fog-hound'}),s);
+ s={...s,game:{...s.game,locationId:'location-4'}};
+ s=act(s,'startCombat',{enemyId:'enemy-hollow-orderly'});
+ assert.equal(s.scenario.combat.status,'active');
+ assert.deepEqual(s.scenario.encounteredEnemyIds,['enemy-fog-hound','enemy-hollow-orderly']);
+ assert.equal(validScenarioSession(s,def,data),true);
+});

@@ -33,8 +33,8 @@ export function scenarioSessionTransition(session,action,def,data){
   const pending=sc.pendingTest||null;
   if(action.type==='startCombat'){
     const enemy=enemies.find(e=>e.id===action.enemyId);
-    if(action.revision!==game.revision||!enemy||game.ended||game.round>def.rules.maxRounds||sc.combat||game.ap<1||pending||!({'location-2':'enemy-fog-hound','location-4':'enemy-hollow-orderly','location-6':'enemy-bell-keeper'}[game.locationId]===enemy.id))return session;
-    return {...session,game:{...game,ap:game.ap-1,revision:game.revision+1},scenario:{...sc,combat:startCombat(enemy.id)}};
+    if(action.revision!==game.revision||!enemy||game.ended||game.round>def.rules.maxRounds||sc.combat?.status==='active'||sc.encounteredEnemyIds?.includes(enemy.id)||game.ap<1||pending||!({'location-2':'enemy-fog-hound','location-4':'enemy-hollow-orderly','location-6':'enemy-bell-keeper'}[game.locationId]===enemy.id))return session;
+    return {...session,game:{...game,ap:game.ap-1,revision:game.revision+1},scenario:{...sc,combat:startCombat(enemy.id),encounteredEnemyIds:[...(sc.encounteredEnemyIds||[]),enemy.id]}};
   }
   if(action.type==='combatTurn'){
     if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds||sc.combat?.status!=='active'||!diceValid(action.dice))return session;
@@ -158,7 +158,7 @@ export function scenarioSessionView(session,def,data={}){
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,
-    equipment:session.scenario.equipment||[],combat:session.scenario.combat||null,
+    equipment:session.scenario.equipment||[],combat:session.scenario.combat||null,encounteredEnemyIds:session.scenario.encounteredEnemyIds||[],
     companion:(Array.isArray(data.companions)?data.companions:[]).filter(d=>!validateCompanion(d).length).map(d=>({id:d.id,name:d.name,kind:d.kind,recruitable:!session.scenario.companion?.activeId&&companionAvailable(d,session.game),active:companionView(d,session.scenario.companion||initialCompanionState(),session.game.round)})),
     puzzles:(Array.isArray(data.puzzles)?data.puzzles:[]).filter(p=>!validatePuzzle(p).length&&p.locationId===session.game.locationId).map(p=>puzzleView(p,session.scenario.puzzles?.[p.id],session.game)),
     availableEndings:session.game.ended||session.game.round>def.rules.maxRounds||session.scenario.pendingTest||(def.finaleLocationId&&session.game.locationId!==def.finaleLocationId)?[]:availableEndings(def,session.game,session.scenario).filter(e=>e.kind!=='defeat').map(e=>({id:e.id,title:e.title,kind:e.kind})),

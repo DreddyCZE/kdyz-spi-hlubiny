@@ -8,7 +8,7 @@ export function selectScenarioInvestigator(session,id){
  game.san=hero.san;
  // Illustrated-mode item IDs are not in the scenario catalog.
  game.revision++;
- return {...session,investigatorId:id,abilityUsed:false,game};
+ return {...session,investigatorId:id,abilityUsed:false,game,scenario:{...session.scenario,equipment:[...hero.startingItems]}};
 }
 export function activateScenarioAbility(session){
  const hero=investigatorById[session.investigatorId],game=session.game;

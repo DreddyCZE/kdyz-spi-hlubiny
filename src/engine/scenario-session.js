@@ -126,7 +126,7 @@ export function scenarioSessionTransition(session,action,def,data){
   return {...session,game:autoDeductions(nextGame,def,data)};
 }
 export function scenarioSessionView(session,def,data={}){
-  return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,investigatorId:session.investigatorId??null,investigator:investigatorById[session.investigatorId]||null,abilityUsed:session.abilityUsed===true,
+  return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,investigatorId:session.investigatorId===undefined?'legacy':session.investigatorId,investigator:investigatorById[session.investigatorId]||null,abilityUsed:session.abilityUsed===true,
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,

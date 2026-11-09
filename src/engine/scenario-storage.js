@@ -13,7 +13,8 @@ export function validScenarioSession(s,def,data){
  const hero=s.investigatorId===undefined||s.investigatorId===null?null:investigatorById[s.investigatorId];
  if(s.investigatorId!==undefined&&s.investigatorId!==null&&!hero)return false;
  if(s.abilityUsed!==undefined&&typeof s.abilityUsed!=='boolean')return false;
- if(s.investigatorId===null&&(g.revision!==0||s.abilityUsed))return false;
+ // Null investigator is valid for headless/legacy scenario journeys; the UI gates player actions.
+ if(s.investigatorId===null&&s.abilityUsed)return false;
  if(hero&&(g.hp>hero.hp||g.san>hero.san))return false;
  if(c.equipment!==undefined&&(!Array.isArray(c.equipment)||new Set(c.equipment).size!==c.equipment.length||c.equipment.some(id=>!['bw-bandage','bw-salt','bw-laudanum','bw-revolver'].includes(id))))return false;
  if(c.encounteredEnemyIds!==undefined&&(!Array.isArray(c.encounteredEnemyIds)||new Set(c.encounteredEnemyIds).size!==c.encounteredEnemyIds.length||c.encounteredEnemyIds.some(id=>!enemies.some(e=>e.id===id))))return false;

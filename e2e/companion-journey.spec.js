@@ -4,6 +4,7 @@ const key='hlubiny-scenario-v1-blackwater-bells';
 for(const mode of ['dog','solo','unknown'])test(`complete companion investigation through UI: ${mode}`,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.emulateMedia({reducedMotion:'reduce'});await page.addInitScript(()=>{Math.random=()=>0.999;});await page.goto('./');
+ await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').first().click({timeout:5000}).catch(async error=>{if(await page.locator('[aria-label="Výběr vyšetřovatele"] .investigator-card').count())throw error;});
  const state=()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
  const afford=async n=>{if(Number(await page.locator('#ap').textContent())<n)await page.locator('#endRound').click();};
  const move=async name=>{await afford(1);await page.getByRole('button',{name:'◇ '+name,exact:true}).click();};

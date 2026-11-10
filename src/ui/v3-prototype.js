@@ -35,7 +35,7 @@ if(params.get('ui')==='v3'){
  const ability=document.createElement('button');ability.type='button';ability.textContent='✦ Schopnosti';ability.onclick=()=>document.querySelector('[data-panel="investigator"]')?.click();
  const chooseSlot=document.createElement('div');chooseSlot.className='v3-investigator-setup';
  chooseSlot.setAttribute('aria-label','Začátek vyšetřování');
- hud.append(hudTitle,chooseSlot,portrait,heroName,role,vitals,equip,ability);
+ hud.append(hudTitle,heroName,chooseSlot,portrait,role,vitals,equip,ability);
  const introSlot=document.createElement('section');introSlot.className='v3-intro-slot';introSlot.setAttribute('aria-label','Úvod do Blackwateru');
  layout.before(introSlot);
  // The existing engine mounts its investigator chooser and prologue inside the story card.

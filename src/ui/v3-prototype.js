@@ -19,6 +19,49 @@ if(params.get('ui')==='v3'){
  const placeholder=document.createComment('Původní umístění příběhové karty');story.before(placeholder);
  dialog.append(story);
  const show=()=>{if(!dialog.open)dialog.showModal();};
+ // Read-only HUD: mirrors the existing engine-rendered DOM rather than duplicating rules.
+ const hud=document.createElement('aside');hud.className='v3-hud';hud.setAttribute('aria-label','Přehled vyšetřovatele');
+ const locationPanel=document.createElement('aside');locationPanel.className='v3-location-panel';locationPanel.setAttribute('aria-label','Aktuální lokace a akce');
+ layout.classList.add('v3-board');layout.prepend(hud);layout.append(locationPanel);
+ const hudTitle=document.createElement('h2');hudTitle.textContent='Vyšetřovatel';
+ const portrait=document.createElement('div');portrait.className='v3-hud-portrait';
+ const heroName=document.createElement('h3');
+ const role=document.createElement('p');role.className='v3-small';
+ const vitals=document.createElement('div');vitals.className='v3-vitals';
+ const equip=document.createElement('button');equip.type='button';equip.textContent='🎒 Vybavení';equip.onclick=()=>document.querySelector('[data-panel="inventory-panel"]')?.click();
+ const ability=document.createElement('button');ability.type='button';ability.textContent='✦ Schopnosti';ability.onclick=()=>document.querySelector('[data-panel="investigator"]')?.click();
+ hud.append(hudTitle,portrait,heroName,role,vitals,equip,ability);
+ const locationHeading=document.createElement('h2');locationHeading.textContent='Aktuální lokace';
+ const locationName=document.createElement('h3'),locationDescription=document.createElement('p');
+ const actionLabel=document.createElement('h2');actionLabel.textContent='Dostupné akce';
+ const locationActions=document.createElement('div');locationActions.className='v3-location-actions';
+ const explore=document.createElement('button');explore.textContent='🔎 Prozkoumat · karta';explore.onclick=show;
+ const clues=document.createElement('button');clues.textContent='⌕ Důkazy a dedukce';clues.onclick=()=>document.querySelector('[data-panel="investigation-journal"]')?.click();
+ const rounds=document.createElement('button');rounds.textContent='◷ Ukončit kolo';rounds.onclick=()=>document.getElementById('endRound')?.click();
+ locationActions.append(explore,clues,rounds);
+ locationPanel.append(locationHeading,locationName,locationDescription,actionLabel,locationActions);
+ const getText=id=>document.getElementById(id)?.textContent?.trim()||'—';
+ const updateHud=()=>{
+   heroName.textContent=getText('investigatorName');role.textContent=getText('investigatorRole');
+   const source=document.getElementById('investigatorPortrait');
+   if(source)portrait.style.backgroundImage=getComputedStyle(source).backgroundImage;
+   vitals.replaceChildren(...[['♥','Životy','hp'],['◉','Příčetnost','san'],['◆','Akční body','ap']].map(([icon,label,id])=>{
+     const item=document.createElement('div');item.className='v3-vital';
+     const labelNode=document.createElement('span');labelNode.textContent=icon+' '+label;
+     const value=document.createElement('strong');value.textContent=getText(id);
+     item.append(labelNode,value);return item;
+   }));
+   locationName.textContent=getText('placeTitle');locationDescription.textContent=getText('placeDesc');
+   rounds.disabled=document.getElementById('endRound')?.disabled||false;
+   explore.disabled=false;
+ };
+ let pendingRefresh=false;
+ const scheduleRefresh=()=>{if(pendingRefresh)return;pendingRefresh=true;queueMicrotask(()=>{pendingRefresh=false;updateHud();});};
+ const sources=['round','hp','san','ap','placeTitle','placeDesc','investigatorName','investigatorRole','investigatorPortrait','endRound'];
+ const observer=new MutationObserver(scheduleRefresh);
+ for(const id of sources){const el=document.getElementById(id);if(el)observer.observe(el,{subtree:true,childList:true,characterData:true,attributes:id==='investigatorPortrait'||id==='endRound'});}
+ updateHud();
+
  open.addEventListener('click',show);
  investigate.addEventListener('click',()=>{show();const draw=document.getElementById('draw');if(draw&&!draw.disabled)draw.focus();});
  close.addEventListener('click',()=>dialog.close());

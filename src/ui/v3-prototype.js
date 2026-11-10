@@ -5,6 +5,9 @@ import {mountV3Investigation} from './v3-investigation.js';
 const params=new URLSearchParams(location.search);
 if(params.get('ui')==='v3'){
  document.body.classList.add('v3');
+ // In this mode the story lives in a closed dialog; keyboard skip must target the map.
+ const skip=document.querySelector('a.skip');
+ if(skip){skip.href='#places';skip.textContent='Přejít na mapu';}
  // V3 branding only; the original document and game mode remain intact.
  const brand=document.querySelector('.top h1'),subtitle=document.querySelector('.top .edition');
  if(brand)brand.textContent='BLACKWATER';

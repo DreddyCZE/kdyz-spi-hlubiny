@@ -18,9 +18,19 @@ if(params.get('ui')==='v3'){
  top.append(title,close);dialog.append(top);document.body.append(dialog);
  const placeholder=document.createComment('Původní umístění příběhové karty');story.before(placeholder);
  dialog.append(story);
- const show=()=>{
+ const cardTag=document.getElementById('cardTag');
+ const updateStoryKind=()=>{
+   const tag=cardTag?.textContent?.trim()||'';
+   const kind=tag.startsWith('UDÁLOST')?'event':tag.startsWith('SETKÁNÍ')?'encounter':tag.startsWith('DŮKAZ')?'evidence':tag.startsWith('PŘEDMĚT')?'item':'exploration';
+   dialog.dataset.storyType=kind;
+   const labels={event:'KARTA UDÁLOSTI',encounter:'KARTA SETKÁNÍ',evidence:'NALEZENÝ DŮKAZ',item:'NALEZENÝ PŘEDMĚT',exploration:'PŘÍBĚHOVÁ KARTA'};
    const place=document.getElementById('placeTitle')?.textContent?.trim();
-   title.textContent='PŘÍBĚHOVÁ KARTA'+(place?' · '+place:'');
+   title.textContent=labels[kind]+(place?' · '+place:'');
+ };
+ if(cardTag)new MutationObserver(updateStoryKind).observe(cardTag,{subtree:true,childList:true,characterData:true});
+ updateStoryKind();
+ const show=()=>{
+   updateStoryKind();
    if(!dialog.open)dialog.showModal();
  };
  // Read-only HUD: mirrors the existing engine-rendered DOM rather than duplicating rules.

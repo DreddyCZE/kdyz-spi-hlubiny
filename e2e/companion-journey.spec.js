@@ -1,4 +1,11 @@
 import {test,expect} from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 import {blackwaterContent as data} from '../src/engine/content.js';
 const key='hlubiny-scenario-v1-blackwater-bells';
 for(const mode of ['dog','solo','unknown'])test(`complete companion investigation through UI: ${mode}`,async({page})=>{

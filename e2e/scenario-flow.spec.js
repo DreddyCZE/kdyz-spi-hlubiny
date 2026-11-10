@@ -1,4 +1,11 @@
 import {test,expect} from '@playwright/test';
+// Existing journey tests begin with the default detective; dedicated selection tests cover the chooser.
+test.beforeEach(async ({page}) => {
+  await page.goto('./');
+  const choose=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});
+  if(await choose.isVisible())await choose.click();
+});
+
 // Current scenario UX: a dice test is first rolled, then accepted or rerolled.
 // These checks intentionally exercise the active scenario, not the old v4 prototype.
 test('scenario dice confirmation, persistence and reload',async({page})=>{

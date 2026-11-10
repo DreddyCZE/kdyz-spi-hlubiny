@@ -138,3 +138,44 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .deck-summary { margin: 0 0 1rem; padding: .8rem; border: 1px solid var(--color-border, #56645e); border-radius: .4rem; }
 .deck-summary h3 { margin: 0; } .deck-summary p { margin: .5rem 0; overflow-wrap: anywhere; }
 .deck-summary button { max-width: 100%; }
+
+/* Unified Blackwater presentation: the scenario engine owns all actions and saves. */
+.edition { margin: .4rem 0 0; font: 600 .85rem/1.4 var(--font-label); color: var(--color-brass-light); letter-spacing: .025em; }
+.game-modes { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem 1rem; padding: .65rem 1rem; margin: -0.6rem 0 1rem; border: 1px solid var(--color-brass); background: var(--texture-leather); font: 600 .82rem/1.5 var(--font-label); }
+.game-modes-current { color: var(--color-brass-light); margin-right: auto; }
+.game-modes a { color: var(--color-brass-light); text-underline-offset: .2em; }
+.game-modes a:hover { color: var(--color-paper-light); }
+/* Map and story stay visible together, with the card receiving more reading space. */
+@media(min-width:1101px) {
+  .layout { grid-template-columns: minmax(0,1.25fr) minmax(390px,1fr); gap: clamp(12px,1.4vw,24px); }
+  .card { padding: clamp(18px,2vw,32px); }
+  .card h2 { font-size: clamp(1.45rem,2vw,2rem); }
+  .investigator-bar > button { min-height: 78px; }
+  .investigator-bar .component-icon { font-size: 1.5rem; margin-bottom: .2rem; }
+}
+@media(max-width:760px) {
+  .game-modes { margin: 0 0 1rem; }
+  .game-modes-current { flex-basis: 100%; }
+  .edition { font-size: .75rem; }
+}
+
+/* Scenario-specific interactive content follows the story instead of interrupting the title. */
+.scenario-feature:not(:empty) { margin: 1rem 0; padding: .75rem; border: 1px solid var(--color-frame); background: #e2d0a61a; }
+.scenario-feature .puzzle-panel { padding: .65rem .5rem; border-bottom: 1px solid var(--color-frame); }
+.scenario-feature .puzzle-panel:last-child { border-bottom: 0; }
+.scenario-feature h3 { margin: 0 0 .6rem; font-size: 1.1rem; }
+.scenario-feature button { margin: .25rem; }
+.game-modes a[aria-current='page'] { font-weight: 800; text-decoration-thickness: 2px; }
+
+/* Reuse the original Blackwater location illustrations without touching map hit targets. */
+.hero.has-location-art { position: relative; isolation: isolate; min-height: 145px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: #102522; }
+.hero.has-location-art::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg,#0a1719 4%,#0a1719dc 38%,#0a171933 100%),var(--location-art) center 45%/cover no-repeat; }
+.hero.has-location-art h2 { color: #f2dfb7; text-shadow: 0 2px 4px #000; }
+.hero.has-location-art p { color: #f2e7d1; text-shadow: 0 1px 3px #000; }
+
+/* Investigator profile is a presentation-only portrait: current scenario still has one fixed investigator. */
+.investigator-profile { display: grid; grid-template-columns: minmax(100px,150px) minmax(0,1fr); gap: 1rem; align-items: center; padding: .75rem; margin-bottom: 1rem; border: 1px solid var(--color-frame); }
+.investigator-portrait { width: 100%; aspect-ratio: 3/4; background: var(--color-surface) center/cover no-repeat; border: 3px double var(--color-brass); }
+.investigator-profile strong { font-size: 1.3rem; }
+.investigator-profile p { margin: .35rem 0; }
+@media(max-width:400px) { .investigator-profile { grid-template-columns: 90px minmax(0,1fr); } }

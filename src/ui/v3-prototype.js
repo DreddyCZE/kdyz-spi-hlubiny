@@ -9,7 +9,7 @@ if(params.get('ui')==='v3'){
  const open=document.createElement('button');open.type='button';open.textContent='📜 Otevřít příběhovou kartu';
  const investigate=document.createElement('button');investigate.type='button';investigate.textContent='🔎 Prozkoumat lokaci';
  const journal=document.createElement('button');journal.type='button';journal.textContent='📖 Deník';
- const hint=document.createElement('p');hint.className='v3-help';hint.textContent='Kliknutím na lokaci se přesuneš podle pravidel hry. Příběhová karta používá původní scénářový engine a ukládání.';
+ const hint=document.createElement('p');hint.className='v3-help';hint.textContent='Vyber lokaci na mapě, otevři příběhovou kartu a pokračuj ve vyšetřování.';
  layout.before(toolbar);toolbar.append(heading,open,investigate,journal);toolbar.after(hint);
  const dialog=document.createElement('dialog');dialog.id='v3-story-dialog';dialog.setAttribute('aria-label','Příběhová karta');
  const top=document.createElement('div');top.className='v3-dialog-top';
@@ -18,7 +18,11 @@ if(params.get('ui')==='v3'){
  top.append(title,close);dialog.append(top);document.body.append(dialog);
  const placeholder=document.createComment('Původní umístění příběhové karty');story.before(placeholder);
  dialog.append(story);
- const show=()=>{if(!dialog.open)dialog.showModal();};
+ const show=()=>{
+   const place=document.getElementById('placeTitle')?.textContent?.trim();
+   title.textContent='PŘÍBĚHOVÁ KARTA'+(place?' · '+place:'');
+   if(!dialog.open)dialog.showModal();
+ };
  // Read-only HUD: mirrors the existing engine-rendered DOM rather than duplicating rules.
  const hud=document.createElement('aside');hud.className='v3-hud';hud.setAttribute('aria-label','Přehled vyšetřovatele');
  const locationPanel=document.createElement('aside');locationPanel.className='v3-location-panel';locationPanel.setAttribute('aria-label','Aktuální lokace a akce');
@@ -40,6 +44,14 @@ if(params.get('ui')==='v3'){
  const rounds=document.createElement('button');rounds.textContent='◷ Ukončit kolo';rounds.onclick=()=>document.getElementById('endRound')?.click();
  locationActions.append(explore,clues,rounds);
  locationPanel.append(locationHeading,locationName,locationDescription,actionLabel,locationActions);
+ // Reuse the existing live location illustration, description and contextual hint.
+ // This avoids a duplicate location card under the map and keeps app.js as source of truth.
+ const originalLocation=document.querySelector('.map-panel .hero');
+ if(originalLocation){
+   locationHeading.after(originalLocation);
+   locationName.remove();
+   locationDescription.remove();
+ }
  const getText=id=>document.getElementById(id)?.textContent?.trim()||'—';
  const updateHud=()=>{
    heroName.textContent=getText('investigatorName');role.textContent=getText('investigatorRole');

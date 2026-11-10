@@ -114,3 +114,24 @@ test('V3 story card presentation reflects the actual engine card type',async({pa
  await expect(page.locator('#v3-story-dialog')).toHaveAttribute('data-story-type',kind);
  await expect(page.locator('#v3-story-dialog #cardArt')).toBeVisible();
 });
+
+test('V3 new-round presentation reports real scenario clocks and survives reload',async({page})=>{
+ await page.goto('./index.html?ui=v3');
+ await page.locator('.v3-investigator-setup').getByRole('button').first().click();
+ const previous=Number(await page.locator('#round').textContent());
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Ukončit kolo/}).click();
+ await expect(page.locator('#round')).toHaveText(String(previous+1));
+ const recap=page.locator('#v3-round-dialog');
+ await expect(recap).toBeVisible();
+ await expect(recap.getByRole('heading',{name:'Kolo '+(previous+1)})).toBeVisible();
+ const actualThreat=(await page.locator('#threat').textContent()).trim();
+ const actualRitual=(await page.locator('#ritual').textContent()).trim();
+ await expect(recap.locator('.v3-round-counter').nth(0).locator('strong')).toHaveText(actualThreat);
+ await expect(recap.locator('.v3-round-counter').nth(1).locator('strong')).toHaveText(actualRitual);
+ await page.screenshot({path:'test-results/blackwater-v3-next-round.png',fullPage:true});
+ await recap.getByRole('button',{name:/Pokračovat ve vyšetřování/}).click();
+ await expect(recap).not.toBeVisible();
+ await page.reload();
+ await expect(page.locator('#round')).toHaveText(String(previous+1));
+ await expect(page.locator('#v3-round-dialog')).not.toBeVisible();
+});

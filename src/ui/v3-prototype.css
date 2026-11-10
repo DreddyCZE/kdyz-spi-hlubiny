@@ -57,3 +57,81 @@ body.v3 .v3-location-actions button:disabled{opacity:.5;cursor:not-allowed}
 body.v3 .v3-location-panel h2:not(:first-child){margin-top:26px}
 @media(max-width:1180px){body.v3 .v3-board{grid-template-columns:190px minmax(0,1fr)}body.v3 .v3-board>.map-panel{grid-column:2}body.v3 .v3-hud{grid-column:1}body.v3 .v3-location-panel{grid-column:1/-1;grid-row:2}body.v3 .v3-location-actions{display:flex;gap:8px}body.v3 .v3-location-actions button{flex:1}}
 @media(max-width:760px){body.v3 .v3-board{display:flex;flex-direction:column}body.v3 .v3-board>.map-panel{order:0}body.v3 .v3-location-panel{order:1}body.v3 .v3-hud{order:2}body.v3 .v3-hud-portrait{height:170px;max-width:220px}body.v3 .v3-location-actions{flex-direction:column}body.v3 .v3-location-actions button{margin:0}}
+
+/* V3 visual audit iteration — grounded in Chromium screenshots (1280 px + 390 px). */
+body.v3 .save-compatibility{margin:0 0 8px;padding:8px 12px;max-width:none;border-radius:3px;background:#11262b;font: .78rem/1.35 system-ui}
+body.v3 .save-compatibility h2{font-size:.85rem;margin:0 0 3px}
+body.v3 .top{padding:10px 16px}
+body.v3 .top h1{font-size:clamp(1.55rem,2.4vw,2.45rem);letter-spacing:.1em;margin:0}
+body.v3 .top .eyebrow{font-size:.62rem}
+body.v3 .game-modes{margin:5px 0 9px;border-color:#405351;background:#15272b;font-size:.71rem;padding:5px 11px}
+body.v3 .game-modes a[href*="ui=v3"]{display:none}
+body.v3 .v3-toolbar{margin-bottom:8px;padding:7px 12px;border-color:#486259}
+body.v3 .v3-toolbar button{padding:8px 12px}
+body.v3 .v3-help{margin:0 0 8px;color:#9eacaa;font-size:.72rem}
+body.v3 .v3-board{gap:9px}
+body.v3 .v3-hud,body.v3 .v3-location-panel{padding:12px}
+body.v3 .v3-hud h2,body.v3 .v3-location-panel h2{font-size:.88rem;letter-spacing:.04em}
+body.v3 .v3-hud h3{font-size:1.15rem}
+body.v3 .v3-location-panel .hero{padding:0;background:none;border:0;min-height:0}
+body.v3 .v3-location-panel .hero.has-location-art{padding-top:115px;position:relative}
+body.v3 .v3-location-panel .hero.has-location-art::before{inset:0 0 auto 0;height:105px;background-size:cover;background-position:center;border:1px solid #715b3f}
+body.v3 .v3-location-panel .hero h2{color:#f6dfb0;font-size:1.3rem;margin:9px 0 4px;border:0;padding:0}
+body.v3 .v3-location-panel .hero p{font-size:.83rem;line-height:1.45}
+body.v3 .v3-location-panel .hero .current-aim{font-size:.8rem}
+body.v3 .v3-location-actions button{font-weight:600}
+body.v3 .mapped .map-point{color:#f5e9d0;background:#15252bf2;border-color:#d1b578;opacity:1;text-shadow:0 1px #000}
+body.v3 .mapped .map-point.locked,body.v3 .mapped .map-point.locked:disabled{color:#d2c5aa;opacity:.92;background:#13232bea;border:1px dashed #87785e}
+body.v3 .mapped .map-point:not(.active):not(.locked):disabled{color:#f2e5c6;background:#1d3538ec;opacity:.85}
+body.v3 .mapped .map-point:focus-visible{outline:3px solid #f9d590;outline-offset:4px;z-index:3}
+body.v3 .mapped .map-point.active{z-index:2}
+body.v3 .map-caption{background:#14252a;color:#d2c5a4;padding:7px 12px;font:.7rem system-ui}
+body.v3 .investigator-bar{display:flex;gap:6px;flex-wrap:wrap;padding:8px;margin-top:12px;background:#14242b;border:1px solid #615439}
+body.v3 .investigator-bar>button{flex:0 1 auto;min-height:40px;padding:8px 12px;border:1px solid #705f41;background:#23373b;color:#ede2c9;box-shadow:none!important;transform:none!important;font:600 .75rem system-ui}
+body.v3 .investigator-bar>button:hover{background:#35544a}
+body.v3 .investigator-bar .component-icon{display:inline;font-size:1rem;color:#d9bc7e;margin:0 6px 0 0}
+body.v3 .investigator-bar .actions{margin:0 0 0 auto;display:flex;flex-direction:row;gap:6px}
+body.v3 .investigator-bar .actions button{font:.75rem system-ui;padding:8px;min-height:40px}
+body.v3 #v3-story-dialog{width:min(780px,calc(100vw - 24px));max-height:min(820px,90dvh);overflow:hidden}
+body.v3 #v3-story-dialog .v3-dialog-top{position:relative;padding:10px 16px;gap:20px}
+body.v3 #v3-story-dialog .v3-dialog-top button{padding:8px 10px;white-space:nowrap}
+body.v3 #v3-story-dialog .card{max-height:calc(min(820px,90dvh) - 57px);padding:16px 24px 24px;overflow:auto;overscroll-behavior:contain}
+body.v3 #v3-story-dialog .card::before{display:none}
+body.v3 #v3-story-dialog .deck-summary{padding:10px 13px;margin:0 0 12px;background:#ebdfc7}
+body.v3 #v3-story-dialog .deck-summary h3{font-size:1rem}
+body.v3 #v3-story-dialog .deck-summary p{font-size:.85rem;margin:4px 0}
+body.v3 #v3-story-dialog .card-art{aspect-ratio:auto;height:clamp(120px,20vh,190px);margin-bottom:12px;background-position:center}
+body.v3 #v3-story-dialog .card-art.empty{display:none}
+body.v3 #v3-story-dialog .card h2{font-size:1.48rem;margin:10px 0}
+body.v3 #v3-story-dialog .card .story{font-size:1rem;line-height:1.55}
+body.v3 #v3-story-dialog .choices{margin-top:12px}
+@media(max-width:1100px){
+ body.v3 .places.mapped{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px;aspect-ratio:auto;min-height:0;background-image:none!important}
+ body.v3 .places.mapped::before{grid-column:1/-1;aspect-ratio:1.85;background:var(--map-art) center/100% 100%;border:1px solid #9a855c}
+ body.v3 .mapped .map-point,body.v3 .mapped .map-point.locked{position:static;left:auto!important;top:auto!important;transform:none;min-width:0;max-width:none;width:100%;min-height:44px;padding:9px 11px;font:.8rem/1.2 system-ui;white-space:normal;text-align:left;overflow-wrap:anywhere;border-radius:4px}
+ body.v3 .mapped .map-point.active{border-radius:4px}
+ body.v3 .mapped .map-point::before{display:none}
+}
+@media(max-width:760px){
+ body.v3 main{padding:8px}
+ body.v3 .top{gap:7px}
+ body.v3 .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+ body.v3 .stat{padding:4px 5px}
+ body.v3 .stat .value{font-size:.72rem}
+ body.v3 .stat b{font-size:1.02rem}
+ body.v3 .game-modes{gap:5px 12px}
+ body.v3 .v3-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.v3 .v3-toolbar strong{grid-column:1/-1;width:auto}
+ body.v3 .v3-toolbar button{font-size:.8rem}
+ body.v3 .places.mapped{min-height:0;aspect-ratio:auto;background:none!important}
+ body.v3 .places.mapped::before{aspect-ratio:1.55}
+ body.v3 .mapped .map-point{font:.83rem/1.2 system-ui;padding:9px 8px;min-height:45px;max-width:none}
+ body.v3 .v3-hud-portrait{height:190px;max-width:100%;background-position:center 30%}
+ body.v3 .v3-hud .v3-vitals{margin:10px 0}
+ body.v3 .investigator-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.v3 .investigator-bar>button{min-height:42px;font:.75rem/1.25 system-ui}
+ body.v3 .investigator-bar .actions{grid-column:1/-1;display:flex}
+ body.v3 #v3-story-dialog .card{padding:12px 15px}
+ body.v3 #v3-story-dialog .card-art{height:135px}
+ body.v3 #v3-story-dialog .v3-dialog-top{padding:8px 11px}
+}

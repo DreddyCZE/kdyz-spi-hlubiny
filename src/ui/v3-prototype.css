@@ -156,3 +156,154 @@ body.v3 .v3-investigator-setup button:focus-visible,body.v3 .v3-intro-slot butto
  body.v3 .v3-intro-slot p{font-size:.85rem}
  body.v3 .v3-investigator-setup button{font-size:.85rem}
 }
+
+/*
+ * B+C visual refinement 03 — applied after review of real Playwright screenshots.
+ * Keep the map authoritative and make story chronology readable without altering game rules.
+ */
+body.v3 .v3-board{
+ grid-template-columns:minmax(170px,205px) minmax(0,1fr) minmax(200px,235px);
+ align-items:start;
+ gap:10px;
+}
+body.v3 .v3-board>.map-panel{align-self:start}
+body.v3 .places.mapped{
+ aspect-ratio:1.62;
+ min-height:0;
+ background-size:100% 100%;
+}
+body.v3 .map-panel .map-heading{padding:9px 14px}
+body.v3 .map-panel .map-heading h2{font-size:1.33rem}
+body.v3 .v3-hud,body.v3 .v3-location-panel{min-height:0;padding:12px}
+body.v3 .v3-hud-portrait{height:200px}
+body.v3 .v3-vitals{margin:12px 0}
+body.v3 .v3-vital{padding:6px 0}
+body.v3 .v3-location-panel .hero.has-location-art{padding-top:132px}
+body.v3 .v3-location-panel .hero.has-location-art::before{height:122px}
+body.v3 .v3-location-actions button{padding:12px 10px}
+body.v3 .v3-choosing .v3-investigator-setup{order:1}
+body.v3 .v3-intro-slot .onboarding:has(h3){
+ display:flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:6px 12px;
+ padding:9px 12px;
+ margin:6px 0 10px;
+}
+body.v3 .v3-intro-slot .onboarding:has(h3)>h3{
+ font-size:1rem;
+ margin:0;
+ flex:0 1 190px;
+ color:#f3d89d;
+}
+body.v3 .v3-intro-slot .onboarding:has(h3)>p{
+ font:.82rem/1.4 system-ui;
+ margin:0;
+ flex:1 1 370px;
+ color:#eadfca;
+}
+body.v3 .v3-intro-slot .onboarding:has(h3)>button{
+ margin:0;
+ padding:8px 11px;
+ font:.79rem system-ui;
+}
+body.v3 .v3-intro-slot .onboarding:has(h2){
+ max-width:100%;
+ background:linear-gradient(125deg,#1b2c32,#14252bcf);
+}
+body.v3 .v3-intro-slot .onboarding:has(h2)>p{max-width:105ch}
+/* Make the narrative follow the illustration immediately; supporting controls follow the story. */
+body.v3 #v3-story-dialog #storyPanel{
+ display:flex;
+ flex-direction:column;
+ gap:0;
+}
+body.v3 #v3-story-dialog .deck-summary{
+ order:0;
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ column-gap:10px;
+ padding:9px 12px;
+ margin:0 0 12px;
+ background:#e9dcc3;
+}
+body.v3 #v3-story-dialog .deck-summary>h3{grid-column:1;grid-row:1;font-size:1.07rem}
+body.v3 #v3-story-dialog .deck-summary>p{grid-column:1;font-size:.8rem;line-height:1.3;margin:2px 0}
+body.v3 #v3-story-dialog .deck-summary>#draw{
+ grid-column:2;
+ grid-row:1 / span 3;
+ align-self:center;
+ padding:11px 15px;
+ border-radius:4px;
+ background:#224b37;
+ color:#f8eed8;
+}
+body.v3 #v3-story-dialog #cardArt{order:1;height:clamp(125px,20vh,190px);flex-shrink:0}
+body.v3 #v3-story-dialog #cardTag{order:2;align-self:start;margin-top:4px}
+body.v3 #v3-story-dialog #cardTitle{order:3;font-size:1.6rem;line-height:1.12}
+body.v3 #v3-story-dialog #cardStory{
+ order:4;
+ margin:3px 0 10px;
+ font-size:1.06rem;
+ line-height:1.62;
+ color:#30251d;
+}
+body.v3 #v3-story-dialog .scenario-feature{
+ order:6;
+ margin:4px 0;
+ padding:9px 11px;
+ border:1px solid #ae9873;
+ background:#c8b58a38;
+}
+body.v3 #v3-story-dialog .scenario-feature:empty{display:none}
+body.v3 #v3-story-dialog [aria-label="Výbava vyšetřovatele"]{order:6}
+body.v3 #v3-story-dialog [aria-label="Schopnost vyšetřovatele"]{order:7}
+body.v3 #v3-story-dialog [aria-label="Taktický souboj"]{order:8}
+body.v3 #v3-story-dialog #scenario-companions{order:9}
+body.v3 #v3-story-dialog #scenario-puzzles{order:10}
+body.v3 #v3-story-dialog .choices{order:11;margin-top:10px}
+body.v3 #v3-story-dialog #outcomes{order:12}
+body.v3 #v3-story-dialog .actions{
+ order:13;
+ position:sticky;
+ bottom:-24px;
+ z-index:2;
+ padding:11px 8px;
+ margin:12px -8px 0;
+ background:linear-gradient(#eee0cbd9,#e8d8bdf5 25%);
+ border-top:1px solid #a68f68;
+ display:flex;
+ gap:8px;
+}
+body.v3 #v3-story-dialog .actions button{
+ min-height:42px;
+ border-radius:4px;
+}
+body.v3 #v3-story-dialog #dicebox{order:14}
+body.v3 #v3-story-dialog .card{scrollbar-gutter:stable}
+body.v3 #v3-story-dialog .v3-dialog-top{position:relative;z-index:3}
+body.v3 #v3-story-dialog #cardArt.empty{display:none}
+body.v3 .investigator-bar{gap:5px;margin-top:10px}
+body.v3 .investigator-bar>button{font-size:.73rem}
+@media(max-width:1180px) and (min-width:761px){
+ body.v3 .v3-board{grid-template-columns:185px minmax(0,1fr)}
+ body.v3 .v3-board>.map-panel{grid-column:2;grid-row:1}
+ body.v3 .v3-hud{grid-column:1;grid-row:1}
+ body.v3 .v3-location-panel{grid-column:1/-1;grid-row:2}
+ body.v3 .places.mapped{aspect-ratio:auto}
+}
+@media(max-width:760px){
+ body.v3 .v3-board{display:flex;flex-direction:column;align-items:stretch}
+ body.v3 .v3-board>.map-panel{width:100%;order:0}
+ body.v3 .v3-location-panel{order:1}
+ body.v3 .v3-hud{order:2}
+ body.v3 .places.mapped{aspect-ratio:auto;background:none}
+ body.v3 .v3-intro-slot .onboarding:has(h3){display:block;padding:10px 12px}
+ body.v3 .v3-intro-slot .onboarding:has(h3)>h3{font-size:.95rem;margin:0 0 3px}
+ body.v3 .v3-intro-slot .onboarding:has(h3)>p{font-size:.82rem;margin:0 0 8px}
+ body.v3 .v3-intro-slot .onboarding:has(h3)>button{margin:2px 5px 0 0}
+ body.v3 #v3-story-dialog .deck-summary{grid-template-columns:1fr}
+ body.v3 #v3-story-dialog .deck-summary>#draw{grid-column:1;grid-row:auto;margin-top:7px}
+ body.v3 #v3-story-dialog #cardStory{font-size:1rem}
+ body.v3 #v3-story-dialog .actions{bottom:-12px}
+}

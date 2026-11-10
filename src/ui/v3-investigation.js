@@ -89,6 +89,65 @@ export function mountV3Investigation(){
  inventoryChanges.observe(source,{subtree:true,childList:true,characterData:true});
  paintInventory();
 
+ // The scenario keeps usable equipment separate from the legacy rewards inventory.
+ // Mirror its *real* buttons instead of making up actions or writing gameplay data.
+ const equipmentSource=document.querySelector('#storyPanel [aria-label="Výbava vyšetřovatele"]');
+ if(equipmentSource){
+  const panel=document.getElementById('inventory-panel');
+  const equipmentHeading=document.createElement('h3');equipmentHeading.className='v3-equipment-heading';
+  equipmentHeading.textContent='Použitelná výbava';
+  const equipmentGrid=document.createElement('div');equipmentGrid.className='v3-equipment-grid';
+  const caption=document.createElement('p');caption.className='v3-equipment-caption';
+  caption.textContent='Použití předmětu se vyhodnocuje podle aktuálního stavu hry.';
+  panel.append(equipmentHeading,caption,equipmentGrid);
+  const aliases=new Map([
+   ['Obvaz','bw-bandage'],['Sůl','bw-salt'],
+   ['Laudanum','bw-laudanum'],['Revolver','bw-revolver'],
+  ]);
+  function equipmentId(label){
+   for(const [prefix,id] of aliases)if(label.startsWith(prefix))return id;
+   return null;
+  }
+  function paintEquipment(){
+   equipmentGrid.replaceChildren();
+   const controls=[...equipmentSource.querySelectorAll('button')];
+   const passive=[...equipmentSource.childNodes]
+    .filter(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim())
+    .map(node=>node.textContent.trim());
+   if(!controls.length&&!passive.length){
+    const empty=document.createElement('p');empty.className='v3-dossier-empty';
+    empty.textContent='Momentálně nemáš žádnou použitelnou výbavu.';
+    equipmentGrid.append(empty);return;
+   }
+   for(const item of [...controls.map(button=>({label:button.textContent.trim(),button})),...passive.map(label=>({label,button:null}))]){
+    const id=equipmentId(item.label);
+    const card=document.createElement('div');card.className='v3-equipment-card';
+    const image=document.createElement('div');image.className='v3-equipment-art';image.setAttribute('aria-hidden','true');
+    const art=id?blackwaterImage('items',id):null;
+    if(art)image.style.backgroundImage='url("'+new URL(art,document.baseURI).href+'")';
+    else image.textContent='◈';
+    const info=document.createElement('div');
+    const label=document.createElement('p');label.className='v3-equipment-name';label.textContent=item.label;
+    info.append(label);
+    if(item.button){
+     const action=document.createElement('button');action.type='button';
+     action.textContent=item.button.disabled?'Nyní nelze použít':'Použít předmět';
+     action.disabled=item.button.disabled;
+     action.addEventListener('click',()=>{
+      if(item.button.isConnected&&!item.button.disabled)item.button.click();
+     });
+     info.append(action);
+    }else{
+     const passiveHint=document.createElement('span');passiveHint.className='v3-equipment-passive';
+     passiveHint.textContent='Automaticky aktivní';info.append(passiveHint);
+    }
+    card.append(image,info);equipmentGrid.append(card);
+   }
+  }
+  new MutationObserver(paintEquipment).observe(equipmentSource,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled']});
+  paintEquipment();
+ }
+
  // This information is derived only from the journal's public visible counters.
  const journal=document.getElementById('investigation-journal');
  if(journal){

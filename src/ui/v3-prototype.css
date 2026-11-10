@@ -135,3 +135,24 @@ body.v3 #v3-story-dialog .choices{margin-top:12px}
  body.v3 #v3-story-dialog .card-art{height:135px}
  body.v3 #v3-story-dialog .v3-dialog-top{padding:8px 11px}
 }
+
+/* Make first-run onboarding available on the map, never hidden behind an unopened modal. */
+body.v3 .v3-intro-slot:empty{display:none}
+body.v3 .v3-intro-slot .onboarding[hidden],body.v3 .v3-investigator-setup [hidden]{display:none}
+body.v3 .v3-intro-slot .onboarding{background:#1b2c32;border:1px solid #917a50;padding:16px 20px;margin:8px 0 12px;max-width:none}
+body.v3 .v3-intro-slot h2{color:#f0d19a;font-size:1.25rem;margin:0 0 8px}
+body.v3 .v3-intro-slot p{max-width:90ch;font-size:.9rem;line-height:1.65;margin:0 0 8px}
+body.v3 .v3-intro-slot button{background:#315342;color:#f9e7c0;border:1px solid #b69b66;border-radius:3px;padding:10px 12px;cursor:pointer;margin:4px 8px 0 0}
+body.v3 .v3-choosing .v3-hud-portrait,
+body.v3 .v3-choosing .v3-small,
+body.v3 .v3-choosing .v3-vitals,
+body.v3 .v3-choosing>button{display:none}
+body.v3 .v3-investigator-setup .scenario-feature{padding:0;border:0;background:none;margin:8px 0}
+body.v3 .v3-investigator-setup button{width:100%;margin:0 0 9px;padding:11px 9px;background:#253d3b;color:#eee0be;border:1px solid #94744b;border-radius:3px;text-align:left;font:.78rem/1.4 system-ui;cursor:pointer}
+body.v3 .v3-investigator-setup button:hover{background:#35594b}
+body.v3 .v3-investigator-setup button:focus-visible,body.v3 .v3-intro-slot button:focus-visible{outline:3px solid #ffdc8c;outline-offset:2px}
+@media(max-width:760px){
+ body.v3 .v3-intro-slot .onboarding{padding:12px;margin:7px 0}
+ body.v3 .v3-intro-slot p{font-size:.85rem}
+ body.v3 .v3-investigator-setup button{font-size:.85rem}
+}

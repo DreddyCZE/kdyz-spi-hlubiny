@@ -74,3 +74,41 @@ test('classic mode is unchanged',async({page})=>{
  await expect(page.locator('.v3-hud')).toHaveCount(0);
  await expect(page.locator('#storyPanel')).toBeVisible();
 });
+
+test('V3 combat screen uses actual encounter controls, survives closing and reveals the result',async({page})=>{
+ await page.addInitScript(()=>{Math.random=()=>0.99;});
+ await page.goto('./index.html?ui=v3');
+ await page.locator('.v3-investigator-setup').getByRole('button',{name:/Námořník · HP 7/}).click();
+ await page.locator('[data-location-id="location-2"]').click();
+ await page.locator('.v3-location-actions button').filter({hasText:'Prozkoumat'}).click();
+ await page.getByRole('button',{name:'Střetnutí: Mlžný pes · 1 AP',exact:true}).click();
+ const battle=page.locator('#v3-combat-dialog');
+ await expect(battle).toBeVisible();
+ await expect(battle.locator('#v3-battle-enemy')).toHaveText('Mlžný pes');
+ await expect(battle.locator('#v3-battle-enemy-art')).toHaveCSS('background-image',/fog-hound\.webp/);
+ await expect(battle.locator('#v3-battle-hp')).toContainText('Životy 7');
+ await page.screenshot({path:'test-results/blackwater-v3-combat.png',fullPage:true});
+ await battle.locator('#v3-battle-close').click();
+ await expect(battle).not.toBeVisible();
+ await expect(page.locator('.v3-combat-reopen')).toBeVisible();
+ await page.locator('.v3-combat-reopen').click();
+ await expect(battle).toBeVisible();
+ await battle.getByRole('button',{name:'🎲 Zaútočit',exact:true}).click();
+ await expect(battle).toContainText('Nepřítel byl poražen.');
+ await expect(battle.locator('#v3-battle-enemy')).toHaveText('Mlžný pes');
+ await page.screenshot({path:'test-results/blackwater-v3-combat-outcome.png',fullPage:true});
+ await battle.locator('#v3-battle-close').click();
+ await expect(battle).not.toBeVisible();
+ await expect(page.locator('.v3-combat-reopen')).toBeHidden();
+ await expect(page.locator('#v3-story-dialog')).not.toBeVisible();
+});
+test('V3 story card presentation reflects the actual engine card type',async({page})=>{
+ await page.goto('./index.html?ui=v3');
+ await page.locator('.v3-investigator-setup').getByRole('button').first().click();
+ await page.locator('.v3-location-actions button').filter({hasText:'Prozkoumat'}).click();
+ await page.locator('#v3-story-dialog #draw').click();
+ const tag=await page.locator('#cardTag').innerText();
+ const kind=tag.startsWith('UDÁLOST')?'event':tag.startsWith('SETKÁNÍ')?'encounter':tag.startsWith('DŮKAZ')?'evidence':tag.startsWith('PŘEDMĚT')?'item':'exploration';
+ await expect(page.locator('#v3-story-dialog')).toHaveAttribute('data-story-type',kind);
+ await expect(page.locator('#v3-story-dialog #cardArt')).toBeVisible();
+});

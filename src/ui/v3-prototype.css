@@ -738,3 +738,49 @@ body.v3 #details.v3-dossier :focus-visible{outline:3px solid #315d53;outline-off
    animation:none!important;transition:none!important;
  }
 }
+
+/* Actual scenario equipment: presentation delegates clicks to existing live buttons. */
+body.v3 #details.v3-dossier .v3-equipment-heading{
+ font:700 1.34rem/1.25 Georgia,serif;color:#334d43;
+ border-top:1px solid #bca680;padding-top:21px;margin:23px 0 8px;
+}
+body.v3 #details.v3-dossier .v3-equipment-caption{
+ font:.84rem/1.5 system-ui;color:#6b6354;margin:0 0 14px;
+}
+body.v3 .v3-equipment-grid{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+body.v3 .v3-equipment-grid>.v3-dossier-empty{grid-column:1/-1}
+body.v3 .v3-equipment-card{
+ display:grid;grid-template-columns:82px minmax(0,1fr);gap:12px;
+ padding:11px;background:#ebdec4;border:1px solid #b4a17e;
+ min-width:0;
+}
+body.v3 .v3-equipment-art{
+ display:grid;place-items:center;width:82px;height:94px;
+ background:#23423e center/cover no-repeat;color:#e5cca0;
+ border:1px solid #a48b5a;font:2rem Georgia,serif;
+}
+body.v3 .v3-equipment-name{
+ font:700 .9rem/1.4 system-ui;color:#4e493a;
+ margin:2px 0 8px;overflow-wrap:anywhere;
+}
+body.v3 .v3-equipment-card button{
+ min-height:40px;padding:8px 11px;
+ border-radius:3px;border:1px solid #547660;
+ background:#2e5748;color:#f1e8d4;
+ font:700 .82rem/1.3 system-ui;
+}
+body.v3 .v3-equipment-card button:disabled{
+ background:#a9aaa0;color:#4f574f;cursor:not-allowed;border-color:#9ba197;
+}
+body.v3 .v3-equipment-passive{
+ display:inline-block;padding:7px 9px;
+ font:700 .75rem/1.4 system-ui;color:#46624d;
+ border:1px solid #b7aa81;background:#dfdfc2;
+}
+@media(max-width:700px){
+ body.v3 .v3-equipment-grid{grid-template-columns:1fr}
+ body.v3 .v3-equipment-card{grid-template-columns:74px minmax(0,1fr)}
+ body.v3 .v3-equipment-art{width:74px;height:87px}
+}

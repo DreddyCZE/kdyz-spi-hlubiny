@@ -810,3 +810,10 @@ body.v3 .investigator-bar>button[data-panel="history"]{display:none}
  body.v3 #details.v3-dossier .v3-journal-metrics{margin:10px 0}
  body.v3 #details.v3-dossier .v3-findings-heading{margin-top:16px;padding-top:14px}
 }
+
+/* Consolidate duplicate hero statistics: desktop HUD owns HP/SAN/AP, top rail owns round/clocks. */
+@media(min-width:761px){
+ body.v3 .top .stat[data-stat="hp"],
+ body.v3 .top .stat[data-stat="san"],
+ body.v3 .top .stat[data-stat="ap"]{display:none}
+}

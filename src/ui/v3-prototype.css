@@ -307,3 +307,15 @@ body.v3 .investigator-bar>button{font-size:.73rem}
  body.v3 #v3-story-dialog #cardStory{font-size:1rem}
  body.v3 #v3-story-dialog .actions{bottom:-12px}
 }
+
+/* Keep cross-mode save information accessible without pushing the game below the fold. */
+body.v3 #save-compatibility{
+ display:flex;align-items:center;flex-wrap:wrap;gap:2px 14px;
+ min-height:30px;margin:0 0 6px;padding:5px 11px;
+}
+body.v3 #save-compatibility h2{margin:0;font:600 .77rem/1.4 system-ui;color:#f0d79f}
+body.v3 #save-compatibility details{font:.76rem/1.35 system-ui;color:#e0d7c7}
+body.v3 #save-compatibility details[open]{flex-basis:100%;padding:7px 0}
+body.v3 #save-compatibility summary{cursor:pointer}
+body.v3 #save-compatibility p{margin:3px 0}
+body.v3 .game-modes{padding:4px 11px;margin:5px 0 7px}

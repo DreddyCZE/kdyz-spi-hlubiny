@@ -94,6 +94,7 @@ test('V3 combat screen uses actual encounter controls, survives closing and reve
  await page.locator('.v3-combat-reopen').click();
  await expect(battle).toBeVisible();
  await battle.getByRole('button',{name:'🎲 Zaútočit',exact:true}).click();
+ await expect(battle.locator('#v3-battle-dice .v3-battle-die')).toHaveText(['6','6']);
  await expect(battle).toContainText('Nepřítel byl poražen.');
  await expect(battle.locator('#v3-battle-enemy')).toHaveText('Mlžný pes');
  await page.screenshot({path:'test-results/blackwater-v3-combat-outcome.png',fullPage:true});

@@ -1,0 +1,37 @@
+/* Blackwater V3 opt-in prototype. Original game stays untouched unless ?ui=v3. */
+body.v3{background:#0b151a;color:#e8dcc4;font-family:Georgia,serif}
+body.v3 main{max-width:1900px;padding:12px 20px 36px}
+body.v3 .top{margin:0;padding:12px 18px;background:#101d24;border:1px solid #655638;display:flex;gap:20px}
+body.v3 .top h1{font-size:clamp(1.4rem,2vw,2.2rem);letter-spacing:.06em}
+body.v3 .top .edition{font-size:.75rem;margin:0;color:#b7ab93}
+body.v3 .stats{gap:3px}
+body.v3 .stat{padding:3px 8px;grid-template-columns:28px auto}
+body.v3 .stat .token-icon{height:27px;width:27px;font-size:16px}
+body.v3 .stat b{font-size:1.1rem}
+body.v3 .game-modes{margin:7px 0 12px}
+body.v3 .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+body.v3 .map-panel{background:#111f25;border:1px solid #786647}
+body.v3 .map-heading{padding:8px 16px;background:#12242a}
+body.v3 .map-heading h2{font-size:1.2rem}
+body.v3 .places.mapped{aspect-ratio:1.95;min-height:390px;background-size:100% 100%;background-repeat:no-repeat}
+body.v3 .mapped .map-point{border:1px solid #c5aa74;background:#18282ce8;color:#f4e7c6;border-radius:30px;font:600 clamp(.65rem,.85vw,.88rem)/1.15 system-ui;padding:8px 12px;min-height:36px;box-shadow:0 3px 14px #000b;max-width:180px;white-space:normal}
+body.v3 .mapped .map-point.active{background:#70501e;color:#fff4cd;border:2px solid #f2d280;box-shadow:0 0 0 4px #d6a44a40,0 0 20px #edb64c}
+body.v3 .mapped .map-point.locked{opacity:.75;border-style:dashed;background:#101a20ed}
+body.v3 .map-caption{padding:7px 16px}
+body.v3 .hero{background:#18262c;padding:12px 18px}
+body.v3 .hero h2{font-size:1.4rem}
+body.v3 .card{max-height:none;min-height:0;padding:22px 30px}
+body.v3 .investigator-bar{position:relative}
+body.v3 .v3-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#16272e;border:1px solid #786647;padding:10px 14px;margin-bottom:12px}
+body.v3 .v3-toolbar button{background:#28423d;color:#f2e8d2;border:1px solid #a58b58;border-radius:4px;padding:10px 15px;cursor:pointer}
+body.v3 .v3-toolbar button:hover{background:#38624f}
+body.v3 .v3-toolbar strong{color:#f2d394;margin-right:auto}
+body.v3 #v3-story-dialog{border:1px solid #a88c58;padding:0;background:#e3d2ad;color:#252017;width:min(850px,95vw);max-height:90vh;box-shadow:0 0 0 1px #352c20,0 20px 100px #000}
+body.v3 #v3-story-dialog::backdrop{background:#030a0de0;backdrop-filter:blur(4px)}
+body.v3 #v3-story-dialog .v3-dialog-top{display:flex;justify-content:space-between;align-items:center;background:#17252b;color:#f2dfb4;padding:10px 18px}
+body.v3 #v3-story-dialog .v3-dialog-top button{border:1px solid #b79a62;background:#283e42;color:#fff;padding:7px 12px;cursor:pointer}
+body.v3 #v3-story-dialog .card{border:0;box-shadow:none;outline:0;max-height:calc(90vh - 54px);overflow:auto}
+body.v3 .v3-help{font: .8rem/1.5 system-ui;color:#c8bda6;margin:0 0 8px}
+@media(max-width:900px){body.v3 main{padding:8px}body.v3 .top{flex-direction:column}body.v3 .places.mapped{aspect-ratio:1.25;min-height:400px}body.v3 .mapped .map-point{font-size:.65rem;padding:6px;max-width:105px}body.v3 .stats{justify-content:start}body.v3 .v3-toolbar{position:sticky;top:0;z-index:4}body.v3 .v3-toolbar strong{width:100%}}
+@media(max-width:540px){body.v3 .places.mapped{aspect-ratio:.85;min-height:430px;background-size:cover;background-position:center}body.v3 .mapped .map-point{max-width:84px;font-size:.58rem;min-height:28px}body.v3 .stat{font-size:.65rem}body.v3 .stat .token-icon{display:none}body.v3 .stat{grid-template-columns:auto}body.v3 .stat .value{grid-column:1}body.v3 #v3-story-dialog .card{padding:16px}}
+@media(prefers-reduced-motion:reduce){body.v3 *,body.v3 *::before,body.v3 *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}

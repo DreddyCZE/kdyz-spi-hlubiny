@@ -33,7 +33,7 @@ E2E příkaz sám sestaví hru a spustí vlastní server na portu 4174; nevyžad
 
 V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Workflow při PR spustí testy a build; po pushi do `main` navíc publikuje `dist`. Relativní adresy podporují cestu `/kdyz-spi-hlubiny/` bez zvláštní konfigurace. Samotný build nic nepublikuje. Reference budou dostupné pod `public/`.
 
-Hlavní scénář ukládá automaticky pod `hlubiny-scenario-v1-blackwater-bells`, ilustrovaný původní režim pod `hlubiny-blackwater-v1` a původní karetní hra pod `hlubiny-v4`. Nastavení průvodce má vlastní klíč `hlubiny-onboarding-v1`. Režimy se navzájem nepřevádějí ani nepřepisují. Platné historické pozice původní hry M1–M2.2 se převádějí jen v původním režimu bez přepsání původních klíčů. Poškozené uložené pozice zůstávají chráněné i při resetu. Chyba úložiště nezastaví hru. Podrobnosti: [pravidla](docs/PLAYING-BLACKWATER.md), [historický engine](docs/ENGINE.md).
+Hlavní scénář ukládá automaticky pod `hlubiny-scenario-v1-blackwater-bells`, ilustrovaný původní režim pod `ksh-blackwater-v1` a původní karetní hra pod `hlubiny-v4`. Nastavení průvodce má vlastní klíč `hlubiny-onboarding-v1`. Režimy se navzájem nepřevádějí ani nepřepisují. Platné historické pozice původní hry M1–M2.2 se převádějí jen v původním režimu bez přepsání původních klíčů. Poškozené uložené pozice zůstávají chráněné i při resetu. Chyba úložiště nezastaví hru. Podrobnosti: [pravidla](docs/PLAYING-BLACKWATER.md), [historický engine](docs/ENGINE.md).
 
 ## M3.2 – balíčky lokací
 

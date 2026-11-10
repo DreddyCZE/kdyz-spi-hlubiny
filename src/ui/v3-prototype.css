@@ -445,3 +445,46 @@ body.v3 .v3-combat-reopen[hidden]{display:none}
  body.v3 #v3-combat-dialog,
  body.v3 #v3-combat-dialog *{animation-duration:.01ms!important;transition-duration:.01ms!important}
 }
+
+/* Real card types from the scenario engine drive their own visual mood. */
+body.v3 #v3-story-dialog[data-story-type="event"] .v3-dialog-top{
+ background:linear-gradient(100deg,#451d25,#171b24);
+ border-bottom:2px solid #be8379;
+}
+body.v3 #v3-story-dialog[data-story-type="event"] #cardArt{
+ border-color:#7a413c;
+ box-shadow:inset 0 -32px 35px #270c11a6,0 3px 18px #2a080c30;
+}
+body.v3 #v3-story-dialog[data-story-type="encounter"] .v3-dialog-top{
+ background:linear-gradient(100deg,#193840,#171f29);
+ border-bottom:2px solid #9fa8a1;
+}
+body.v3 #v3-story-dialog[data-story-type="encounter"] #cardArt{border-color:#607d82}
+body.v3 #v3-story-dialog[data-story-type="evidence"] .v3-dialog-top{
+ background:linear-gradient(100deg,#254732,#172528);
+ border-bottom:2px solid #91a778;
+}
+body.v3 #v3-story-dialog[data-story-type="evidence"] #cardArt{border-color:#78916b}
+body.v3 #v3-story-dialog[data-story-type="item"] .v3-dialog-top{
+ background:linear-gradient(100deg,#5a4329,#232124);
+ border-bottom:2px solid #c9ad79;
+}
+body.v3 #v3-story-dialog #cardTag{
+ font:.73rem/1.3 system-ui;
+ letter-spacing:.17em;
+ font-weight:800;
+ color:#775f42;
+}
+body.v3 #v3-story-dialog[data-story-type="event"] #cardTag{color:#983e48}
+body.v3 #v3-story-dialog[data-story-type="encounter"] #cardTag{color:#316278}
+body.v3 #v3-story-dialog[data-story-type="evidence"] #cardTag{color:#3c704d}
+body.v3 #v3-story-dialog #cardStory::first-letter{
+ font-size:1.6em;
+ font-weight:700;
+ color:#806741;
+}
+body.v3 #v3-story-dialog #dicebox.show{
+ margin-top:15px;
+ border-top:1px solid #a28d69;
+ padding-top:15px;
+}

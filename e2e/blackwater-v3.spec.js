@@ -26,7 +26,7 @@ test('V3 mobile layout remains usable',async({page})=>{
  await expect(page.locator('.v3-board .map-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel #placeTitle')).toBeVisible();
- await expect(page.locator('#places')).toHaveCSS('grid-template-columns',/\\d+px \\d+px/);
+ await expect(page.locator('#places')).toHaveCSS('grid-template-columns',/\d+px \d+px/);
  await page.screenshot({path:'test-results/blackwater-v3-mobile.png',fullPage:true});
 });
 test('classic mode is unchanged',async({page})=>{

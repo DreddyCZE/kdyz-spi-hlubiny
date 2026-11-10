@@ -34,7 +34,25 @@ if(params.get('ui')==='v3'){
  const vitals=document.createElement('div');vitals.className='v3-vitals';
  const equip=document.createElement('button');equip.type='button';equip.textContent='🎒 Vybavení';equip.onclick=()=>document.querySelector('[data-panel="inventory-panel"]')?.click();
  const ability=document.createElement('button');ability.type='button';ability.textContent='✦ Schopnosti';ability.onclick=()=>document.querySelector('[data-panel="investigator"]')?.click();
- hud.append(hudTitle,portrait,heroName,role,vitals,equip,ability);
+ const chooseSlot=document.createElement('div');chooseSlot.className='v3-investigator-setup';
+ chooseSlot.setAttribute('aria-label','Začátek vyšetřování');
+ hud.append(hudTitle,chooseSlot,portrait,heroName,role,vitals,equip,ability);
+ const introSlot=document.createElement('section');introSlot.className='v3-intro-slot';introSlot.setAttribute('aria-label','Úvod do Blackwateru');
+ layout.before(introSlot);
+ // The existing engine mounts its investigator chooser and prologue inside the story card.
+ // Move the actual DOM nodes into visible V3 onboarding slots (no copied controls or rules).
+ const syncOnboarding=()=>{
+   const chooser=chooseSlot.querySelector('[aria-label="Výběr vyšetřovatele"]')||story.querySelector('[aria-label="Výběr vyšetřovatele"]');
+   const introduction=introSlot.querySelector('.onboarding')||story.querySelector('.onboarding');
+   if(chooser&&!chooseSlot.contains(chooser))chooseSlot.append(chooser);
+   if(introduction&&!introSlot.contains(introduction))introSlot.append(introduction);
+   const choosing=Boolean(chooser&&!chooser.hidden);
+   hud.classList.toggle('v3-choosing',choosing);
+   if(choosing)heroName.textContent='Vyber si vyšetřovatele';
+ };
+ const setupObserver=new MutationObserver(syncOnboarding);
+ setupObserver.observe(story,{childList:true,subtree:true});
+ syncOnboarding();
  const locationHeading=document.createElement('h2');locationHeading.textContent='Aktuální lokace';
  const locationName=document.createElement('h3'),locationDescription=document.createElement('p');
  const actionLabel=document.createElement('h2');actionLabel.textContent='Dostupné akce';
@@ -66,6 +84,7 @@ if(params.get('ui')==='v3'){
    locationName.textContent=getText('placeTitle');locationDescription.textContent=getText('placeDesc');
    rounds.disabled=document.getElementById('endRound')?.disabled||false;
    explore.disabled=false;
+   syncOnboarding();
  };
  let pendingRefresh=false;
  const scheduleRefresh=()=>{if(pendingRefresh)return;pendingRefresh=true;queueMicrotask(()=>{pendingRefresh=false;updateHud();});};

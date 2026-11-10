@@ -22,6 +22,10 @@ export function mountV3Combat({story,storyDialog,locationActions}){
    <div class="v3-battle-actor"><div class="v3-battle-portrait" id="v3-battle-enemy-art" role="img" aria-label="Nepřítel"></div><h3 id="v3-battle-enemy"></h3><p id="v3-battle-enemy-hp"></p></div>
  </div>
  <div class="v3-battle-rules"><span id="v3-battle-round"></span><span>Útok nebo únik · hod dvěma kostkami</span></div>
+ <div class="v3-battle-dice-tray" aria-label="Výsledek posledního hodu">
+  <span class="v3-battle-dice-title">POSLEDNÍ HOD</span>
+  <div id="v3-battle-dice" aria-live="polite"><span class="v3-battle-die">?</span><span class="v3-battle-die">?</span></div>
+ </div>
  <div id="v3-battle-controls"></div>`;
  const $=id=>battle.querySelector('#'+id);
  const originalClose=$('v3-battle-close');
@@ -38,7 +42,7 @@ export function mountV3Combat({story,storyDialog,locationActions}){
  reopen.hidden=true;
  reopen.onclick=()=>{if(!battle.open){battle.showModal();refresh();}};
  locationActions.prepend(reopen);
- let section=null,seenActive=false,lastEnemy=null;
+ let section=null,seenActive=false,lastEnemy=null,lastRoll='';
  const isActive=()=>Boolean(section?.firstElementChild?.textContent?.startsWith('Souboj:'));
  const setPicture=(node,path)=>{node.style.backgroundImage=path?'url("'+path+'")':'none';};
  function refresh(){
@@ -58,6 +62,7 @@ export function mountV3Combat({story,storyDialog,locationActions}){
      if(section.parentNode!==story)story.querySelector('#cardStory')?.before(section);
      seenActive=false;
      lastEnemy=null;
+     lastRoll='';
      return;
    }
    if(section.parentNode!==$('v3-battle-controls'))$('v3-battle-controls').append(section);
@@ -77,6 +82,14 @@ export function mountV3Combat({story,storyDialog,locationActions}){
    originalClose.textContent=finished?'Pokračovat ve vyšetřování →':'Zpět na mapu ✕';
    battle.classList.toggle('v3-battle-finished',finished);
    // The engine's result description remains below its own buttons, so no outcome is fabricated.
+   if(summary!==lastRoll){
+     lastRoll=summary;
+     const dice=summary.match(/(?:^|·)\s*(\d+)\s*\+\s*(\d+)\s*·/);
+     $('v3-battle-dice').replaceChildren(...(dice?[dice[1],dice[2]]:['?','?']).map(value=>{
+       const tile=document.createElement('span');tile.className='v3-battle-die';
+       tile.textContent=value;return tile;
+     }));
+   }
    if(finished&&summary)$('v3-battle-round').textContent='Střetnutí skončilo · '+summary;
  }
  function install(target){

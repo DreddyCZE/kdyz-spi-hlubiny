@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-# One lock covers source resolution, packaging AND deployment for every publisher.
+# Publishers keep one shared lock; PR tests never publish and cancel outdated runs.
 concurrency:
-  group: github-pages
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('blackwater-pr-{0}', github.event.pull_request.number) || 'github-pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test-build:
     runs-on: ubuntu-latest

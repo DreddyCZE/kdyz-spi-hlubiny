@@ -2,6 +2,10 @@
 const params=new URLSearchParams(location.search);
 if(params.get('ui')==='v3'){
  document.body.classList.add('v3');
+ // V3 branding only; the original document and game mode remain intact.
+ const brand=document.querySelector('.top h1'),subtitle=document.querySelector('.top .edition');
+ if(brand)brand.textContent='BLACKWATER';
+ if(subtitle)subtitle.textContent='Zvony pod přílivem · Vyšetřovací příběh';
  const css=document.createElement('link');css.rel='stylesheet';css.href='./src/ui/v3-prototype.css';document.head.append(css);
  const layout=document.querySelector('.layout'),story=document.getElementById('storyPanel');
  const toolbar=document.createElement('section');toolbar.className='v3-toolbar';toolbar.setAttribute('aria-label','Ovládání prototypu');

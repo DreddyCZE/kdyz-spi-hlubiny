@@ -4,7 +4,16 @@ Stav: experimentální rozhraní v PR #23. **Nejde o novou hru ani o nový save 
 
 ## Jak otevřít V3
 
-Po publikování příslušné verze webu otevři `index.html?ui=v3` na stejné doméně, kde běží hlavní scénář. Bez tohoto parametru je původní rozhraní beze změny. Dokud je PR #23 pouze Draft, není zaručeno, že veřejný web V3 obsahuje. Chceš-li prohlédnout vzhled před zveřejněním, v GitHub Actions → **Test and deploy Pages** vyhledej artefakt `blackwater-v3-screenshots`.
+Po publikování příslušné verze webu otevři `index.html?ui=v3` na stejné doméně, kde běží hlavní scénář. Bez tohoto parametru je původní rozhraní beze změny. Dokud je PR #23 pouze Draft, veřejný web V3 nemusí obsahovat. Na PR větvi se v GitHub Actions → **Test and deploy Pages** vytváří také samostatný balíček `blackwater-v3-playable` a artefakt `blackwater-v3-screenshots`.
+
+**Jak si zahrát V3 před sloučením (Windows):**
+1. Otevři nejnovější úspěšný běh **Test and deploy Pages** u PR #23 a v sekci **Artifacts** stáhni `blackwater-v3-playable`.
+2. Rozbal ZIP do prázdné složky; v ní musí být `index.html`, `src/`, `public/`.
+3. Otevři PowerShell v této složce a spusť `py -m http.server 8000` (alternativně `python -m http.server 8000`).
+4. V prohlížeči otevři **http://localhost:8000/index.html?ui=v3**.
+5. Lokální server ukonči pomocí Ctrl+C. Uložené pozice z localhostu jsou oddělené od GitHub Pages; jejich přenos není automatický.
+
+Nepouštěj `index.html` dvojklikem jako `file://`: ES moduly webové hry vyžadují webový server.
 
 V prohlížeči můžeš použít novou hru, nebo pokračovat v kompatibilní scénářové pozici. Nezískané důkazy, výsledky voleb či skrytá data se nesmějí zobrazovat.
 
@@ -35,6 +44,6 @@ V prohlížeči můžeš použít novou hru, nebo pokračovat v kompatibilní sc
 - Výsledné vizuální doladění všech obrazovek a typografie.
 - Podrobná dostupnost pro klávesnici a čtečky obrazovky napříč všemi modálními okny.
 - Rozšířený balance a ruční playtest napříč celým příběhem.
-- Samostatné veřejné preview pro PR větev. PR testy vytvářejí screenshoty, nikoli automatické Pages nasazení.
+- Samostatné **veřejné** preview pro PR větev. PR testy vytvářejí lokálně hratelný ZIP a screenshoty, nikoli automatické Pages nasazení.
 
 Technické detaily a průběh změn jsou popsány v PR #23.

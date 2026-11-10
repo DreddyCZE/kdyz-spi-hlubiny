@@ -38,14 +38,15 @@ export function mountV3Combat({story,storyDialog,locationActions}){
  reopen.hidden=true;
  reopen.onclick=()=>{if(!battle.open){battle.showModal();refresh();}};
  locationActions.prepend(reopen);
- let section=null,seenActive=false;
+ let section=null,seenActive=false,lastEnemy=null;
  const isActive=()=>Boolean(section?.firstElementChild?.textContent?.startsWith('Souboj:'));
  const setPicture=(node,path)=>{node.style.backgroundImage=path?'url("'+path+'")':'none';};
  function refresh(){
    if(!section)return;
    const active=isActive();
    const content=section.textContent||'';
-   const enemy=enemies.find(e=>content.includes(e.name));
+   const enemy=enemies.find(e=>content.includes(e.name))||lastEnemy;
+   if(active&&enemy)lastEnemy=enemy;
    const hpMatch=content.match(/HP\s+(\d+)\/(\d+)/);
    const roundMatch=content.match(/výměna\s+(\d+)\/(\d+)/);
    const finished=/Nepřítel byl poražen\.|Podařilo se uniknout\./.test(content);
@@ -56,6 +57,7 @@ export function mountV3Combat({story,storyDialog,locationActions}){
      if(battle.open)battle.close();
      if(section.parentNode!==story)story.querySelector('#cardStory')?.before(section);
      seenActive=false;
+     lastEnemy=null;
      return;
    }
    if(section.parentNode!==$('v3-battle-controls'))$('v3-battle-controls').append(section);

@@ -57,7 +57,7 @@ Přehled Jak se hraje je dostupný klávesnicí i před výběrem postavy. Použ
 
 ## D5 – hádanky a příběhové důsledky
 
-Ke třem znamením zvonu přibývá doplnění jména na hřbitově a nastavení signálu v majáku. Pokus vyžaduje skutečně nalezené důkazy; první chyba zvýší Hrozbu, další chyby ji neopakují. Explicitní náhradní cesta spotřebuje AP a provede uvedené efekty v jediném přechodu. Dokončené řešení ani náhradní cestu nelze opakovat. Rozpracované nastavení hádanky je volitelným polem uloženého stavu, starší pozice bez něj zůstávají platné.
+Ke třem znamením zvonu přibývá doplnění jména na hřbitově a nastavení signálu v majáku. Jméno vyžaduje porovnání archivního opisu a fotografie s rytinou ze hřbitova; signál spojuje deník, plán a svědectví ze tří míst. Pokus vyžaduje skutečně nalezené důkazy; první chyba zvýší Hrozbu, další chyby ji neopakují. Explicitní náhradní cesta spotřebuje AP a provede uvedené efekty v jediném přechodu. Dokončené řešení ani náhradní cestu nelze opakovat. Rozpracované nastavení hádanky je volitelným polem uloženého stavu, starší pozice bez něj zůstávají platné. Dříve dokončená jmenná hádanka zůstává při načtení dokončená; nové podklady se vyžadují jen při novém pokusu.
 
 Nové karty propojují archiv, Vossovo svědectví, Thomasovu pomoc a návrat posádky. Epilog promítá pouze skutečně dosažené příznaky a zvolený konec; před koncem se nezobrazuje. Podmínky existujících zakončení se nemění.
 

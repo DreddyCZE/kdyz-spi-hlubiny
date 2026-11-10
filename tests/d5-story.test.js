@@ -42,6 +42,17 @@ test('mechanism draft survives reload; malformed or solved drafts are rejected',
  assert.ok(validatePuzzle({...p,requiredEvidence:'oops'}).length);
 });
 
+test('name puzzle compares archive and cemetery evidence while preserving previously solved saves',()=>{
+ let s=newScenarioSession(def,data);s.game.locationId='location-4';s.game.evidence=['reward-10','reward-11'];
+ assert.equal(view(s,def,data).puzzles.find(p=>p.id==='bw-missing-name').canAttempt,false);
+ assert.strictEqual(act(s,{type:'attemptPuzzle',puzzleId:'bw-missing-name',answer:'nathaniel-voss'}),s);
+ s.game.evidence.push('reward-14');s=act(s,{type:'attemptPuzzle',puzzleId:'bw-missing-name',answer:'nathaniel-voss'});
+ assert.equal(s.scenario.puzzles['bw-missing-name'].status,'solved');
+ s.game.evidence=s.game.evidence.filter(id=>id!=='reward-14');
+ const storage=db();assert.ok(saveScenarioSession(storage,s,def,data));
+ assert.equal(view(loadScenarioSession(storage,def,data),def,data).puzzles.find(p=>p.id==='bw-missing-name').status,'solved');
+});
+
 function journey(hero){
  let s=act(newScenarioSession(def,data),{type:'selectInvestigator',investigatorId:hero});
  const actions=[];
@@ -55,9 +66,10 @@ for(const hero of ['detective','occultist','sailor'])for(const ending of ['quiet
  const j=journey(hero);
  j.resolve(j.seek('0-0').choices[0]);
  j.move('location-2');j.resolve(j.seek('bw-02-04').choices[0]);
- j.move('location-4');j.run({type:'attemptPuzzle',puzzleId:'bw-missing-name',answer:'nathaniel-voss'});
+ j.move('location-4');
  // The original cemetery card supplies the ritual evidence.
  j.resolve(j.seek('4-0').choices[0]);
+ j.run({type:'attemptPuzzle',puzzleId:'bw-missing-name',answer:'nathaniel-voss'});
  j.move('location-3');j.resolve(j.seek('bw-03-04').choices.find(o=>o.id==='bw-03-04-ally'));
  j.move('location-5');j.resolve(j.seek('5-0').choices[0]);
  assert.ok(['reward-2','reward-9','reward-12'].every(id=>j.s.game.evidence.includes(id)),JSON.stringify(j.s.game.evidence));

@@ -198,7 +198,7 @@ function render(){
     const section=document.createElement('section');section.className='puzzle-panel';section.dataset.puzzleId=p.id;
     const title=document.createElement('h3');title.textContent=p.title;section.append(title);
     const status=document.createElement('p');status.textContent=p.status==='solved'?'Vyřešeno':p.status==='bypassed'?'Náhradní cesta dokončena':p.status==='blocked'?'Pokusy vyčerpány · hledej jinou cestu':'Hádanka · pokusy '+p.attempts;section.append(status);
-    for(const text of [p.description,p.riskText,p.resultText,!p.canAttempt?'Chybí podklady pro ověření řešení. Vrať se pro uvedené důkazy.':''].filter(Boolean)){const note=document.createElement('p');note.textContent=text;section.append(note);}
+    for(const text of [p.description,p.riskText,p.resultText,p.status==='open'&&!p.canAttempt?'Chybí podklady pro ověření řešení. Vrať se pro uvedené důkazy.':''].filter(Boolean)){const note=document.createElement('p');note.textContent=text;section.append(note);}
     for(const clue of p.clues){const item=document.createElement('p');item.textContent=clue.text;section.append(item);}
     for(const hint of p.hints){const item=document.createElement('p');item.textContent='Nápověda: '+hint.text;section.append(item);}
     if(p.fallback&&scene.canAct&&!pending)section.append(button(p.fallback.text+' · '+p.fallback.apCost+' AP',()=>dispatch({type:'usePuzzleFallback',revision:state.revision,puzzleId:p.id}),state.ap<p.fallback.apCost));

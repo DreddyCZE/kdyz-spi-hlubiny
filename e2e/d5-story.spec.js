@@ -26,13 +26,13 @@ async function journey(page){
  }throw Error('Unreachable '+id);};
  const move=async id=>{await afford(1);await page.locator(`[data-location-id="${id}"]`).click();};
  await resolve((await seek('0-0')).choices[0]);await move('location-2');await resolve((await seek('bw-02-04')).choices[0]);
- await move('location-4');const name=page.locator('[data-puzzle-id="bw-missing-name"]');
+ await move('location-4');await resolve((await seek('4-0')).choices[0]);const name=page.locator('[data-puzzle-id="bw-missing-name"]');
  await name.getByRole('combobox',{name:'Vyber závěr'}).selectOption('samuel-reed');
  await name.getByRole('button',{name:'Ověřit řešení'}).click();await expect(name).toContainText('Inkoust se rozteče');
  await name.getByRole('combobox',{name:'Vyber závěr'}).selectOption('nathaniel-voss');await page.reload();
  await expect(name.getByRole('combobox')).toHaveValue('nathaniel-voss');
  await name.getByRole('button',{name:'Ověřit řešení'}).click();await expect(name).toContainText('Vyřešeno');
- await resolve((await seek('4-0')).choices[0]);await move('location-3');
+ await move('location-3');
  await resolve((await seek('bw-03-04')).choices.find(o=>o.id==='bw-03-04-ally'));
  await move('location-5');await resolve((await seek('5-0')).choices[0]);
  const mechanism=page.locator('[data-puzzle-id="bw-lighthouse-signal"]');

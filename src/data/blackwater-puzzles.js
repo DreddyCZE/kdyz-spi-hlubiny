@@ -20,11 +20,12 @@ export const blackwaterPuzzles=Object.freeze([
  }),
  createPuzzle({
   id:'bw-missing-name',version:1,title:'Chybějící jméno v matrice',locationId:'location-4',type:'deduction',
-  description:'Hrobník položí na stůl tři jmenovky. Urči, koho vymazali z přísahy roku 1883. Potřebuješ archivní opis a fotografii; nejsou-li v deníku, vrať se do knihovny k Dopisu správci.',
-  requiredEvidence:['reward-10','reward-11'],
+  description:'Hrobník položí na stůl tři jmenovky. Urči, koho vymazali z přísahy roku 1883. Porovnej archivní opis a fotografii s rituální rytinou ze hřbitova. Kopie hledej v knihovně u Dopisu správci, rytinu na zdejším náhrobku; chybějící podklady může nahradit hrobníkův placený opis.',
+  requiredEvidence:['reward-10','reward-11','reward-14'],
   clues:[
    {id:'name-register',sourceEvidenceId:'reward-10',text:'Archivní opis: čtvrtý podpis přísahy patřil tehdejšímu starostovi, nikoli kapitánovi ani dědici strážců.'},
-   {id:'name-photo',sourceEvidenceId:'reward-11',text:'Popisky na fotografii: Nathaniel Voss — starosta 1883. Thomas Bell — současný správce majáku. Samuel Reed — kapitán Milosti.'}
+   {id:'name-photo',sourceEvidenceId:'reward-11',text:'Popisky na fotografii: Nathaniel Voss — starosta 1883. Thomas Bell — současný správce majáku. Samuel Reed — kapitán Milosti.'},
+   {id:'name-gravestone',sourceEvidenceId:'reward-14',text:'Rytina na náhrobku spojuje chybějící jmenovku s městskou pečetí a přísahou z roku 1883. Hledáš tehdejšího úředníka, ne dnešního svědka.'}
   ],interaction:{options:['samuel-reed','thomas-bell','nathaniel-voss'],answer:'nathaniel-voss'},
   labels:{'samuel-reed':'Samuel Reed','thomas-bell':'Thomas Bell','nathaniel-voss':'Nathaniel Voss'},
   attempts:{mode:'limited',max:3,penaltyAfter:1},

@@ -54,3 +54,33 @@ Scénářový režim přebírá výběr tří postav, jejich limity HP/SAN, jedn
 ## D6 – veřejná pravidla
 
 Přehled Jak se hraje je dostupný klávesnicí i před výběrem postavy. Používá délku a AP aktivního scénáře, pro původní režim popisuje sedm kol a původní porážku. Nečte tabulky následků, podmínky zakončení ani řešení hádanek. Otevření i zavření je čistě prezentační a neukládá žádnou změnu hry. Pravidla uvádějí aktuální sdílené atributy, skutečné efekty vybavení a maximálně tři bojové výměny; neslibují dosud nepřipojený mýtus ani návrat vyřazené postavy.
+
+## D5 – hádanky a příběhové důsledky
+
+Ke třem znamením zvonu přibývá doplnění jména na hřbitově a nastavení signálu v majáku. Pokus vyžaduje skutečně nalezené důkazy; první chyba zvýší Hrozbu, další chyby ji neopakují. Explicitní náhradní cesta spotřebuje AP a provede uvedené efekty v jediném přechodu. Dokončené řešení ani náhradní cestu nelze opakovat. Rozpracované nastavení hádanky je volitelným polem uloženého stavu, starší pozice bez něj zůstávají platné.
+
+Nové karty propojují archiv, Vossovo svědectví, Thomasovu pomoc a návrat posádky. Epilog promítá pouze skutečně dosažené příznaky a zvolený konec; před koncem se nezobrazuje. Podmínky existujících zakončení se nemění.
+
+## D6 – prolog a kontextové nápovědy
+
+Nová hra nabízí přeskočitelný český prolog a nápovědy podle veřejného herního stavu. Přečtené nápovědy a jejich vypnutí se ukládají odděleně pod klíčem `hlubiny-onboarding-v1`; nemění herní revizi ani náhodu. Rozehrané pozice bez nastavení průvodce jej automaticky nezapínají. Nová hra průvodce obnoví. Nedostupné úložiště nebrání pokračování.
+
+## Pasivní vlastnosti vyšetřovatelů
+
+Detektiv s alespoň jedním získaným důkazem přičítá +1 k vyšetřovacím testům VĚ a VN. Bonus se použije při porovnání prvního hodu a přehodu i při přijetí výsledku. Promítá se do veřejného přehledu dosažitelných úrovní a součtu hodu; neovlivňuje bojové hody. Již vyhodnocené hody se po získání dalších důkazů nepřepočítávají.
+
+Okultistka má první přehod vyšetřovacího testu v každém kole zdarma, i pokud zbývá pouze 1 SAN. Další přehody mají obvyklou cenu 1 SAN a vyžadují alespoň 2 SAN. Každý konkrétní hod lze stále přehodit jen jednou. Bezplatný přehod se spotřebuje při jeho provedení, nikoli až při přijetí výsledku.
+
+Námořník sníží první záporný HP efekt z karty nebo celkové HP zranění jedné bojové výměny o 1. Karty a boj sdílejí jeden limit za kolo. Snížení proběhne před oříznutím HP na nulu a vyhodnocením porážky; zranění větší než zbývající HP plus ochrana je stále smrtelné. SAN ani Hrozba se nesnižují. Využití se zaznamená i při úplném zrušení ztráty 1 HP.
+
+Save zůstává ve scénářové obálce verze 1 s aditivními volitelnými poli: `passiveRound` uvádí poslední kolo využití okultistky či námořníka; výsledky zvýhodněných hodů detektiva mají `testBonus: 1`. Validátor kontroluje typ postavy, rozsah kola, atribut, dostupný důkaz a přesný součet/úroveň hodu. Starší uložené výsledky bez bonusu zachovají původní součet. Legacy validátor bez explicitně povoleného bonusu nové výsledky odmítá. Starší pozice bez informace o využití mají vlastnost v aktuálním kole dostupnou; její minulou aktivaci nelze zpětně odvodit.
+
+## Vyřazení a návrat – rozhodnutí auditu 2026-11-10
+
+Nula HP nebo SAN zůstává konečnou porážkou. Scénář má jediného aktivního vyšetřovatele a nepovinného pomocníka bez vlastní tahové ekonomiky. Automatické oživení by změnilo význam posledního zranění, spotřebních předmětů i námořníkovy ochrany; nynější pravidla žádný zdroj návratu ani cenu nedefinují. Návrat proto v této integraci nepřidáváme. Případný budoucí návrh musí určit jednorázový zdroj záchrany, cenu v čase a následky, ověřit oba druhy vyřazení a řešit save. Současný epilog porážky a nová hra umožňují uzavřít neúspěšný příběh bez neřešitelného stavu.
+
+## Audit atmosférických větví
+
+PR #16 má samostatný prezentační kontrolér a animace karet/výsledků, ale jeho staré zapojení odhaluje již vyhodnocený hod po animaci. Nový scénář vyžaduje výslovné přijetí výsledku; přepsání aktuálního adaptéru starou verzí by poškodilo tuto vlastnost. Větev proto zůstává oddělená. Zachováváme aktuální animaci kostek, reduced motion a blokaci potvrzení během animace; výsledky nově rozlišujeme textem i kontrastními rámečky. Audio větev a stará příběhová větev nemají vlastní commity nad jejich společným historickým základem, takže neobsahují funkční audio k převzetí.
+
+Průvodce lze znovu otevřít tlačítkem „Průvodce hrou“ bez resetu rozehrané hry. Vedle prvních akcí vysvětluje i spotřební výbavu. Aktuální směr pátrání vychází pouze ze získaných důkazů a dostupných veřejných akcí; neuvádí skryté podmínky zakončení.

@@ -6,7 +6,7 @@ export function seededDice(seed=1){
  const random=()=>{state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296;};
  return ()=>[1+Math.floor(random()*6),1+Math.floor(random()*6)];
 }
-export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,chooseEnding,reroll=false}={}){
+export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,chooseChoice,chooseEnding,reroll=false,investigatorId,useEquipment=false,useAbilities=false,combat=null,puzzles=false}={}){
  if(!Number.isSafeInteger(maxActions)||maxActions<1||maxActions>100000)throw new RangeError('maxActions');
  const dice=seededDice(seed),trace=[];let session=newScenarioSession(def,data),attempts=0;
  const dispatch=action=>{
@@ -15,12 +15,13 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   if(session!==before){
    const gainedKnowledge=session.game.knowledge.filter(id=>!before.game.knowledge.includes(id));
    const gainedEvidence=session.game.evidence.filter(id=>!before.game.evidence.includes(id));
-   trace.push({type:action.type,round:session.game.round,ap:session.game.ap,locationId:session.game.locationId,endingId:session.scenario.endingId,...(gainedKnowledge.length?{gainedKnowledge}:{}),...(gainedEvidence.length?{gainedEvidence}:{})});
+   trace.push({type:action.type,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,apSpent:action.type==='endRound'?0:Math.max(0,before.game.ap-session.game.ap),hpLost:Math.max(0,before.game.hp-session.game.hp),sanLost:Math.max(0,before.game.san-session.game.san),locationId:session.game.locationId,endingId:session.scenario.endingId,...(gainedKnowledge.length?{gainedKnowledge}:{}),...(gainedEvidence.length?{gainedEvidence}:{})});
   }
   return session!==before;
  };
+ if(investigatorId!==undefined&&!dispatch({type:'selectInvestigator',investigatorId}))throw new RangeError('investigatorId');
  for(;attempts<maxActions;attempts++){
-  const view=scenarioSessionView(session,def),game=session.game;
+  const view=scenarioSessionView(session,def,data),game=session.game;
   if(view.ending||game.ended)break;
   if(view.availableEndings.length){
    const ending=chooseEnding?.(view.availableEndings,game,session.scenario)||view.availableEndings.find(e=>e.kind==='victory')||view.availableEndings[0];
@@ -29,6 +30,17 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   }
   if(game.round>def.rules.maxRounds)break;
   if(view.pendingTest){dispatch({type:'acceptTest'});continue;}
+  if(view.combat?.status==='active'){dispatch({type:'combatTurn',move:combat==='escape'?'escape':'attack',dice:dice()});continue;}
+  if(useEquipment){
+   const item=view.equipment.find(id=>id==='bw-bandage'&&game.hp<=(view.investigator?.hp??6)-2||id==='bw-laudanum'&&game.san<=(view.investigator?.san??8)-2||id==='bw-salt'&&game.threat>=6);
+   if(item&&dispatch({type:'useEquipment',itemId:item}))continue;
+  }
+  if(useAbilities&&view.investigator&&!view.abilityUsed){
+   const useful=investigatorId==='detective'&&game.ap===0||investigatorId==='sailor'&&game.hp<=view.investigator.hp-2||investigatorId==='occultist'&&view.clocks[0]?.current>=3;
+   if(useful&&dispatch({type:'useInvestigatorAbility'}))continue;
+  }
+  if(combat&&view.availableEncounters.length&&game.ap>0){if(dispatch({type:'startCombat',enemyId:view.availableEncounters[0].enemyId}))continue;}
+  if(puzzles){const puzzle=view.puzzles.find(p=>p.fallback&&game.ap>=p.fallback.apCost);if(puzzle&&dispatch({type:'usePuzzleFallback',puzzleId:puzzle.id}))continue;}
   const card=currentCard(game,data);
   if(card&&game.result){dispatch({type:'next'});continue;}
   if(game.ap===0){if(!dispatch({type:'endRound'}))break;continue;}
@@ -41,9 +53,9 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
     if(choice.test){
      const started=dispatch({type:'startTest',cardId:card.id,choiceId:choice.id,dice:dice()});
      if(started){
-      if(session.scenario.pendingTest&&session.game.san>=2){
+      if(session.scenario.pendingTest&&session.game.san>scenarioSessionView(session,def,data).rerollCost){
        const test=choice.test,first=session.scenario.pendingTest.firstDice;
-       const result=evaluate(...first,attributes[test.attribute]+(test.modifier||0),test.difficulty);
+       const result=evaluate(...first,attributes[test.attribute]+(test.modifier||0)+(view.testBonuses[test.attribute]||0),test.difficulty);
        const shouldReroll=typeof reroll==='function'?reroll({game:session.game,card,choice,result,round:session.game.round}):Boolean(reroll);
        if(shouldReroll)dispatch({type:'rerollTest',dice:dice()});
       }
@@ -62,7 +74,7 @@ export function simulateScenario(def,data,{seed=1,maxActions=500,chooseLocation,
   if(destination&&locations.includes(destination)&&dispatch({type:'move',locationId:destination}))continue;
   if(!dispatch({type:'endRound'}))break;
  }
- return {seed,endingId:session.scenario.endingId,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,knowledge:[...session.game.knowledge],evidence:[...session.game.evidence],actions:trace.length,attempts,trace,exhausted:attempts>=maxActions&&!session.scenario.endingId&&!session.game.ended};
+ return {seed,investigatorId:session.investigatorId,endingId:session.scenario.endingId,round:session.game.round,ap:session.game.ap,hp:session.game.hp,san:session.game.san,threat:session.game.threat,ended:session.game.ended,apSpent:trace.reduce((n,s)=>n+s.apSpent,0),hpLost:trace.reduce((n,s)=>n+s.hpLost,0),sanLost:trace.reduce((n,s)=>n+s.sanLost,0),knowledge:[...session.game.knowledge],evidence:[...session.game.evidence],actions:trace.length,attempts,trace,exhausted:attempts>=maxActions&&!session.scenario.endingId&&!session.game.ended};
 }
 export function simulateBatch(def,data,{runs=100,seed=1,...options}={}){
  if(!Number.isSafeInteger(runs)||runs<1||runs>10000)throw new RangeError('runs');

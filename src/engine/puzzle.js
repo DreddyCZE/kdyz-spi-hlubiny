@@ -33,13 +33,29 @@ export function validatePuzzle(p){
   for(const [i,h] of (Array.isArray(p.hints)?p.hints:[]).entries())if(!record(h)||!validId(h.id)||typeof h.text!=='string'||!h.text.trim()||h.sourceEvidenceId!==undefined&&!validId(h.sourceEvidenceId))fail('hints['+i+']','invalid');
   for(const field of ['onSolve','onWrong'])if(!Array.isArray(p[field])||p[field].some(e=>!record(e)||!['setFlag','modifyThreat'].includes(e.type)||e.type==='setFlag'&&(!validId(e.id)||typeof e.value!=='boolean')||e.type==='modifyThreat'&&!Number.isSafeInteger(e.amount)))fail(field,'invalid effects');
   if(!record(p.fallback)||!validId(p.fallback.id)||p.fallback.type!=='alternatePath')fail('fallback','alternate path required');
+  if(p.requiredEvidence!==undefined&&(!Array.isArray(p.requiredEvidence)||!unique(p.requiredEvidence)||!p.requiredEvidence.every(validId)))fail('requiredEvidence','unique evidence IDs required');
+  if(p.labels!==undefined&&(!record(p.labels)||Object.entries(p.labels).some(([k,v])=>!validId(k)||typeof v!=='string'||!v.trim())))fail('labels','invalid labels');
+  for(const field of ['description','riskText','solvedText','wrongText'])if(p[field]!==undefined&&(typeof p[field]!=='string'||!p[field].trim()))fail(field,'text required');
+  if(p.fallback?.apCost!==undefined&&(!Number.isSafeInteger(p.fallback.apCost)||p.fallback.apCost<0||p.fallback.apCost>3||typeof p.fallback.text!=='string'||typeof p.fallback.resultText!=='string'||validatePuzzleEffects(p.fallback.effects)))fail('fallback','invalid executable alternative');
   return errors;
+}
+function validatePuzzleEffects(effects){return !Array.isArray(effects)||effects.some(e=>!record(e)||!['setFlag','modifyThreat'].includes(e.type)||(e.type==='setFlag'?(!validId(e.id)||typeof e.value!=='boolean'):!Number.isSafeInteger(e.amount)));}
+export const hasPuzzleClues=(p,game)=>(p.requiredEvidence||[]).every(id=>(game.evidence||[]).includes(id));
+export function validPuzzleDraft(p,a){
+ const v=p.interaction;
+ if(p.type==='sequence')return Array.isArray(a)&&a.length===v.symbols.length&&unique(a)&&a.every(x=>v.symbols.includes(x));
+ if(p.type==='deduction')return v.options.includes(a);
+ const keys=p.type==='matching'?v.left:v.controls;
+ return record(a)&&Object.keys(a).length===keys.length&&keys.every(k=>(p.type==='matching'?v.right:v.states[k]).includes(a[k]));
 }
 export function createPuzzle(p){const errors=validatePuzzle(p);if(errors.length)throw new Error('Invalid puzzle:\n'+errors.join('\n'));return structuredClone(p);}
 export function initialPuzzleState(){return {status:'open',attempts:0,hintIds:[]};}
 export function puzzleView(p,state,game){
   const s=state||initialPuzzleState(),evidence=game.evidence||[];
   return {id:p.id,title:p.title,type:p.type,status:s.status,attempts:s.attempts,remaining:p.attempts.mode==='limited'?Math.max(0,p.attempts.max-s.attempts):null,
+    description:p.description||'',riskText:p.riskText||'První chybný pokus může mít následek.',labels:{...p.labels},canAttempt:hasPuzzleClues(p,game),draft:s.draft===undefined?null:structuredClone(s.draft),
+    resultText:s.status==='solved'?p.solvedText||'':s.status==='bypassed'?p.fallback.resultText:s.attempts?p.wrongText||'':'',
+    fallback:p.fallback.apCost!==undefined&&!['solved','bypassed'].includes(s.status)?{text:p.fallback.text,apCost:p.fallback.apCost}:null,
     clues:p.clues.filter(c=>evidence.includes(c.sourceEvidenceId)).map(c=>({id:c.id,text:c.text})),
     hints:(p.hints||[]).filter(h=>s.hintIds.includes(h.id)&&(!h.sourceEvidenceId||evidence.includes(h.sourceEvidenceId))).map(h=>({id:h.id,text:h.text})),
     availableHints:(p.hints||[]).filter(h=>!s.hintIds.includes(h.id)&&(!h.sourceEvidenceId||evidence.includes(h.sourceEvidenceId))).map(h=>({id:h.id})),

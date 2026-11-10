@@ -1,5 +1,7 @@
 # Herní návrh M2.1 / M2.2
 
+> Historický dokument původního režimu. Hlavní scénář již obsahuje vítězná zakončení, postavy a souboje; aktuální stav viz [AUTONOMOUS-STATUS.md](AUTONOMOUS-STATUS.md) a [pravidla](PLAYING-BLACKWATER.md).
+
 ## Zachovaný koncept
 
 Eleanor Whitmore vyšetřuje přímořské lokace pomocí příběhových karet. Základ vychází z [referenčního prototypu 0.3](../public/legacy-prototype.html). Druhý [referenční prototyp](../public/reference-prototype.html) zůstává samostatnou inspirací. Ani jeden se neupravuje. M2.2 doplňuje obecný systém důkazů, znalostí a dedukcí s dočasným deníkem. Nepřidává boj, systém více postav, vítězství ani mobilní optimalizaci.

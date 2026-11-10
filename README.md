@@ -1,6 +1,8 @@
 # Když spí hlubiny
 
-Atmosférická karetní webová hra o vyšetřování u moře. Zachovává Eleanor Whitmore, sedm lokací a osm karet z prototypu 0.3. Herní aplikace nemá externí runtime knihovny; Node.js 22 nebo novější. Pro E2E testy se instalují vývojové závislosti a samostatné Chromium.
+Atmosférická karetní webová hra o vyšetřování u moře. Hlavní scénář Zvony pod přílivem nabízí tři vyšetřovatele s aktivními i pasivními schopnostmi, sedm lokací, dvanáct kol, tři hádanky, nepovinné souboje, společníka a větvené epilogy. Původní režimy zůstávají dostupné s oddělenými uloženými pozicemi. Herní aplikace nemá externí runtime knihovny; Node.js 22 nebo novější. Pro E2E testy se instalují vývojové závislosti a samostatné Chromium.
+
+[Hrát Blackwater](https://dreddycze.github.io/kdyz-spi-hlubiny/) · [Pravidla bez spoilerů](docs/PLAYING-BLACKWATER.md) · [Aktuální stav a omezení](docs/AUTONOMOUS-STATUS.md). Starší milníky níže dokumentují vývoj původního režimu.
 
 ```sh
 npm run dev
@@ -31,7 +33,7 @@ E2E příkaz sám sestaví hru a spustí vlastní server na portu 4174; nevyžad
 
 V repozitáři nastav **Settings → Pages → Source → GitHub Actions**. Workflow při PR spustí testy a build; po pushi do `main` navíc publikuje `dist`. Relativní adresy podporují cestu `/kdyz-spi-hlubiny/` bez zvláštní konfigurace. Samotný build nic nepublikuje. Reference budou dostupné pod `public/`.
 
-Hra ukládá automaticky do `localStorage` pod klíčem `hlubiny-v4`. Platné uložené hry M1 (`hlubiny-v1`), M2.1 (`hlubiny-v2`) a M2.2 (`hlubiny-v3`) se převedou bez přepsání původních klíčů. Převod zachová herní postup a nespustí dedukce. Neplatná přítomná novější verze se nenahradí starší hrou; začne nový stav. Chyba úložiště nezastaví hru a po akci se zobrazí upozornění. Podrobnosti: [ENGINE.md](docs/ENGINE.md).
+Hlavní scénář ukládá automaticky pod `hlubiny-scenario-v1-blackwater-bells`, ilustrovaný původní režim pod `hlubiny-blackwater-v1` a původní karetní hra pod `hlubiny-v4`. Nastavení průvodce má vlastní klíč `hlubiny-onboarding-v1`. Režimy se navzájem nepřevádějí ani nepřepisují. Platné historické pozice původní hry M1–M2.2 se převádějí jen v původním režimu bez přepsání původních klíčů. Poškozené uložené pozice zůstávají chráněné i při resetu. Chyba úložiště nezastaví hru. Podrobnosti: [pravidla](docs/PLAYING-BLACKWATER.md), [historický engine](docs/ENGINE.md).
 
 ## M3.2 – balíčky lokací
 

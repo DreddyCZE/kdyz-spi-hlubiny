@@ -1,5 +1,8 @@
 import {investigators,investigatorById} from '../data/blackwater-investigators.js';
 export {investigators,investigatorById};
+export function scenarioTestBonuses(session){return investigatorById[session.investigatorId]?.passive?.kind==='insight'&&session.game.evidence.length?{'VĚ':1,VN:1}:{};}
+export function scenarioRerollCost(session){return investigatorById[session.investigatorId]?.passive?.kind==='composure'&&session.passiveRound!==session.game.round?0:1;}
+export const scenarioDamageReduction=session=>investigatorById[session.investigatorId]?.passive?.kind==='endurance'&&session.passiveRound!==session.game.round?1:0;
 export function selectScenarioInvestigator(session,id){
  const hero=Object.hasOwn(investigatorById,id)?investigatorById[id]:null;
  if(!hero||session.investigatorId!==null||session.game.revision!==0||session.game.round!==1||session.scenario.endingId)return session;

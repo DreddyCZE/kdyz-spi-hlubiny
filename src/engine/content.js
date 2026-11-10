@@ -1,3 +1,4 @@
+import {blackwaterStoryCards,blackwaterEpilogues,blackwaterEpilogueThreads,blackwaterEndingPrompts} from '../data/blackwater-story.js';
 import { cards as migrated } from '../data/cards.js';
 import { exampleCard } from '../data/example-card.js';
 import { blackwaterM4Cards } from '../data/blackwater-m4.js';
@@ -42,7 +43,7 @@ export function createContent(cards, investigation = investigationDefinitions, o
 export const content=createContent([...migrated,exampleCard]);
 export const legacyContent=createContent([...migrated,exampleCard],legacyInvestigationDefinitions,{flags:['harbor-note-read']});
 // Opt-in Blackwater content; legacy default decks must remain unchanged.
-const companionCardFlags=[...blackwaterCompanionCards,...blackwaterConflictCards].flatMap(c=>c.choices.flatMap(o=>Object.values(o.outcomes).flatMap(result=>result.effects.filter(e=>e.type==='setFlag').map(e=>e.id))));
+const companionCardFlags=[...blackwaterCompanionCards,...blackwaterConflictCards,...blackwaterStoryCards].flatMap(c=>c.choices.flatMap(o=>Object.values(o.outcomes).flatMap(result=>result.effects.filter(e=>e.type==='setFlag').map(e=>e.id))));
 const companionFlags=blackwaterCompanions.flatMap(c=>c.abilities.map(a=>a.discoveryFlagId).filter(Boolean));
-const puzzleFlags=blackwaterPuzzles.flatMap(p=>p.onSolve.concat(p.onWrong).filter(e=>e.type==='setFlag').map(e=>e.id));
-export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterConflictCards,...blackwaterM4Cards,...additionalBlackwaterCards,...blackwaterCompanionCards],investigationDefinitions,{flags:[...new Set([...flags,...puzzleFlags,...companionFlags,...companionCardFlags])]}),puzzles:blackwaterPuzzles,companions:blackwaterCompanions,encounters:blackwaterEncounters});
+const puzzleFlags=blackwaterPuzzles.flatMap(p=>p.onSolve.concat(p.onWrong,p.fallback.effects||[]).filter(e=>e.type==='setFlag').map(e=>e.id));
+export const blackwaterContent=Object.freeze({...createContent([...migrated,exampleCard,...blackwaterConflictCards,...blackwaterM4Cards,...additionalBlackwaterCards,...blackwaterCompanionCards,...blackwaterStoryCards],investigationDefinitions,{flags:[...new Set([...flags,...puzzleFlags,...companionFlags,...companionCardFlags])]}),puzzles:blackwaterPuzzles,companions:blackwaterCompanions,encounters:blackwaterEncounters,epilogues:blackwaterEpilogues,epilogueThreads:blackwaterEpilogueThreads,endingPrompts:blackwaterEndingPrompts});

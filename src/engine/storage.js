@@ -6,7 +6,7 @@ import { rememberEvidence } from './investigation.js';
 export const SAVE_KEY='hlubiny-v4';
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const uniqueIDs=(a,allowed)=>Array.isArray(a)&&a.length<=allowed.length&&new Set(a).size===a.length&&a.every(id=>allowed.includes(id));
-export function validState(s,data=content){
+export function validState(s,data=content,rules={}){
   const catalog=data.refs;
   if(!isRecord(s)||s.version!==4||Object.keys(s).sort().join()!==Object.keys(newState(data)).sort().join())return false;
   if(!Number.isSafeInteger(s.revision)||s.revision<0||!catalog.locations.includes(s.locationId))return false;
@@ -31,12 +31,13 @@ export function validState(s,data=content){
   if(!isRecord(s.resolved))return false;
   for(const [id,r] of Object.entries(s.resolved)){
     const c=Object.hasOwn(data.byId,id)?data.byId[id]:null;
-    if(!c||!isRecord(r)||Object.keys(r).sort().join()!=='cardId,choiceId,dice,key,revision,total'||r.cardId!==id||!Number.isSafeInteger(r.revision)||r.revision<1||r.revision>s.revision)return false;
+    if(!c||!isRecord(r)||Object.keys(r).filter(k=>k!=='testBonus').sort().join()!=='cardId,choiceId,dice,key,revision,total'||r.cardId!==id||!Number.isSafeInteger(r.revision)||r.revision<1||r.revision>s.revision)return false;
     const o=c.choices.find(o=>o.id===r.choiceId);if(!o)return false;
     if(o.test){
+      if(r.testBonus!==undefined&&(!Number.isSafeInteger(r.testBonus)||r.testBonus!==1||rules.testBonuses?.[o.test.attribute]!==r.testBonus))return false;
       if(!Array.isArray(r.dice)||r.dice.length!==2)return false;
-      try{const expected=evaluate(...r.dice,attributes[o.test.attribute]+(o.test.modifier||0),o.test.difficulty);if(r.key!==expected.key||r.total!==expected.total)return false;}catch{return false;}
-    }else if(r.key!=='success'||r.dice!==null||r.total!==null)return false;
+      try{const expected=evaluate(...r.dice,attributes[o.test.attribute]+(o.test.modifier||0)+(r.testBonus||0),o.test.difficulty);if(r.key!==expected.key||r.total!==expected.total)return false;}catch{return false;}
+    }else if(r.testBonus!==undefined||r.key!=='success'||r.dice!==null||r.total!==null)return false;
   }
   const card=currentCard(s,data);
   if(s.choiceId!==null&&(!card||!data.byId[card.id].choices.some(o=>o.id===s.choiceId)))return false;

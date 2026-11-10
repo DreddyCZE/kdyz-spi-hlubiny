@@ -1,4 +1,6 @@
 import {test,expect} from '@playwright/test';
+import {blackwaterScenario} from '../src/data/blackwater-scenario.js';
+import {scenarioSaveKey} from '../src/engine/scenario-storage.js';
 
 // V3 is an opt-in presentation layer: all gameplay actions still come from the scenario engine.
 test('V3 map and story dialog render and can be operated',async({page})=>{
@@ -184,4 +186,26 @@ test('V3 dossier and equipment remain usable at phone width',async({page})=>{
  await expect(dossier.locator('.v3-journal-metrics')).toBeVisible();
  await expect(dossier.getByRole('tab',{name:/^Dedukce/})).toBeVisible();
  await page.screenshot({path:'test-results/blackwater-v3-dossier-mobile.png',fullPage:true});
+});
+
+test('V3 dossier equipment delegates to real scenario transitions and persists consumption',async({page})=>{
+ await page.goto('./index.html?ui=v3');
+ await page.locator('.v3-investigator-setup').getByRole('button',{name:/Detektiv/}).click();
+ const key=scenarioSaveKey(blackwaterScenario);
+ const before=await page.evaluate(key=>localStorage.getItem(key),key);
+ await page.locator('.v3-hud').getByRole('button',{name:/Vybavení/}).click();
+ const dossier=page.locator('#details.v3-dossier');
+ const equipment=dossier.locator('.v3-equipment-grid');
+ await expect(equipment).toContainText('Sůl');
+ const use=equipment.getByRole('button',{name:'Použít předmět'}).first();
+ await expect(use).toBeEnabled();
+ await use.click();
+ const after=await page.evaluate(key=>localStorage.getItem(key),key);
+ expect(after).not.toBe(before);
+ await expect(equipment).not.toContainText('Sůl');
+ await page.locator('#closeDetails').click();
+ await page.reload();
+ await page.locator('.v3-hud').getByRole('button',{name:/Vybavení/}).click();
+ await expect(page.locator('.v3-equipment-grid')).not.toContainText('Sůl');
+ await expect(page.locator('.v3-hud')).toBeVisible();
 });

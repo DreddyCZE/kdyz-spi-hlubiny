@@ -18,6 +18,10 @@ for(const identical of [true,false])test('combined artifact retains root and pre
 });
 test('only pages.yml owns deployment; the other workflow is a reusable builder',async()=>{
  const pages=await readFile(new URL('../.github/workflows/pages.yml',import.meta.url),'utf8');const builder=await readFile(new URL('../.github/workflows/blackwater-preview.yml',import.meta.url),'utf8');
- assert.match(pages,/group: github-pages/);assert.match(pages,/cancel-in-progress: false/);assert.match(pages,/uses: .\/\.github\/workflows\/blackwater-preview.yml/);
+ // Production and preview publishers must still share one lock. PR checks do not publish
+ // and may cancel obsolete test runs so they never block a production deployment.
+ assert.ok(pages.includes("group: ${{ github.event_name == 'pull_request' && format('blackwater-pr-{0}', github.event.pull_request.number) || 'github-pages' }}"));
+ assert.ok(pages.includes("cancel-in-progress: ${{ github.event_name == 'pull_request' }}"));
+ assert.match(pages,/uses: .\/\.github\/workflows\/blackwater-preview.yml/);
  assert.match(builder,/workflow_call:/);assert.doesNotMatch(builder,/deploy-pages@|workflow_dispatch:|\n  push:/);assert.match(builder,/git merge-base --is-ancestor/);assert.match(builder,/steps.refs.outputs.root/);assert.match(builder,/scripts\/build-pages.mjs/);
 });

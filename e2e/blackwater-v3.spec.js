@@ -209,3 +209,58 @@ test('V3 dossier equipment delegates to real scenario transitions and persists c
  await expect(page.locator('.v3-equipment-grid')).not.toContainText('Sůl');
  await expect(page.locator('.v3-hud')).toBeVisible();
 });
+
+test('V3 coherent playthrough: start, card, dice, map, encounter, new round, reload and dossier',async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.addInitScript(()=>{Math.random=()=>0.99;});
+ await page.goto('./index.html?ui=v3');
+ await expect(page.locator('.v3-hud.v3-choosing')).toBeVisible();
+ await page.locator('.v3-investigator-setup').getByRole('button',{name:/^Námořník/}).click();
+ await expect(page.locator('#investigatorName')).toHaveText('Námořník');
+
+ // First exploration is a real card from the scenario deck.
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Prozkoumat/}).click();
+ const story=page.locator('#v3-story-dialog');
+ await expect(story).toBeVisible();
+ await story.locator('#draw').click();
+ await expect(story.locator('#cardTitle')).not.toBeEmpty();
+ await story.locator('#choices button').first().click();
+ await story.locator('#roll').click();
+ await expect(story.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
+ await story.getByRole('button',{name:'Přijmout výsledek'}).click();
+ await expect(story.locator('#reveal')).not.toBeEmpty();
+ await story.locator('#next').click();
+ await story.getByRole('button',{name:'Zpět na mapu'}).click();
+ await expect(story).not.toBeVisible();
+
+ // Fight uses the same scenario state and persists its outcome.
+ await page.locator('[data-location-id="location-2"]').click();
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Prozkoumat/}).click();
+ await page.getByRole('button',{name:'Střetnutí: Mlžný pes · 1 AP'}).click();
+ const battle=page.locator('#v3-combat-dialog');
+ await expect(battle).toBeVisible();
+ await battle.getByRole('button',{name:'🎲 Zaútočit'}).click();
+ await expect(battle).toContainText('Nepřítel byl poražen.');
+ await battle.locator('#v3-battle-close').click();
+
+ // Move to the next round and confirm that it is restored, not replayed.
+ const before=Number(await page.locator('#round').textContent());
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Ukončit kolo/}).click();
+ const recap=page.locator('#v3-round-dialog');
+ await expect(recap).toBeVisible();
+ await expect(page.locator('#round')).toHaveText(String(before+1));
+ await recap.getByRole('button',{name:/Pokračovat ve vyšetřování/}).click();
+ await page.reload();
+ await expect(page.locator('#round')).toHaveText(String(before+1));
+ await expect(page.locator('#investigatorName')).toHaveText('Námořník');
+
+ // Journal and inventory show the persisted public state.
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Důkazy a dedukce/}).click();
+ const dossier=page.locator('#details.v3-dossier');
+ await expect(dossier).toBeVisible();
+ await expect(dossier.locator('.v3-journal-metrics')).toBeVisible();
+ await dossier.locator('[data-dossier-target="inventory-panel"]').click();
+ await expect(dossier.locator('.v3-equipment-card').first()).toBeVisible();
+ await page.screenshot({path:'test-results/blackwater-v3-playthrough.png',fullPage:true});
+ expect(errors).toEqual([]);
+});

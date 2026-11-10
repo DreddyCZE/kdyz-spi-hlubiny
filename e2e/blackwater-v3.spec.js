@@ -14,7 +14,8 @@ test('V3 map and story dialog render and can be operated',async({page})=>{
  const mapArtBox = await page.locator('#places').boundingBox();
  expect(mapBox.height-mapArtBox.height).toBeLessThan(130);
  await expect(page.locator('.v3-toolbar')).toHaveCount(0);
- await expect(page.locator('.v3-location-actions button').first()).toBeDisabled();
+ await expect(page.locator('.v3-combat-reopen')).toBeHidden();
+ await expect(page.locator('.v3-location-actions').getByRole('button',{name:/Prozkoumat/})).toBeDisabled();
  const selection=page.locator('.v3-investigator-setup [aria-label="Výběr vyšetřovatele"]');
  await expect(selection).toBeVisible();
  await page.screenshot({path:'test-results/blackwater-v3-desktop.png',fullPage:true});
@@ -22,7 +23,7 @@ test('V3 map and story dialog render and can be operated',async({page})=>{
  await selection.getByRole('button').first().click();
  await expect(selection).toBeHidden();
  await page.screenshot({path:'test-results/blackwater-v3-in-game.png',fullPage:true});
- await page.locator('.v3-location-actions button').first().click();
+ await page.locator('.v3-location-actions').getByRole('button',{name:/Prozkoumat/}).click();
  await expect(page.locator('#v3-story-dialog')).toBeVisible();
  await expect(page.locator('#v3-story-dialog #storyPanel')).toBeVisible();
  // Empty card art must not consume most of the modal; the draw action stays visible.

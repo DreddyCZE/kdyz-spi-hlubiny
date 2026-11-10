@@ -1,9 +1,9 @@
 import {enemies} from './combat.js';
-import {investigatorById} from './scenario-investigators.js';
+import {investigatorById,scenarioTestBonuses} from './scenario-investigators.js';
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
 import {isEnded,currentCard} from './game.js';
-import {validatePuzzle} from './puzzle.js';
+import {validatePuzzle,validPuzzleDraft} from './puzzle.js';
 import {validateCompanion} from './companion.js';
 export const SCENARIO_SAVE_KEY='hlubiny-scenario-v1';
 export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
@@ -13,6 +13,7 @@ export function validScenarioSession(s,def,data){
  const hero=Object.hasOwn(investigatorById,s.investigatorId)?investigatorById[s.investigatorId]:null;
  if(s.investigatorId!==undefined&&s.investigatorId!==null&&!hero)return false;
  if(s.abilityUsed!==undefined&&typeof s.abilityUsed!=='boolean')return false;
+ if(s.passiveRound!==undefined&&(!['composure','endurance'].includes(hero?.passive?.kind)||!Number.isSafeInteger(s.passiveRound)||s.passiveRound<1||s.passiveRound>g.round))return false;
  // Null investigator is valid for headless/legacy scenario journeys; the UI gates player actions.
  if(s.investigatorId===null&&s.abilityUsed)return false;
  if(!Number.isSafeInteger(g.hp)||g.hp<0||g.hp>(hero?.hp??6)||!Number.isSafeInteger(g.san)||g.san<0||g.san>(hero?.san??8))return false;
@@ -33,7 +34,7 @@ export function validScenarioSession(s,def,data){
  // Reuse the strict legacy validator with only the scenario-specific range and ritual exception.
  const legacy={...g,round:Math.min(g.round,7),ap:Math.min(g.ap,3),hp:Math.min(g.hp,6),san:Math.min(g.san,8),ritual:Math.min(g.ritual,7),ended:isEnded(g,{scenarioClock:true})};
  if(g.ended!==legacy.ended)return false;
- if(!validState(legacy,data))return false;
+ if(!validState(legacy,data,{testBonuses:scenarioTestBonuses(s)}))return false;
  if(!c.clocks||Object.keys(c.clocks).length!==def.clocks.length)return false;
  for(const clock of def.clocks){
   const n=c.clocks[clock.id];if(!Number.isSafeInteger(n)||n<0||n>clock.max)return false;
@@ -51,7 +52,9 @@ export function validScenarioSession(s,def,data){
   if(Object.keys(c.puzzles).length>defs.size)return false;
   for(const [id,p] of Object.entries(c.puzzles)){
    const d=defs.get(id);
-   if(!d||!p||!['open','solved','blocked'].includes(p.status)||!Number.isSafeInteger(p.attempts)||p.attempts<0||p.attempts>10000||!Array.isArray(p.hintIds)||new Set(p.hintIds).size!==p.hintIds.length||p.hintIds.some(h=>!d.hints.some(x=>x.id===h)))return false;
+   if(!d||!p||!['open','solved','blocked','bypassed'].includes(p.status)||!Number.isSafeInteger(p.attempts)||p.attempts<0||p.attempts>10000||!Array.isArray(p.hintIds)||new Set(p.hintIds).size!==p.hintIds.length||p.hintIds.some(h=>!d.hints.some(x=>x.id===h)))return false;
+   if(p.draft!==undefined&&!validPuzzleDraft(d,p.draft))return false;
+   if(p.status==='bypassed'&&d.fallback.apCost===undefined)return false;
    if(d.attempts.mode==='limited'&&p.attempts>d.attempts.max)return false;
    if(p.status==='blocked'&&(d.attempts.mode!=='limited'||p.attempts!==d.attempts.max))return false;
    if(p.status==='solved'&&p.attempts===0)return false;

@@ -1,5 +1,16 @@
 # Roadmap k hratelnému Blackwater (M4–M7)
 
+## Aktuální přehled 2026-11-10
+
+- Integrační PR #19 sloučen do main; PR #21 je jeho předkem. Alternativní draft #20 uzavřen jako redundantní.
+- Hotové v navazující obsahové větvi: tři hádanky s alternativními cestami, ukládání rozpracovaných řešení, příběhové návaznosti a epilogy, přeskočitelný a znovu otevřitelný průvodce, tři aktivní a tři pasivní schopnosti.
+- Funkční mapa, karetní testy s potvrzením, výbava, lokální souboje, pes, deník a oddělené save režimy; původní prototypy zachovány.
+- Audit animací: staré zapojení PR #16 nelze přenést přes nový potvrzovaný hod; PR zůstává oddělený. Audio větev neobsahuje implementaci.
+- Vyřazení při 0 HP/SAN zůstává porážkou; návrat by byl změnou pravidel a není součástí integrace.
+- Zbývá lidský playtest, ověření délky partie a širší redakce příběhu. Reprodukovatelné simulace nejsou lidský playtest. Online kooperace, audio a návrat postavy nejsou hotové funkce.
+
+Aktuální hráčská pravidla: [PLAYING-BLACKWATER.md](PLAYING-BLACKWATER.md). Ověření vydání: [AUTONOMOUS-STATUS.md](AUTONOMOUS-STATUS.md). Následuje historický plán.
+
 > Historický plán. Aktuální audit implementace, překryvů větví a zbývající práce je v [AUTONOMOUS-STATUS.md](AUTONOMOUS-STATUS.md). Níže uvedená výchozí realita předchází scénářovému frameworku a integraci U2/U3; není aktuálním seznamem chybějících funkcí.
 
 ## Aktuální realita

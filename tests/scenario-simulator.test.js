@@ -80,3 +80,15 @@ test('evidence counts equal individually collected evidence across seeds',()=>{
  for(let seed=42;seed<46;seed++)for(const id of simulateScenario(blackwaterScenario,content,{seed,maxActions:500}).evidence)expected[id]=(expected[id]||0)+1;
  assert.deepEqual(batch.evidenceCounts,expected);
 });
+
+test('selected investigators and survival policies are deterministic and report real costs',()=>{
+ for(const investigatorId of ['detective','occultist','sailor']){
+  const options={seed:42,investigatorId,useEquipment:true,useAbilities:true,combat:'escape',puzzles:true,reroll:()=>true};
+  const a=simulateScenario(blackwaterScenario,content,options);
+  assert.deepEqual(a,simulateScenario(blackwaterScenario,content,options));
+  assert.equal(a.investigatorId,investigatorId);assert.equal(a.trace[0].type,'selectInvestigator');
+  for(const key of ['apSpent','hpLost','sanLost'])assert.equal(a[key],a.trace.reduce((n,t)=>n+t[key],0));
+  assert.equal(a.exhausted,false);assert.ok(a.endingId||a.ended);
+ }
+ assert.throws(()=>simulateScenario(blackwaterScenario,content,{investigatorId:'unknown'}),RangeError);
+});

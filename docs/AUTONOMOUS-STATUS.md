@@ -1,4 +1,39 @@
-# Stav autonomní stabilizace – 2026-11-09
+# Stav Blackwater – 2026-11-10
+
+## Vydávaná obsahová verze a ověření
+
+GitHub znovu ověřen 10. 11. 2026. Integrační PR #19 sloučen do main jako `6a2efdf3729fdab98e4b978b341f0658e71c388a`; obsahuje celý PR #21 (9462585). Před sloučením přesný integrační HEAD prošel `npm ci`, 232/232 unit testy, buildem, 85/85 Chromium E2E a diff checkem. Oba původní workflow PR #19 byly zelené. Draft #20 byl po porovnání všech pěti souborů uzavřen jako redundantní s vysvětlením; větev ani historii nemažeme.
+
+Navazující obsahový PR dokončuje tři hádanky, placené alternativy bez nevratného zámku po chybě, persistenci nastavení, pět příběhových karet a variantní epilogy. Všechny tři postavy mají aktivní i pasivní schopnost. Prolog a nápovědy lze přeskočit, vypnout a znovu otevřít bez resetu. Rozhraní rozlišuje výsledky textem i barvou, ukazuje směr pátrání a poslední bojovou výměnu. Oddělené save režimy a public prototypy jsou zachované.
+
+Obsahové dokončení je v [PR #22](https://github.com/DreddyCZE/kdyz-spi-hlubiny/pull/22). Integrační main 6a2efdf prošel [celým publish workflow](https://github.com/DreddyCZE/kdyz-spi-hlubiny/actions/runs/42866787177). Živý manifest po nasazení potvrdil rootSha i previewSha 6a2efdf; v Chromium na kořeni i /preview/ při 320/390/1440 px prošel výběr postavy, dobrání, skrytí následku před přijetím, potvrzení hodu a reload stejného save. Konzole bez chyb, žádný horizontální přetečený obsah. Tato kontrola potvrzuje integrační vydání; publikovaný obsah vždy určuje aktuální manifest.
+
+Před obsahovou integrací: **256/256 unit testů, 95/95 Chromium E2E**, `npm ci`, build a `git diff --check`. Testy pokrývají všechny postavy, tři vítězná zakončení, časovou i HP/SAN porážku, 320/390/1440 px, klávesnici, reduced motion, reload testu, boje, hádanek a zakončení. Dodatečný obsahový audit rozložil podklady jmenné hádanky mezi archiv a hřbitov; dříve dokončené uložené řešení zůstává platné. Žádný test není vypnutý. Běhy sdílející výstupní adresář se nepoužívají souběžně.
+
+Reprodukovatelný [audit vyvážení](BALANCE-2026-11-10.md): **4 200 her**, dvě sady seedů, tři postavy, čtyři strategie a cílené volby všech vítězných konců. Každý konec je dosažitelný každou postavou. Základní strategie neměly vyčerpání limitu akcí ani živý neterminální stav. Simulace není lidský playtest; nezaručuje neexistenci všech možných slepých uliček. Obtížnost se jen podle heuristické úspěšnosti nemění.
+
+Aktuální [pravidla bez spoilerů](PLAYING-BLACKWATER.md), [pravidlová rozhodnutí](design.md), [roadmapa a hranice rozsahu](ROADMAP-GAMEPLAY.md). Finální stav publikace se ověřuje podle GitHub Actions a manifestu `pages-build.json`, ne jen podle HTTP 200.
+
+### Otevřené problémy
+
+- **P2 – lidský playtest:** změřit délku partie, porozumění cílům a hospodaření se SAN. Cíl 60–90 minut zatím není ověřen lidským hraním. Zejména námořník má v soubojových strategiích vyšší riziko konce na SAN.
+- **P2 – redakce obsahu:** dále rozšířit smyslové detaily a rozmanitost následků; současná implementace není dokončením všech dlouhodobých příběhových návrhů.
+- **P3 – animace/audio:** PR #16 zůstává oddělený draft se starým zapojením hodu. Audio větev neobsahuje vlastní implementaci. Nepřebírat starší app přes aktuální potvrzovaný hod.
+- **Záměrné hranice:** žádný online multiplayer, více plnohodnotných současných postav ani návrat při 0 HP/SAN. Rozhodnutí o vyřazení je v designu. Známá blokující chyba veřejného průchodu nebyla nalezena.
+
+Následující záznamy jsou **historie předchozích lokálních kroků**, nikoli aktuální seznam chybějících funkcí nebo stav nasazení.
+
+## Navázání 2026-11-10 – pracovní větev D5–D7
+
+Původní audit níže je historický. Rozpracovaná implementace nyní obsahuje tři hádanky, placené náhradní cesty, persistenci jejich nastavení, pět navazujících příběhových karet a epilogy podle dosažených příznaků. Připojen je přeskočitelný prolog a kontextové nápovědy s vlastním úložištěm. Opravena chyba vykreslení společníka způsobená odkazem na proměnnou hádanky a uzamčení potvrzení hodu během animace.
+
+Pasivní schopnosti postav byly v navazujícím kroku připojeny k přechodům scénáře, validaci save i veřejnému UI. Detektiv získává podmíněný bonus k VĚ/VN; okultistka má první přehod za kolo zdarma; námořník první HP zranění z karty nebo bojové výměny za kolo sníží o 1. Uložené výsledky se zpětně nepřepočítávají. D7 lidský playtest a finální balans zůstávají otevřené. Žádný commit, push ani nasazení této práce neproběhly.
+
+Unit testy: 248/248. Build a kontrola whitespace procházejí. Samostatné testy průvodce ověřily persistenci nastavení a nedostupné úložiště; mobilní prolog byl vizuálně zkontrolován na 390 px. První celou E2E sadu znehodnotily souběžné buildy a běhy sdílející výstupní adresář; rozhodující je následný samostatný běh.
+
+Závěrečný samostatný Chromium běh: **92/92**, 2,9 minuty, bez opakování testů. Obsahuje průchody ke třem vítězným zakončením, mobil 320/390 px, reload hádanek, prolog, ochranu cizích save a původní herní režimy. `npm run build` a `git diff --check` úspěšné.
+
+Po připojení pasivních vlastností: **254/254 unit testů**, **94/94 Chromium testů** v celé sadě (2,9 minuty). Dodatečný cílený běh všech tří pasivních UI testů: **3/3**, včetně následně doplněné kontroly detektivova bonusu, shodné úrovně/součtu a reloadu. Screenshot detektivovy vlastnosti vizuálně zkontrolován. Námořník má regrese pro smrtelné zranění, rozhodnutí bez hodu, sdílený limit mezi kartou a bojem a obnovení dostupnosti v dalším kole; okultistka pro 1 SAN, cenu dalších přehodů a persistenci využití. Starší save bez volitelných polí zůstávají platné. Průchody D5 používají pro srovnání postav veřejný bonus při volbě deterministických kostek, aby zachovaly stejné úrovně výsledků.
 
 ## Ověřený výchozí stav
 

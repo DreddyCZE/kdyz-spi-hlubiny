@@ -1,5 +1,6 @@
 import {enemies} from '../engine/combat.js';
 import {renderRules} from './rules.js';
+import {createOnboarding} from './onboarding.js';
 import {investigators} from '../engine/scenario-investigators.js';
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
@@ -34,6 +35,7 @@ const portrait=blackwaterImage('investigators','occultist');
 if(portrait)$('investigatorPortrait').style.backgroundImage=`url("${new URL(portrait,document.baseURI).href}")`;
 let storage;try{storage=window.localStorage;}catch{/* unavailable storage is handled below */}
 mountSaveNotice(storage,legacyMode?'legacy':'scenario');
+const preferenceStorage=storage;
 document.getElementById('roundLimit').textContent=legacyMode?'7':String(activeScenario.rules.maxRounds);
 storage=protectedSaveStorage(storage,legacyMode?SAVE_KEY:scenarioSaveKey(activeScenario));
 const freshSession=()=>legacyMode?{game:newState(content),scenario:{}}:newScenarioSession(activeScenario,content);
@@ -50,7 +52,10 @@ const puzzleDrafts=new Map();
 const equipmentActions=document.createElement('section');equipmentActions.className='scenario-feature';equipmentActions.setAttribute('aria-label','Výbava vyšetřovatele');$('cardStory').before(equipmentActions);
 const combatActions=document.createElement('section');combatActions.className='scenario-feature';combatActions.setAttribute('aria-label','Taktický souboj');$('cardStory').before(combatActions);
 const investigatorSetup=document.createElement('section');investigatorSetup.className='scenario-feature';investigatorSetup.setAttribute('aria-label','Výběr vyšetřovatele');$('cardStory').before(investigatorSetup);
+const onboarding=legacyMode?null:createOnboarding(investigatorSetup,preferenceStorage,session);
+if(onboarding){const reopen=document.createElement('button');reopen.type='button';reopen.textContent='Průvodce hrou';reopen.onclick=()=>onboarding.reopen();document.querySelector('[data-panel="rules-panel"]').after(reopen);}
 const investigatorAbility=document.createElement('section');investigatorAbility.className='scenario-feature';investigatorAbility.setAttribute('aria-label','Schopnost vyšetřovatele');$('cardStory').before(investigatorAbility);
+const currentAim=document.createElement('p');currentAim.className='current-aim';currentAim.setAttribute('aria-label','Aktuální směr pátrání');$('placeDesc').after(currentAim);
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
@@ -60,8 +65,12 @@ function render(){
   const focused=document.activeElement;
   const choiceFocus=focused?.dataset.choiceId;
   const mapFocus=focused?.dataset.locationId;
+  const puzzleFocus=focused?.dataset.puzzleControl;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
+  currentAim.hidden=legacyMode;
+  currentAim.textContent=scene.ending||state.ended?'Vyšetřování skončilo. Výsledek najdeš u příběhové karty.':scene.availableEndings.length?'V jeskyních se můžeš rozhodnout, jak vyšetřování uzavřeš.':state.evidence.length?'Porovnávej důkazy v deníku, prozkoumej další místa a připrav se na cestu do jeskyní.':'Začni v přístavu: dober kartu a získej první stopu po zmizelé posádce.';
+  onboarding?.render(session,scene);
   investigatorSetup.hidden=legacyMode||scene.investigatorId!==null;
   investigatorSetup.replaceChildren();
   if(!investigatorSetup.hidden){for(const hero of investigators){investigatorSetup.append(button(`${hero.name} · HP ${hero.hp} / SAN ${hero.san} · ${hero.ability}`,()=>dispatch({type:'selectInvestigator',revision:state.revision,investigatorId:hero.id}),false,'investigator-card'));}}
@@ -72,6 +81,7 @@ function render(){
   if(scene.combat?.status==='active'){
     const enemy=enemies.find(e=>e.id===scene.combat.enemyId);
     const title=document.createElement('p');title.textContent='Souboj: '+enemy.name+' · HP '+scene.combat.enemyHp+'/'+enemy.hp+' · výměna '+scene.combat.exchange+'/3';combatActions.append(title);
+    const cost=document.createElement('p');cost.textContent='Zahájení stálo 1 AP. Další výměny už AP nestojí. Útok i útěk mohou způsobit zranění; po třetí výměně následuje vynucený únik.';combatActions.append(cost);
     for(const move of ['attack','escape'])combatActions.append(button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>dispatch({type:'combatTurn',revision:state.revision,move,dice:rollDice()})));
   }else{
     if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
@@ -79,8 +89,10 @@ function render(){
       for(const encounter of scene.availableEncounters)combatActions.append(button('Střetnutí: '+encounter.name+' · 1 AP',()=>dispatch({type:'startCombat',revision:state.revision,enemyId:encounter.enemyId})));
     }
   }
+  if(scene.combat?.roll){const last=document.createElement('p');last.setAttribute('role','status');last.textContent='Poslední výměna: '+(scene.combat.lastMove==='attack'?'útok':'útěk')+' · '+scene.combat.dice.join(' + ')+' · '+labels[scene.combat.roll.key];combatActions.append(last);}
   investigatorAbility.replaceChildren();
   if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}
+  if(scene.investigator?.passive){const p=document.createElement('p');p.textContent=scene.investigator.passive.name+': '+scene.investigator.passive.text+(scene.passiveUsed?' V tomto kole využito.':'');investigatorAbility.append(p);}
   $('investigatorName').textContent=scene.investigator?.name||investigatorName;
   $('investigatorRole').textContent=scene.investigator?scene.investigator.role+' · hlavní scénář':'Výzkumnice · hlavní scénář';
   const selectedPortrait=blackwaterImage('investigators',scene.investigator?.id||'occultist');
@@ -113,7 +125,8 @@ function render(){
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
   $('cardTitle').textContent=card?.title||(deck.canDraw?'Neznámá karta čeká':'Žádná dostupná karta');
   $('cardStory').textContent=card?.description||(deck.canDraw?'Dobrat kartu je zdarma. AP zaplatíš až za zvolený postup.':'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.');
-  $('challenge').textContent=choice?`${choice.apCost} AP · `+(choice.test?`Test ${choice.test.attribute} · obtížnost ${choice.test.difficulty} · modifikátor ${choice.test.modifier||0}`:'Rozhodnutí bez testu'):'';
+  const testBonus=choice?.test?(scene.testBonuses?.[choice.test.attribute]||0):0;
+  $('challenge').textContent=choice?`${choice.apCost} AP · `+(choice.test?`Test ${choice.test.attribute} · obtížnost ${choice.test.difficulty} · modifikátor ${choice.test.modifier||0}${testBonus?' · postava +'+testBonus:''}`:'Rozhodnutí bez testu'):'';
   $('choices').replaceChildren(...(card?.choices||[]).map(o=>{
     const b=button(`${o.label} · ${o.apCost} AP${o.test?' · '+o.test.attribute:' · bez testu'}${o.unavailableReason?' · '+o.unavailableReason:''}`,()=>dispatch({type:'choose',choiceId:o.id}),rolling||!!pending||!scene.canAct||!o.available,'choice'+(o.id===choice?.id?' active':''));
     b.dataset.choiceId=o.id; b.setAttribute('aria-pressed',String(o.id===choice?.id));return b;
@@ -125,7 +138,7 @@ function render(){
   if(!preview.hidden){
     const heading=document.createElement('p');heading.className='outcome-heading';heading.textContent='Možné následky · odhalí je až hod';
     preview.append(heading);
-    for(const tier of reachableOutcomeKeys(choice)){
+    for(const tier of reachableOutcomeKeys({...choice,test:{...choice.test,modifier:(choice.test.modifier||0)+testBonus}})){
       const slot=document.createElement('span');slot.className='outcome-slot';
       slot.textContent=labels[tier];slot.setAttribute('aria-label',labels[tier]+' · následek je skrytý');
       preview.append(slot);
@@ -135,19 +148,22 @@ function render(){
   // While rolling, do not put the hidden result into the DOM at all.
   $('reveal').classList.toggle('show',Boolean(result)&&!rolling);
   $('reveal').textContent=result&&!rolling?labels[result.key]+' — '+result.text:'';
+  if(result&&!rolling)$('reveal').dataset.outcome=result.key;else delete $('reveal').dataset.outcome;
   if(rolling){$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='Kostky se kutálejí…';}
   else if(result){
     $('die1').textContent=result.dice?.[0]??'—';$('die2').textContent=result.dice?.[1]??'—';
-    $('sum').textContent=result.test?`${result.dice.join(' + ')} + ${attributes[result.test.attribute]} + ${result.test.modifier||0} = ${result.total} proti obtížnosti ${result.test.difficulty}`:'Rozhodnutí bez hodu kostkami.';
+    $('sum').textContent=result.test?`${result.dice.join(' + ')} + ${attributes[result.test.attribute]} + ${result.test.modifier||0}${result.testBonus?' + '+result.testBonus+' (postava)':''} = ${result.total} proti obtížnosti ${result.test.difficulty}`:'Rozhodnutí bez hodu kostkami.';
   }else{$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='';}
   $('roll').textContent=choice?.test?'🎲 Hodit kostkami':'Provést rozhodnutí';
   $('roll').hidden=Boolean(pending);
   rerollControls.hidden=!pending;
   if(pending){
-    const first=evaluatePending(pending.firstDice,choice?.test);
-    const second=pending.secondDice?evaluatePending(pending.secondDice,choice?.test):null;
+    const first=evaluatePending(pending.firstDice,choice?.test,testBonus);
+    const second=pending.secondDice?evaluatePending(pending.secondDice,choice?.test,testBonus):null;
     rerollInfo.textContent='První hod: '+pending.firstDice.join(' + ')+' · '+labels[first.key]+(second?' | Přehod: '+pending.secondDice.join(' + ')+' · '+labels[second.key]:'')+'. Následky se odkryjí až po potvrzení.';
-    rerollButton.disabled=!!second||state.san<2;
+    rerollButton.textContent='Sebrat odvahu · přehodit za '+scene.rerollCost+' SAN';
+    rerollButton.disabled=rolling||!!second||state.san<=scene.rerollCost;
+    acceptButton.disabled=rolling;
     rerollButton.hidden=!!second;
   }
   $('roll').disabled=rolling||!scene.canAct||!choice?.available;
@@ -179,23 +195,25 @@ function render(){
   // Accessible puzzle controls use the public projection, never private answers.
   puzzleActions.replaceChildren();
   for(const p of scene.puzzles){
-    const section=document.createElement('section');section.className='puzzle-panel';
+    const section=document.createElement('section');section.className='puzzle-panel';section.dataset.puzzleId=p.id;
     const title=document.createElement('h3');title.textContent=p.title;section.append(title);
-    const status=document.createElement('p');status.textContent=p.status==='solved'?'Vyřešeno':p.status==='blocked'?'Pokusy vyčerpány · hledej jinou cestu':'Hádanka · pokusy '+p.attempts;section.append(status);
+    const status=document.createElement('p');status.textContent=p.status==='solved'?'Vyřešeno':p.status==='bypassed'?'Náhradní cesta dokončena':p.status==='blocked'?'Pokusy vyčerpány · hledej jinou cestu':'Hádanka · pokusy '+p.attempts;section.append(status);
+    for(const text of [p.description,p.riskText,p.resultText,p.status==='open'&&!p.canAttempt?'Chybí podklady pro ověření řešení. Vrať se pro uvedené důkazy.':''].filter(Boolean)){const note=document.createElement('p');note.textContent=text;section.append(note);}
     for(const clue of p.clues){const item=document.createElement('p');item.textContent=clue.text;section.append(item);}
     for(const hint of p.hints){const item=document.createElement('p');item.textContent='Nápověda: '+hint.text;section.append(item);}
-    if(p.status==='open'&&scene.canAct&&!pending){
+    if(p.fallback&&scene.canAct&&!pending)section.append(button(p.fallback.text+' · '+p.fallback.apCost+' AP',()=>dispatch({type:'usePuzzleFallback',revision:state.revision,puzzleId:p.id}),state.ap<p.fallback.apCost));
+    if(p.status==='open'&&p.canAttempt&&scene.canAct&&!pending){
       const answer=[];
       if(p.type==='sequence'){
-        const previous=puzzleDrafts.get(p.id);
+        const previous=p.draft??puzzleDrafts.get(p.id);
         answer.push(...(Array.isArray(previous)&&previous.length===p.interaction.symbols.length&&previous.every(x=>p.interaction.symbols.includes(x))?previous:p.interaction.symbols));
         const controls=document.createElement('div');controls.className='puzzle-sequence';
         const draw=()=>{
           controls.replaceChildren(...answer.map((symbol,i)=>{
             const cell=document.createElement('div');cell.className='puzzle-symbol';
             const label=document.createElement('span');label.textContent=symbol;cell.append(label);
-            const left=button('←',()=>{[answer[i-1],answer[i]]=[answer[i],answer[i-1]];puzzleDrafts.set(p.id,[...answer]);draw();},i===0);
-            const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];puzzleDrafts.set(p.id,[...answer]);draw();},i===answer.length-1);
+            const left=button('←',()=>{[answer[i-1],answer[i]]=[answer[i],answer[i-1]];puzzleDrafts.set(p.id,[...answer]);dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:[...answer]});},i===0);
+            const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];puzzleDrafts.set(p.id,[...answer]);dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:[...answer]});},i===answer.length-1);
             left.setAttribute('aria-label','Posunout '+symbol+' doleva');
             right.setAttribute('aria-label','Posunout '+symbol+' doprava');
             cell.append(left,right);return cell;
@@ -204,26 +222,28 @@ function render(){
       }else if(p.type==='deduction'){
         const select=document.createElement('select');
         select.setAttribute('aria-label','Vyber závěr');
-        for(const option of p.interaction.options){const el=document.createElement('option');el.value=option;el.textContent=option;select.append(el);}
-        const previous=puzzleDrafts.get(p.id);
+        for(const option of p.interaction.options){const el=document.createElement('option');el.value=option;el.textContent=p.labels[option]||option;select.append(el);}
+        const previous=p.draft??puzzleDrafts.get(p.id);
         if(typeof previous==='string'&&p.interaction.options.includes(previous))select.value=previous;
-        select.onchange=()=>puzzleDrafts.set(p.id,select.value);
+        select.dataset.puzzleControl=p.id+'-conclusion';
+        select.onchange=()=>dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:select.value});
         section.append(select);answer.push(select);
       }else if(p.type==='matching'||p.type==='mechanism'){
         const keys=p.type==='matching'?p.interaction.left:p.interaction.controls;
         const optionsFor=key=>p.type==='matching'?p.interaction.right:p.interaction.states[key];
-        const previous=puzzleDrafts.get(p.id);
+        const previous=p.draft??puzzleDrafts.get(p.id);
         const selections=new Map();
         for(const key of keys){
           const line=document.createElement('label');line.className='puzzle-match-row';
-          const text=document.createElement('span');text.textContent=key;line.append(text);
-          const select=document.createElement('select');select.setAttribute('aria-label','Nastavení: '+key);
+          const text=document.createElement('span');text.textContent=p.labels[key]||key;line.append(text);
+          const select=document.createElement('select');select.setAttribute('aria-label','Nastavení: '+(p.labels[key]||key));
           for(const value of optionsFor(key)){
-            const option=document.createElement('option');option.value=value;option.textContent=value;select.append(option);
+            const option=document.createElement('option');option.value=value;option.textContent=p.labels[value]||value;select.append(option);
           }
           if(previous&&typeof previous==='object'&&!Array.isArray(previous)&&optionsFor(key).includes(previous[key]))select.value=previous[key];
           selections.set(key,select);
-          select.onchange=()=>puzzleDrafts.set(p.id,Object.fromEntries([...selections].map(([k,v])=>[k,v.value])));
+          select.dataset.puzzleControl=p.id+'-'+key;
+          select.onchange=()=>dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:Object.fromEntries([...selections].map(([k,v])=>[k,v.value]))});
           line.append(select);section.append(line);
         }
         answer.push(selections);
@@ -239,15 +259,17 @@ function render(){
     if(p.status!=='open')puzzleDrafts.delete(p.id);
     puzzleActions.append(section);
   }
-  finaleActions.replaceChildren(...scene.availableEndings.map(e=>button('Dokončit scénář: '+e.title,()=>dispatch({type:'finishScenario',revision:state.revision,endingId:e.id}),false,'primary')));
+  finaleActions.replaceChildren(...scene.availableEndings.map(e=>{const section=document.createElement('section');const prompt=document.createElement('p');prompt.textContent=e.prompt||'';section.append(prompt,button('Dokončit scénář: '+e.title,()=>dispatch({type:'finishScenario',revision:state.revision,endingId:e.id}),false,'primary'));return section;}));
+  for(const text of scene.epilogue||[]){const paragraph=document.createElement('p');paragraph.textContent=text;finaleActions.append(paragraph);}
   $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
   if(mapFocus){$('cardTitle').focus({preventScroll:true});}
+  if(puzzleFocus){[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus)?.focus();}
 }
-const evaluatePending=(dice,test)=>{
+const evaluatePending=(dice,test,bonus=0)=>{
   if(!test)return {key:'failure'};
-  const total=dice[0]+dice[1]+attributes[test.attribute]+(test.modifier||0),margin=total-test.difficulty;
+  const total=dice[0]+dice[1]+attributes[test.attribute]+(test.modifier||0)+bonus,margin=total-test.difficulty;
   return {key:dice[0]===6&&dice[1]===6?'criticalSuccess':dice[0]===1&&dice[1]===1?'criticalFailure':margin>=3?'greatSuccess':margin>=0?'success':margin>=-2?'partialSuccess':'failure'};
 };
 const rerollControls=document.createElement('div');rerollControls.hidden=true;
@@ -276,7 +298,7 @@ $('endRound').onclick=()=>dispatch({type:'endRound',revision:state.revision});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;for(const id of ['die1','die2'])$(id).classList.remove('rolling');
-  session=freshSession();state=session.game;puzzleDrafts.clear();persist();render();
+  session=freshSession();state=session.game;puzzleDrafts.clear();onboarding?.restart();persist();render();
 };
 render();
 

@@ -179,3 +179,11 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 3px s
 .investigator-profile strong { font-size: 1.3rem; }
 .investigator-profile p { margin: .35rem 0; }
 @media(max-width:400px) { .investigator-profile { grid-template-columns: 90px minmax(0,1fr); } }
+
+.current-aim { border-left: 3px solid var(--color-brass); padding-left: .7rem; }
+.reveal[data-outcome] { border: 2px solid #bba16d; border-left-width: 6px; padding: .8rem; }
+.reveal[data-outcome='success'],.reveal[data-outcome='greatSuccess'] { border-color: #8fbd9d; background: #0a281d; color: #f8ebcf; }
+.reveal[data-outcome='criticalSuccess'] { border-color: #f2ce70; background: #193a29; color: #fff4d1; }
+.reveal[data-outcome='partialSuccess'] { border-color: #d0b779; background: #332b1c; color: #fff0cf; }
+.reveal[data-outcome='failure'],.reveal[data-outcome='criticalFailure'] { border-color: #df9b91; background: #3d211e; color: #fff0dc; }
+.reveal[data-outcome='criticalFailure'] { border-style: double; border-width: 4px 4px 4px 8px; }

@@ -91,8 +91,13 @@ export function transition(state,action,data=content,rules={}){
       if(action.revision!==s.revision||!c||action.cardId!==c.id)return state;
       const o=c.choices.find(o=>o.id===action.choiceId);if(!o||!canChoose(s,c,o,data))return state;
       let r={dice:null,total:null,key:'success'};
-      if(o.test){if(!Array.isArray(action.dice)||action.dice.length!==2)return state;try{r=evaluate(...action.dice,attributes[o.test.attribute]+(o.test.modifier||0),o.test.difficulty);}catch{return state;}}
-      s=applyEffects(s,o.outcomes[r.key].effects,data,rules.statLimits||{hp:6,san:8});if(!s)return state;
+      if(o.test){if(!Array.isArray(action.dice)||action.dice.length!==2)return state;const bonus=rules.testBonuses?.[o.test.attribute]||0;try{r=evaluate(...action.dice,attributes[o.test.attribute]+(o.test.modifier||0)+bonus,o.test.difficulty);if(bonus)r.testBonus=bonus;}catch{return state;}}
+      let reduction=rules.hpDamageReduction||0;
+      const effects=o.outcomes[r.key].effects.map(e=>{
+        if(e.type!=='modifyStat'||e.stat!=='hp'||e.amount>=0||!reduction)return e;
+        const prevented=Math.min(reduction,-e.amount);reduction=0;return {...e,amount:e.amount+prevented};
+      });
+      s=applyEffects(s,effects,data,rules.statLimits||{hp:6,san:8});if(!s)return state;
       s.ap-=o.apCost;s.choiceId=o.id;s.result={...r,cardId:c.id,choiceId:o.id,revision:state.revision+1};s.resolved[c.id]=s.result;s.log.unshift(c.title+': '+labels[r.key]);break;
     }
     case 'next':{

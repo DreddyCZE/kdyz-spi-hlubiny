@@ -1,5 +1,7 @@
 # Herní engine a vyhodnocování M2.2
 
+> Historický popis původního režimu. Aktuální scénářový adaptér, pasivy a save popisuje [design](design.md), hráčská pravidla jsou v [PLAYING-BLACKWATER.md](PLAYING-BLACKWATER.md).
+
 ## Vrstvy
 
 - [game.js](../src/engine/game.js): čisté přechody herních akcí, cena a výsledek v jednom kroku.

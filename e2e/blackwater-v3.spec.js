@@ -7,6 +7,9 @@ test('V3 map and story dialog render and can be operated',async({page})=>{
  await page.goto('./index.html?ui=v3');
  await expect(page.locator('body')).toHaveClass(/v3/);
  await expect(page.locator('.v3-board .map-panel')).toBeVisible();
+ await expect(page.locator('a.skip')).toHaveAttribute('href','#places');
+ await expect(page.locator('.top .stat[data-stat="hp"]')).toBeHidden();
+ await expect(page.locator('.top .stat[data-stat="san"]')).toBeHidden();
  await expect(page.locator('.v3-hud')).toBeVisible();
  await expect(page.locator('.v3-location-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel #placeTitle')).toBeVisible();
@@ -146,6 +149,8 @@ test('V3 investigation dossier reuses real tabs and opens inventory without chan
  const dossier=page.locator('#details.v3-dossier');
  await expect(dossier).toBeVisible();
  await expect(dossier.locator('.v3-journal-metrics')).toBeVisible();
+ await expect(dossier.locator('#journal-title')).toBeHidden();
+ await expect(dossier.locator('.v3-dossier-heading h2')).toHaveText('Vyšetřovací deník');
  await expect(dossier.getByRole('tab',{name:/^Důkazy/})).toHaveAttribute('aria-selected','true');
  await dossier.getByRole('tab',{name:/^Znalosti/}).click();
  await expect(dossier.locator('#journal-knowledge')).toBeVisible();

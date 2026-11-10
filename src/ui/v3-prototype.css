@@ -784,3 +784,29 @@ body.v3 .v3-equipment-passive{
  body.v3 .v3-equipment-card{grid-template-columns:74px minmax(0,1fr)}
  body.v3 .v3-equipment-art{width:74px;height:87px}
 }
+
+/* Visual audit: each dossier view has a single title, short headings and clearer content order. */
+body.v3 #details.v3-dossier #journal-title,
+body.v3 #details.v3-dossier .journal-eyebrow,
+body.v3 #details.v3-dossier #inventory-panel>h2,
+body.v3 #details.v3-dossier #investigator>h2,
+body.v3 #details.v3-dossier #history>h2{display:none}
+body.v3 #details.v3-dossier .journal-intro{margin:0 0 12px;font:.9rem/1.5 system-ui}
+body.v3 #details.v3-dossier .journal-panel{min-height:0}
+body.v3 #details.v3-dossier .journal-footer{margin-top:16px;padding-top:10px}
+body.v3 #details.v3-dossier .journal-tabs{margin:6px 0 13px}
+body.v3 #details.v3-dossier .v3-journal-metrics{margin:10px 0 16px}
+body.v3 #details.v3-dossier .v3-equipment-heading{
+ border-top:0;margin:0 0 5px;padding:0
+}
+body.v3 #details.v3-dossier .v3-findings-heading{
+ font:700 1.34rem/1.25 Georgia,serif;color:#334d43;
+ border-top:1px solid #bca680;padding-top:18px;margin:20px 0 10px
+}
+body.v3 .investigator-bar>button[data-focus="journal-knowledge"],
+body.v3 .investigator-bar>button[data-focus="journal-deductions"],
+body.v3 .investigator-bar>button[data-panel="history"]{display:none}
+@media(max-width:700px){
+ body.v3 #details.v3-dossier .v3-journal-metrics{margin:10px 0}
+ body.v3 #details.v3-dossier .v3-findings-heading{margin-top:16px;padding-top:14px}
+}

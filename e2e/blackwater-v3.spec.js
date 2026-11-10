@@ -34,6 +34,13 @@ test('V3 map and story dialog render and can be operated',async({page})=>{
  const narrativeTop = await page.locator('#v3-story-dialog #cardStory').evaluate(el => el.getBoundingClientRect().top);
  const equipmentTop = await page.locator('#v3-story-dialog [aria-label="Výbava vyšetřovatele"]').evaluate(el => el.getBoundingClientRect().top);
  expect(narrativeTop).toBeLessThan(equipmentTop);
+ await expect(page.locator('#v3-story-dialog .actions')).toHaveCSS('position','static');
+ const overlap=await page.locator('#v3-story-dialog #storyPanel').evaluate(panel=>{
+   const choices=panel.querySelector('.choices').getBoundingClientRect();
+   const actions=panel.querySelector('.actions').getBoundingClientRect();
+   return choices.bottom-actions.top;
+ });
+ expect(overlap).toBeLessThanOrEqual(1);
  await page.screenshot({path:'test-results/blackwater-v3-story-card.png',fullPage:true});
  await page.getByRole('button',{name:'Zpět na mapu'}).click();
  await expect(page.locator('#v3-story-dialog')).not.toBeVisible();
@@ -44,12 +51,23 @@ test('V3 mobile layout remains usable',async({page})=>{
  await expect(page.locator('.v3-board .map-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel #placeTitle')).toBeVisible();
+ const selection=page.locator('.v3-investigator-setup [aria-label="Výběr vyšetřovatele"]');
+ await expect(selection).toBeVisible();
+ const startingHud=await page.locator('.v3-hud').boundingBox();
+ const startingMap=await page.locator('.map-panel').boundingBox();
+ expect(startingHud.y).toBeLessThan(startingMap.y);
  const columns = await page.locator('#places').evaluate(element =>
    getComputedStyle(element).gridTemplateColumns.split(/\s+/).map(value => Number.parseFloat(value))
  );
  expect(columns).toHaveLength(2);
  expect(columns.every(width => Number.isFinite(width) && width > 0)).toBe(true);
  await page.screenshot({path:'test-results/blackwater-v3-mobile.png',fullPage:true});
+ await selection.getByRole('button').first().click();
+ await expect(selection).toBeHidden();
+ const playingHud=await page.locator('.v3-hud').boundingBox();
+ const playingMap=await page.locator('.map-panel').boundingBox();
+ expect(playingMap.y).toBeLessThan(playingHud.y);
+ await page.screenshot({path:'test-results/blackwater-v3-mobile-in-game.png',fullPage:true});
 });
 test('classic mode is unchanged',async({page})=>{
  await page.goto('./index.html');

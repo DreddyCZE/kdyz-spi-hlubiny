@@ -1,5 +1,6 @@
 import {mountV3Combat} from './v3-combat.js';
 import {mountV3RoundTransition} from './v3-round.js';
+import {mountV3Investigation} from './v3-investigation.js';
 // Progressive enhancement only: the existing scenario engine owns all actions and saves.
 const params=new URLSearchParams(location.search);
 if(params.get('ui')==='v3'){
@@ -76,6 +77,9 @@ if(params.get('ui')==='v3'){
  locationPanel.append(locationHeading,locationName,locationDescription,actionLabel,locationActions);
  mountV3Combat({story,storyDialog:dialog,locationActions});
  mountV3RoundTransition();
+ // The journal is inserted by app.js; wait until all deferred modules finish.
+ if(document.readyState==='complete')mountV3Investigation();
+ else document.addEventListener('DOMContentLoaded',mountV3Investigation,{once:true});
  // Reuse the existing live location illustration, description and contextual hint.
  // This avoids a duplicate location card under the map and keeps app.js as source of truth.
  const originalLocation=document.querySelector('.map-panel .hero');

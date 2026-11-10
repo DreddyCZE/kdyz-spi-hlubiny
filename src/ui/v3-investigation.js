@@ -63,7 +63,7 @@ export function mountV3Investigation(){
   gallery.replaceChildren();
   if(!names.length){
    const empty=document.createElement('p');empty.className='v3-dossier-empty';
-   empty.textContent='Zatím nemáš žádné získané předměty ani nalezené záznamy.';
+   empty.textContent='Z průzkumu zatím nemáš žádné nové nálezy.';
    gallery.append(empty);return;
   }
   for(const name of names){
@@ -99,7 +99,10 @@ export function mountV3Investigation(){
   const equipmentGrid=document.createElement('div');equipmentGrid.className='v3-equipment-grid';
   const caption=document.createElement('p');caption.className='v3-equipment-caption';
   caption.textContent='Použití předmětu se vyhodnocuje podle aktuálního stavu hry.';
-  panel.append(equipmentHeading,caption,equipmentGrid);
+  // Put usable items first. Rewards found during exploration follow underneath.
+  const findingsTitle=document.createElement('h3');
+  findingsTitle.className='v3-findings-heading';findingsTitle.textContent='Nálezy z průzkumu';
+  gallery.before(equipmentHeading,caption,equipmentGrid,findingsTitle);
   const aliases=new Map([
    ['Obvaz','bw-bandage'],['Sůl','bw-salt'],
    ['Laudanum','bw-laudanum'],['Revolver','bw-revolver'],

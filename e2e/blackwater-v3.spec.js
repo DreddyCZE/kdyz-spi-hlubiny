@@ -197,7 +197,7 @@ test('V3 dossier equipment delegates to real scenario transitions and persists c
  const dossier=page.locator('#details.v3-dossier');
  const equipment=dossier.locator('.v3-equipment-grid');
  await expect(equipment).toContainText('Sůl');
- const use=equipment.getByRole('button',{name:'Použít předmět'}).first();
+ const use=equipment.locator('.v3-equipment-card').filter({hasText:'Sůl'}).getByRole('button',{name:'Použít předmět'});
  await expect(use).toBeEnabled();
  await use.click();
  const after=await page.evaluate(key=>localStorage.getItem(key),key);

@@ -488,3 +488,37 @@ body.v3 #v3-story-dialog #dicebox.show{
  border-top:1px solid #a28d69;
  padding-top:15px;
 }
+
+/* Dice numbers appear only after the engine resolves a combat turn. */
+body.v3 .v3-battle-dice-tray{
+ display:flex;align-items:center;justify-content:center;gap:18px;
+ margin:12px 24px 4px;padding:11px 14px;
+ background:linear-gradient(120deg,#14272c,#253a3a,#14272c);
+ border:1px solid #695d48;border-radius:5px;
+}
+body.v3 .v3-battle-dice-title{
+ font:700 .69rem/1.35 system-ui;letter-spacing:.14em;color:#d2b989;
+}
+body.v3 #v3-battle-dice{display:flex;gap:10px}
+body.v3 .v3-battle-die{
+ display:grid;place-items:center;
+ width:48px;height:48px;
+ border-radius:6px;border:2px solid #b79e71;
+ box-shadow:inset 0 0 0 2px #2b332f,0 4px 10px #0008;
+ background:#f2e7cf;color:#25343a;
+ font:700 1.6rem Georgia,serif;
+ animation:v3-die-reveal .32s ease-out both;
+}
+body.v3 .v3-battle-die:nth-child(2){animation-delay:.08s}
+@keyframes v3-die-reveal{
+ from{opacity:.15;transform:translateY(-11px) rotate(-12deg) scale(.85)}
+ to{opacity:1;transform:none}
+}
+@media(max-width:760px){
+ body.v3 .v3-battle-dice-tray{margin:8px 12px 3px;padding:8px;gap:8px}
+ body.v3 .v3-battle-die{width:42px;height:42px;font-size:1.4rem}
+ body.v3 .v3-battle-dice-title{font-size:.63rem}
+}
+@media(prefers-reduced-motion:reduce){
+ body.v3 .v3-battle-die{animation:none!important}
+}

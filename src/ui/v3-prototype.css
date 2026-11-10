@@ -35,3 +35,25 @@ body.v3 .v3-help{font: .8rem/1.5 system-ui;color:#c8bda6;margin:0 0 8px}
 @media(max-width:900px){body.v3 main{padding:8px}body.v3 .top{flex-direction:column}body.v3 .places.mapped{aspect-ratio:1.25;min-height:400px}body.v3 .mapped .map-point{font-size:.65rem;padding:6px;max-width:105px}body.v3 .stats{justify-content:start}body.v3 .v3-toolbar{position:sticky;top:0;z-index:4}body.v3 .v3-toolbar strong{width:100%}}
 @media(max-width:540px){body.v3 .places.mapped{aspect-ratio:.85;min-height:430px;background-size:cover;background-position:center}body.v3 .mapped .map-point{max-width:84px;font-size:.58rem;min-height:28px}body.v3 .stat{font-size:.65rem}body.v3 .stat .token-icon{display:none}body.v3 .stat{grid-template-columns:auto}body.v3 .stat .value{grid-column:1}body.v3 #v3-story-dialog .card{padding:16px}}
 @media(prefers-reduced-motion:reduce){body.v3 *,body.v3 *::before,body.v3 *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* B + C layout: permanent investigator HUD, central interactive map, contextual actions. */
+body.v3 .v3-board{display:grid;grid-template-columns:minmax(180px,230px) minmax(0,1fr) minmax(200px,260px);align-items:stretch;gap:12px}
+body.v3 .v3-board>.map-panel{grid-column:2;grid-row:1}
+body.v3 .v3-hud{grid-column:1;grid-row:1}
+body.v3 .v3-location-panel{grid-column:3;grid-row:1}
+body.v3 .v3-hud,body.v3 .v3-location-panel{background:#13232a;border:1px solid #806e4b;padding:15px;min-width:0;color:#e9ddc4}
+body.v3 .v3-hud h2,body.v3 .v3-location-panel h2{font:600 1rem Georgia;color:#d9bd83;border-bottom:1px solid #746044;padding-bottom:9px;margin:0 0 13px}
+body.v3 .v3-hud h3,body.v3 .v3-location-panel h3{color:#f4dfb2;font-size:1.25rem;margin:10px 0 5px}
+body.v3 .v3-hud-portrait{height:clamp(150px,19vw,245px);background:#263943 center/cover no-repeat;border:1px solid #7d6946;box-shadow:inset 0 0 25px #0007}
+body.v3 .v3-small{font:.78rem/1.5 system-ui;color:#bcb09a}
+body.v3 .v3-vitals{margin:18px 0;display:grid;gap:9px}
+body.v3 .v3-vital{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #4c514d;padding:7px 0;font:.85rem system-ui}
+body.v3 .v3-vital strong{color:#f3dfb5}
+body.v3 .v3-hud button,body.v3 .v3-location-actions button{display:block;width:100%;text-align:left;margin:7px 0;padding:11px;border:1px solid #947c50;background:#253b3e;color:#f0e3c9;cursor:pointer;border-radius:3px;font: .85rem system-ui}
+body.v3 .v3-hud button:hover,body.v3 .v3-location-actions button:hover{background:#36564b}
+body.v3 .v3-location-panel p{color:#c6bda9;font-size:.9rem;line-height:1.6}
+body.v3 .v3-location-actions button:first-child{background:#24563d;border-color:#a1b38b}
+body.v3 .v3-location-actions button:disabled{opacity:.5;cursor:not-allowed}
+body.v3 .v3-location-panel h2:not(:first-child){margin-top:26px}
+@media(max-width:1180px){body.v3 .v3-board{grid-template-columns:190px minmax(0,1fr)}body.v3 .v3-board>.map-panel{grid-column:2}body.v3 .v3-hud{grid-column:1}body.v3 .v3-location-panel{grid-column:1/-1;grid-row:2}body.v3 .v3-location-actions{display:flex;gap:8px}body.v3 .v3-location-actions button{flex:1}}
+@media(max-width:760px){body.v3 .v3-board{display:flex;flex-direction:column}body.v3 .v3-board>.map-panel{order:0}body.v3 .v3-location-panel{order:1}body.v3 .v3-hud{order:2}body.v3 .v3-hud-portrait{height:170px;max-width:220px}body.v3 .v3-location-actions{flex-direction:column}body.v3 .v3-location-actions button{margin:0}}

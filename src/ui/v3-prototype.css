@@ -319,3 +319,38 @@ body.v3 #save-compatibility details[open]{flex-basis:100%;padding:7px 0}
 body.v3 #save-compatibility summary{cursor:pointer}
 body.v3 #save-compatibility p{margin:3px 0}
 body.v3 .game-modes{padding:4px 11px;margin:5px 0 7px}
+
+/* V3 usability review: mobile first-run selection and non-obscured story choices. */
+body.v3 #v3-story-dialog .actions {
+  position: static;
+  bottom: auto;
+  z-index: auto;
+  margin: 12px 0 0;
+  padding: 12px 0 0;
+  background: transparent;
+  border-top: 1px solid #a68f68;
+  flex-wrap: wrap;
+}
+body.v3 #v3-story-dialog .choices {
+  padding-bottom: 8px;
+  scroll-margin-block: 20px;
+}
+body.v3 #v3-story-dialog .actions button:focus-visible,
+body.v3 #v3-story-dialog #choices button:focus-visible {
+  outline: 3px solid #326148;
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  /* The investigator must be selected before the map can be explored. */
+  body.v3 .v3-board > .v3-hud.v3-choosing {
+    order: -1;
+  }
+  body.v3 .v3-choosing .v3-investigator-setup button {
+    min-height: 48px;
+  }
+  body.v3 #v3-story-dialog .actions {
+    position: static;
+    bottom: auto;
+    margin: 10px 0 0;
+  }
+}

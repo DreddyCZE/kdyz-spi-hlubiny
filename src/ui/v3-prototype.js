@@ -1,3 +1,4 @@
+import {mountV3Combat} from './v3-combat.js';
 // Progressive enhancement only: the existing scenario engine owns all actions and saves.
 const params=new URLSearchParams(location.search);
 if(params.get('ui')==='v3'){
@@ -62,6 +63,7 @@ if(params.get('ui')==='v3'){
  const rounds=document.createElement('button');rounds.textContent='◷ Ukončit kolo';rounds.onclick=()=>document.getElementById('endRound')?.click();
  locationActions.append(explore,clues,rounds);
  locationPanel.append(locationHeading,locationName,locationDescription,actionLabel,locationActions);
+ mountV3Combat({story,storyDialog:dialog,locationActions});
  // Reuse the existing live location illustration, description and contextual hint.
  // This avoids a duplicate location card under the map and keeps app.js as source of truth.
  const originalLocation=document.querySelector('.map-panel .hero');

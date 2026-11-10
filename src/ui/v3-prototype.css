@@ -564,3 +564,177 @@ body.v3 .v3-round-content>button:hover{background:#417253}
 @media(prefers-reduced-motion:reduce){
  body.v3 #v3-round-dialog,body.v3 #v3-round-dialog *{animation:none!important;transition:none!important}
 }
+
+/* V3 investigation dossier: one existing native details dialog, no duplicated game state. */
+body.v3 #details.v3-dossier{
+ width:min(1000px,calc(100vw - 24px));
+ max-height:92dvh;overflow-x:hidden;overflow-y:auto;scrollbar-gutter:stable;
+ padding:0;background:#e8dbc1;color:#2a302e;
+ border:1px solid #b89b67;border-radius:6px;
+ box-shadow:0 0 0 2px #101b1c,0 28px 105px #000e;
+}
+body.v3 #details.v3-dossier::backdrop{background:#02090ce8;backdrop-filter:blur(5px)}
+body.v3 .v3-dossier-heading{
+ position:sticky;top:0;z-index:4;
+ display:flex;align-items:center;justify-content:space-between;gap:16px;
+ padding:15px 22px;background:linear-gradient(115deg,#14282e,#253b40);
+ border-bottom:1px solid #957956;color:#f2e5c8;
+}
+body.v3 .v3-dossier-heading h2{
+ margin:2px 0 0;color:#f4e3bd;font:700 clamp(1.3rem,2.4vw,1.85rem)/1.12 Georgia,serif;
+}
+body.v3 .v3-dossier-overline{
+ color:#d7b77b;margin:0;font:700 .66rem/1.5 system-ui;letter-spacing:.17em;
+}
+body.v3 .v3-dossier-heading #closeDetails{
+ margin:0;padding:10px 14px;min-height:44px;flex-shrink:0;
+ background:#2c4143;border:1px solid #a28a61;color:#f4e5c7;
+ border-radius:4px;font:700 .8rem system-ui;
+}
+body.v3 .v3-dossier-nav{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+ padding:0;background:#1c3137;border-bottom:2px solid #c3a573;
+}
+body.v3 .v3-dossier-nav button{
+ min-width:0;min-height:48px;padding:10px 8px;
+ border:0;border-right:1px solid #43575a;border-radius:0;
+ background:transparent;color:#d9d0bb;font:700 .83rem/1.3 system-ui;
+}
+body.v3 .v3-dossier-nav button[aria-current="page"]{
+ background:#e8dbc1;color:#293c39;box-shadow:inset 0 4px #af8651;
+}
+body.v3 .v3-dossier-nav button:not([aria-current="page"]):hover{background:#304d4e}
+body.v3 #details.v3-dossier>.detail-panel{
+ padding:21px 25px 30px;margin:0;min-height:260px;
+}
+body.v3 #details.v3-dossier>.detail-panel[hidden]{display:none}
+body.v3 #details.v3-dossier .journal-eyebrow{color:#7b684a;letter-spacing:.15em}
+body.v3 #details.v3-dossier .journal h2{
+ color:#253c3b;margin:4px 0 7px;font:700 clamp(1.5rem,3vw,2rem)/1.1 Georgia,serif;
+}
+body.v3 #details.v3-dossier .journal-intro{color:#655e52;margin-bottom:14px}
+body.v3 .v3-journal-metrics{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+ margin:15px 0 20px;
+}
+body.v3 .v3-journal-metric{
+ display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;
+ min-height:85px;padding:11px 8px;background:#d8c8a9;
+ border:1px solid #b59c73;box-shadow:inset 0 1px #f5ead6;
+}
+body.v3 .v3-journal-metric span{
+ font:700 .75rem/1.35 system-ui;letter-spacing:.025em;color:#605843;
+}
+body.v3 .v3-journal-metric strong{
+ font:700 1.7rem/1 Georgia,serif;color:#314e48;
+}
+body.v3 #details.v3-dossier .journal-tabs{
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;
+ border-bottom:1px solid #b8a27e;padding-bottom:8px;margin:6px 0 17px;
+}
+body.v3 #details.v3-dossier .journal-tab{
+ min-height:46px;border:1px solid #baaa8c;border-radius:4px;
+ padding:9px 7px;font:700 .78rem/1.3 system-ui;
+ background:#e5d9c2;color:#514b3f;box-shadow:none;
+}
+body.v3 #details.v3-dossier .journal-tab[aria-selected="true"]{
+ background:#294a46;color:#f6e5c9;border-color:#49645e;box-shadow:inset 0 -3px #d4b676;
+}
+body.v3 #details.v3-dossier .journal-panel h3{
+ font:700 1.45rem/1.2 Georgia,serif;color:#304741;margin:0 0 13px;
+}
+body.v3 #details.v3-dossier .journal-panel h4{color:#5b715d}
+body.v3 #details.v3-dossier .journal-entry{
+ position:relative;padding:16px 18px;margin-bottom:11px;
+ background:linear-gradient(115deg,#f2e8d3,#e6d7b9);
+ border:1px solid #bba67f;border-left:4px solid #7c715a;
+ box-shadow:0 2px 0 #bba77a35;
+}
+body.v3 #details.v3-dossier #journal-evidence .journal-entry{border-left-color:#94794a}
+body.v3 #details.v3-dossier #journal-knowledge .journal-entry{border-left-color:#4e7769}
+body.v3 #details.v3-dossier #journal-deductions .journal-entry{border-left-color:#456d84}
+body.v3 #details.v3-dossier .journal-entry strong{
+ font:700 1.13rem/1.3 Georgia,serif;color:#3d3930;
+}
+body.v3 #details.v3-dossier .journal-entry p>span{
+ color:#5c5548;font:.9rem/1.55 system-ui;margin-top:6px;
+}
+body.v3 #details.v3-dossier .journal-meta{color:#6f6756}
+body.v3 #details.v3-dossier .journal-empty,
+body.v3 .v3-dossier-empty{
+ padding:18px;border:1px dashed #ae9a77;background:#f0e5d1;color:#655f50;
+ font:.9rem/1.55 system-ui;margin:10px 0;
+}
+body.v3 #details.v3-dossier .journal-timeline{
+ border-left:3px solid #879c91;margin-left:12px;padding:0 0 0 21px;
+}
+body.v3 #details.v3-dossier .journal-timeline li{
+ position:relative;padding:10px 5px 18px 10px;border:0;
+ color:#534e45;font:.9rem/1.45 system-ui;
+}
+body.v3 #details.v3-dossier .journal-timeline li::marker{color:#53776a}
+body.v3 #details.v3-dossier .journal-footer button{
+ min-height:46px;background:#2e5748;color:#f7e9d0;border:1px solid #6a8068;
+}
+body.v3 #details.v3-dossier .journal-status{color:#5d6259}
+body.v3 #details.v3-dossier #inventory-panel h2,
+body.v3 #details.v3-dossier #investigator h2,
+body.v3 #details.v3-dossier #history h2{
+ color:#29423d;font:700 1.6rem/1.2 Georgia,serif;margin:0 0 16px;
+}
+body.v3 .v3-inventory-source{display:none}
+body.v3 .v3-inventory-gallery{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;
+}
+body.v3 .v3-inventory-gallery>.v3-dossier-empty{grid-column:1/-1}
+body.v3 .v3-inventory-card{
+ display:grid;grid-template-columns:105px minmax(0,1fr);min-width:0;gap:14px;
+ padding:12px;background:linear-gradient(120deg,#f0e6d0,#ded0b2);
+ border:1px solid #b29d75;box-shadow:0 3px 6px #695a3e24;
+}
+body.v3 .v3-inventory-art{
+ display:grid;place-items:center;width:105px;height:122px;
+ border:2px solid #9f8659;background:#24403c center/cover no-repeat;
+ color:#e5cc90;font:2.6rem Georgia,serif;
+}
+body.v3 .v3-inventory-art-fallback{background:linear-gradient(140deg,#2f514b,#142e37)}
+body.v3 .v3-inventory-category{
+ color:#6f674e;font:700 .69rem/1.4 system-ui;letter-spacing:.1em;text-transform:uppercase;margin:2px 0 7px;
+}
+body.v3 .v3-inventory-card h3{
+ color:#34463a;font:700 1.13rem/1.3 Georgia,serif;
+ margin:0 0 7px;overflow-wrap:anywhere;
+}
+body.v3 .v3-inventory-desc{font:.82rem/1.55 system-ui;color:#655e4e;margin:0}
+body.v3 #details.v3-dossier #investigator .investigator-profile{
+ padding:15px;border:1px solid #b8a27d;background:#f0e4cc;
+ grid-template-columns:minmax(100px,185px) minmax(0,1fr);
+}
+body.v3 #details.v3-dossier #investigator .investigator-portrait{border-color:#aa8e5c}
+body.v3 #details.v3-dossier #history #log p{
+ border-left:3px solid #647f70;border-bottom:1px solid #bca780;
+ background:#f1e6d1;padding:12px;margin:0 0 8px;color:#50493d;
+}
+body.v3 #details.v3-dossier :focus-visible{outline:3px solid #315d53;outline-offset:2px}
+@media(max-width:700px){
+ body.v3 #details.v3-dossier{width:calc(100vw - 12px);max-height:96dvh}
+ body.v3 .v3-dossier-heading{padding:12px 13px;gap:8px}
+ body.v3 .v3-dossier-heading #closeDetails{font-size:.75rem;padding:8px 9px}
+ body.v3 .v3-dossier-overline{font-size:.58rem;letter-spacing:.08em}
+ body.v3 .v3-dossier-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+ body.v3 .v3-dossier-nav button{font-size:.73rem;padding:9px 3px;overflow-wrap:anywhere;min-height:48px}
+ body.v3 #details.v3-dossier>.detail-panel{padding:14px 13px 24px}
+ body.v3 #details.v3-dossier .journal-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.v3 .v3-journal-metrics{gap:5px}
+ body.v3 .v3-journal-metric{min-height:73px;padding:9px 4px}
+ body.v3 .v3-journal-metric strong{font-size:1.4rem}
+ body.v3 .v3-journal-metric span{font-size:.65rem}
+ body.v3 .v3-inventory-gallery{grid-template-columns:1fr;gap:10px}
+ body.v3 .v3-inventory-card{grid-template-columns:88px minmax(0,1fr);gap:11px}
+ body.v3 .v3-inventory-art{width:88px;height:104px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.v3 #details.v3-dossier *,body.v3 #details.v3-dossier *::before,body.v3 #details.v3-dossier *::after{
+   animation:none!important;transition:none!important;
+ }
+}

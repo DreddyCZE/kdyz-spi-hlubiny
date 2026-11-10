@@ -35,7 +35,11 @@ test('V3 mobile layout remains usable',async({page})=>{
  await expect(page.locator('.v3-board .map-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel')).toBeVisible();
  await expect(page.locator('.v3-location-panel #placeTitle')).toBeVisible();
- await expect(page.locator('#places')).toHaveCSS('grid-template-columns',/\d+px \d+px/);
+ const columns = await page.locator('#places').evaluate(element =>
+   getComputedStyle(element).gridTemplateColumns.split(/\s+/).map(value => Number.parseFloat(value))
+ );
+ expect(columns).toHaveLength(2);
+ expect(columns.every(width => Number.isFinite(width) && width > 0)).toBe(true);
  await page.screenshot({path:'test-results/blackwater-v3-mobile.png',fullPage:true});
 });
 test('classic mode is unchanged',async({page})=>{

@@ -1,0 +1,126 @@
+/* Cinematic presentation of the existing encounter engine; no replacement of rules. */
+body.v3 #v3-combat-dialog {
+ width:min(920px,calc(100vw - 24px));
+ max-height:min(820px,93dvh);
+ overflow:auto;
+ padding:0;
+ border:1px solid #bd945d;
+ border-radius:6px;
+ color:#f1e6d1;
+ background:radial-gradient(ellipse at 50% 10%,#28404a 0,#101d26 48%,#081116 100%);
+ box-shadow:0 0 0 1px #0d1519,0 30px 90px #000e;
+}
+body.v3 #v3-combat-dialog::backdrop {
+ background:#02070aee;
+ backdrop-filter:blur(6px);
+}
+body.v3 .v3-battle-heading{
+ position:sticky;top:0;z-index:2;
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:14px 20px;
+ background:#101c23f7;
+ border-bottom:1px solid #86704b;
+}
+body.v3 .v3-battle-heading h2{margin:3px 0 0;color:#f1dbac;font:700 clamp(1.2rem,2.6vw,1.9rem)/1.15 Georgia,serif}
+body.v3 .v3-battle-eyebrow{font:700 .7rem/1.4 system-ui;letter-spacing:.2em;color:#d2ae77}
+body.v3 .v3-battle-heading button{
+ padding:10px 14px;flex-shrink:0;cursor:pointer;border:1px solid #aa8555;
+ background:#24383e;color:#f0dfc3;border-radius:4px;
+}
+body.v3 .v3-battle-heading button:hover{background:#35504d}
+body.v3 .v3-battle-pair{
+ display:grid;grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);
+ gap:12px;align-items:center;padding:20px 24px 15px;
+}
+body.v3 .v3-battle-actor{min-width:0;text-align:center}
+body.v3 .v3-battle-portrait{
+ width:min(100%,315px);height:clamp(150px,30vh,245px);
+ margin:0 auto 10px;background:#22323c center 34%/cover no-repeat;
+ border:2px solid #ac8a5d;outline:1px solid #3b3330;box-shadow:0 9px 22px #0009;
+}
+body.v3 .v3-battle-actor h3{font:700 1.25rem/1.2 Georgia,serif;color:#f2dba8;margin:4px 0 2px}
+body.v3 .v3-battle-actor p{font:.85rem/1.5 system-ui;color:#d4c8b8;margin:4px 0}
+body.v3 .v3-battle-versus{font:2.6rem Georgia,serif;text-align:center;color:#d9ae72;text-shadow:0 0 18px #f4b44566}
+body.v3 .v3-battle-rules{
+ display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;
+ margin:0 24px;padding:11px 14px;background:#172c33;
+ border-top:1px solid #625a48;border-bottom:1px solid #625a48;
+ font:.83rem/1.35 system-ui;color:#dbd1c0;
+}
+body.v3 .v3-battle-rules span:first-child{color:#f6d696;font-weight:700}
+body.v3 #v3-battle-controls{padding:12px 24px 24px}
+body.v3 #v3-battle-controls .scenario-feature{
+ border:0;background:transparent;color:#eadfcd;margin:0;padding:0;
+}
+body.v3 #v3-battle-controls .scenario-feature p{font:.93rem/1.5 system-ui;color:#d3c6b8;margin:8px 0}
+body.v3 #v3-battle-controls .scenario-feature p:first-child{display:none}
+body.v3 #v3-battle-controls .scenario-feature [role="status"]{
+ padding:12px 14px;background:#314840;border:1px solid #9a9b6f;
+ border-radius:4px;color:#f3e4c6;font-weight:700;
+}
+body.v3 #v3-battle-controls .scenario-feature button{
+ display:inline-flex;justify-content:center;align-items:center;gap:8px;
+ min-width:170px;min-height:52px;margin:9px 9px 4px 0;padding:11px 18px;
+ font:700 .95rem system-ui;cursor:pointer;border:1px solid #b69860;
+ border-radius:4px;background:#2e533c;color:#fcf1d8;
+}
+body.v3 #v3-battle-controls .scenario-feature button[data-combat-move="escape"]{background:#5a4035;border-color:#a68b6a}
+body.v3 .v3-battle-equipment{padding:0 24px 18px;color:#ccbea2;font:.8rem/1.5 system-ui}
+body.v3 #v3-battle-controls button:focus-visible,
+body.v3 .v3-battle-heading button:focus-visible,
+body.v3 .v3-combat-reopen:focus-visible{outline:3px solid #f5d18e;outline-offset:3px}
+body.v3 #v3-combat-dialog.v3-battle-finished .v3-battle-rules{background:#304a41}
+body.v3 .v3-combat-reopen{background:#664233!important;color:#f8e7d5!important;border-color:#d2a06c!important}
+body.v3 .v3-combat-reopen[hidden]{display:none}
+@media(max-width:760px){
+ body.v3 #v3-combat-dialog{width:calc(100vw - 12px);max-height:94dvh}
+ body.v3 .v3-battle-heading{padding:10px 12px;flex-wrap:wrap}
+ body.v3 .v3-battle-heading>div{min-width:0;flex:1 1 120px}
+ body.v3 .v3-battle-heading button{padding:8px 9px;font-size:.75rem}
+ body.v3 .v3-battle-pair{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);gap:5px;padding:13px 10px 10px}
+ body.v3 .v3-battle-portrait{height:clamp(120px,24vh,190px)}
+ body.v3 .v3-battle-versus{font-size:1.4rem}
+ body.v3 .v3-battle-actor h3{font-size:1rem}
+ body.v3 .v3-battle-actor p{font-size:.7rem}
+ body.v3 .v3-battle-rules{margin:0 12px;padding:9px;font-size:.76rem}
+ body.v3 #v3-battle-controls{padding:12px}
+ body.v3 #v3-battle-controls .scenario-feature button{display:block;width:100%;margin:8px 0;min-height:48px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.v3 #v3-combat-dialog,
+ body.v3 #v3-combat-dialog *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* Dice numbers appear only after the engine resolves a combat turn. */
+body.v3 .v3-battle-dice-tray{
+ display:flex;align-items:center;justify-content:center;gap:18px;
+ margin:12px 24px 4px;padding:11px 14px;
+ background:linear-gradient(120deg,#14272c,#253a3a,#14272c);
+ border:1px solid #695d48;border-radius:5px;
+}
+body.v3 .v3-battle-dice-title{
+ font:700 .69rem/1.35 system-ui;letter-spacing:.14em;color:#d2b989;
+}
+body.v3 #v3-battle-dice{display:flex;gap:10px}
+body.v3 .v3-battle-die{
+ display:grid;place-items:center;
+ width:48px;height:48px;
+ border-radius:6px;border:2px solid #b79e71;
+ box-shadow:inset 0 0 0 2px #2b332f,0 4px 10px #0008;
+ background:#f2e7cf;color:#25343a;
+ font:700 1.6rem Georgia,serif;
+ animation:v3-die-reveal .32s ease-out both;
+}
+body.v3 .v3-battle-die:nth-child(2){animation-delay:.08s}
+@keyframes v3-die-reveal{
+ from{opacity:.15;transform:translateY(-11px) rotate(-12deg) scale(.85)}
+ to{opacity:1;transform:none}
+}
+@media(max-width:760px){
+ body.v3 .v3-battle-dice-tray{margin:8px 12px 3px;padding:8px;gap:8px}
+ body.v3 .v3-battle-die{width:42px;height:42px;font-size:1.4rem}
+ body.v3 .v3-battle-dice-title{font-size:.63rem}
+}
+@media(prefers-reduced-motion:reduce){
+ body.v3 .v3-battle-die{animation:none!important}
+}

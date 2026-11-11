@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-# One lock covers source resolution, packaging AND deployment for every publisher.
+# Publishers keep one shared lock; PR tests never publish and cancel outdated runs.
 concurrency:
-  group: github-pages
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('blackwater-pr-{0}', github.event.pull_request.number) || 'github-pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test-build:
     runs-on: ubuntu-latest
@@ -23,6 +23,23 @@ jobs:
       - run: node scripts/playwright.mjs install --with-deps chromium
       - name: Build and test in Chromium
         run: npm run test:e2e
+      - name: Prepare standalone Blackwater V3 build for PR playtesting
+        if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature/blackwater-v3') }}
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        if: ${{ github.event_name == 'pull_request' && startsWith(github.head_ref, 'feature/blackwater-v3') }}
+        with:
+          name: blackwater-v3-playable
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: blackwater-v3-screenshots
+          path: test-results/blackwater-v3-*.png
+          if-no-files-found: ignore
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

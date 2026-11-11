@@ -74,7 +74,8 @@ body.v3 .v3-combat-reopen{background:#664233!important;color:#f8e7d5!important;b
 body.v3 .v3-combat-reopen[hidden]{display:none}
 @media(max-width:760px){
  body.v3 #v3-combat-dialog{width:calc(100vw - 12px);max-height:94dvh}
- body.v3 .v3-battle-heading{padding:10px 12px}
+ body.v3 .v3-battle-heading{padding:10px 12px;flex-wrap:wrap}
+ body.v3 .v3-battle-heading>div{min-width:0;flex:1 1 120px}
  body.v3 .v3-battle-heading button{padding:8px 9px;font-size:.75rem}
  body.v3 .v3-battle-pair{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr);gap:5px;padding:13px 10px 10px}
  body.v3 .v3-battle-portrait{height:clamp(120px,24vh,190px)}

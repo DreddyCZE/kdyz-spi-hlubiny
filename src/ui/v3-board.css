@@ -88,6 +88,7 @@ body.v3 :focus-visible{outline:3px solid #f7d592;outline-offset:3px}
  body.v3 .mapped .map-point::before{display:none}
 }
 @media(max-width:760px){
+ body.v3 dialog{max-width:calc(100vw - 12px)}
  body.v3 main{padding:6px}
  body.v3 .top{position:sticky;top:0;z-index:5;flex-direction:row;flex-wrap:nowrap;gap:8px;align-items:center;padding:9px 10px}
  body.v3 .top>div:first-child{flex:1}

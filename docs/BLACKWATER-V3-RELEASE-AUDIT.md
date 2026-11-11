@@ -28,7 +28,7 @@ Základní průzkum stále tvoří otevření karty, dobrání, výběr postupu,
 
 ## Automatizované ověření a screenshoty
 
-- [Snímková sada](../e2e/v3-release.spec.js): 1920 × 1080, 1440 × 900, 1280 × 720, 390 × 844, 320 × 700. Výběr, rozehraná mapa, karta, kostky, výsledek, souboj před/po útoku, inventář, deník a nové kolo. Kontrola horizontálního přetečení a chyb JavaScriptu.
+- [Snímková sada](../e2e/v3-release.spec.js): 1920 × 1080, 1440 × 900, 1280 × 720, 390 × 844, 320 × 700. Výběr, rozehraná mapa, karta, kostky, výsledek, souboj před/po útoku, inventář, deník a nové kolo. Kontrola horizontálního přetečení stránky i otevřených dialogů a chyb JavaScriptu. Vizuální kontrola 320px souboje odhalila přetékající dlouhé tlačítko záhlaví; oprava nastavuje skutečnou maximální šířku dialogu a dovoluje zalomení záhlaví.
 - [Úplné V3 průchody](../e2e/v3-journey.spec.js): všechny tři postavy × tři vítězná zakončení, získávání skutečných důkazů a znalostí, chybná i správná odpověď hádanky, reload rozpracovaných řešení, cena AP a uzamčení zakončené hry. Sdílená cesta také nadále testuje hlavní scénář bez V3.
 - Samostatné regrese pro vypršení času, smrt na HP/SAN v probíhajícím souboji, tři placené alternativy hádanek, bezplatný přehod okultistky, ochranu námořníka a jeho léčení, aktivní schopnost detektiva, spotřebování výbavy a návrat fokusu.
 - Původní testy zachovávají pokrytí starších režimů, chráněných/poškozených save, neveřejných následků, podadresáře Pages a reduced motion. Testy nejsou vypnuté a finální běh nepoužívá opakování.

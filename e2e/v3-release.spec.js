@@ -8,6 +8,9 @@ for(const [width,height] of [[1920,1080],[1440,900],[1280,720],[390,844],[320,70
   await page.goto('./index.html?ui=v3');
   const shot=async name=>{
    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+   for(const dialog of await page.locator('dialog[open]').all()){
+    expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth+1),'Dialog must not clip controls horizontally').toBe(true);
+   }
    await page.screenshot({path:`test-results/blackwater-v3-${width}-${name}.png`,animations:'disabled',fullPage:!await page.locator('dialog[open]').count()});
   };
   await shot('selection');

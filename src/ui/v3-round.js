@@ -1,5 +1,6 @@
 // Blackwater V3: purely visual new-round recap. The engine remains the sole source of truth.
 import {blackwaterImage} from '../data/story-art.js';
+import {openDialog} from './v3-dialog.js';
 
 export function mountV3RoundTransition(){
  const endRound=document.getElementById('endRound');
@@ -33,9 +34,12 @@ export function mountV3RoundTransition(){
   queueMicrotask(()=>{
    const after=read();
    if(!Number.isFinite(before.round)||!Number.isFinite(after.round)||after.round<=before.round)return;
+   if(document.body.classList.contains('v3-ended'))return;
    title.textContent='Kolo '+after.round;
    counters.replaceChildren(renderChange('Hrozba',before.threat,after.threat),renderChange('Rituál',before.ritual,after.ritual));
-   if(!dialog.open)dialog.showModal();
+   const latest=document.querySelector('#log p');
+   if(latest)narrative.textContent=latest.textContent;
+   openDialog(dialog,document.querySelector('.v3-location-actions button:last-child'));
   });
  },{capture:true});
  return dialog;

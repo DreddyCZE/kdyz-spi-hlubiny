@@ -10,9 +10,11 @@ export function renderMap(anchor, locations, map, state, busy, onMove) {
   anchor.replaceChildren(...locations.map(location => {
     const current = location.id === state.locationId;
     const locked = !state.unlockedLocations.includes(location.id);
+    const explored=Boolean(state.drawnCards?.[location.id]||state.cursors?.[location.id]);
     const b = document.createElement('button');
     b.textContent = `${current ? '◉' : locked ? '▣' : '◇'} ${location.name}${current ? ' · zde' : locked ? ' · zamčeno' : ''}`;
-    b.className = `map-point${current ? ' active' : ''}${locked ? ' locked' : ''}`;
+    b.className = `map-point${current ? ' active' : ''}${locked ? ' locked' : ''}${explored?' explored':''}`;
+    b.title=explored?'Zde už jsi dobral kartu.':locked?'Lokace je uzamčená.':'Přesun stojí 1 AP.';
     b.dataset.locationId = location.id;
     if(current) b.setAttribute('aria-current','location');
     b.disabled = busy || state.ended || state.ap < 1 || current || locked;

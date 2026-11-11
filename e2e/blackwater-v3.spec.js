@@ -36,10 +36,11 @@ test('V3 map and story dialog render and can be operated',async({page})=>{
  await expect(page.locator('#v3-story-dialog #draw')).toBeEnabled();
  await page.locator('#v3-story-dialog #draw').click();
  await expect(page.locator('#v3-story-dialog .card-art.empty')).toHaveCount(0);
- // A narrative-led story card: explain what happened before showing bonuses and equipment.
+ // The card reads as narrative then decisions; equipment has its own dossier surface.
  const narrativeTop = await page.locator('#v3-story-dialog #cardStory').evaluate(el => el.getBoundingClientRect().top);
- const equipmentTop = await page.locator('#v3-story-dialog [aria-label="Výbava vyšetřovatele"]').evaluate(el => el.getBoundingClientRect().top);
- expect(narrativeTop).toBeLessThan(equipmentTop);
+ const choicesTop = await page.locator('#v3-story-dialog .choices').evaluate(el => el.getBoundingClientRect().top);
+ expect(narrativeTop).toBeLessThan(choicesTop);
+ await expect(page.locator('#v3-story-dialog #scenario-equipment')).toBeHidden();
  await expect(page.locator('#v3-story-dialog .actions')).toHaveCSS('position','static');
  const overlap=await page.locator('#v3-story-dialog #storyPanel').evaluate(panel=>{
    const choices=panel.querySelector('.choices').getBoundingClientRect();

@@ -43,7 +43,7 @@ export function mountV3Investigation(){
    button.setAttribute('aria-current',isCurrent?'page':'false');
    button.setAttribute('aria-pressed',String(isCurrent));
   }
-  if(active)title.textContent=active.title;
+  title.textContent=active?.title||(!document.getElementById('rules-panel').hidden?'Jak se hraje':'Vyšetřovací složka');
  }
  for(const section of details.querySelectorAll('.detail-panel')){
   new MutationObserver(reflect).observe(section,{attributes:true,attributeFilter:['hidden']});
@@ -56,18 +56,17 @@ export function mountV3Investigation(){
  gallery.setAttribute('aria-label','Získané předměty a záznamy');
  source.after(gallery);source.classList.add('v3-inventory-source');
  source.setAttribute('aria-hidden','true');
- const known=new Map(blackwaterItems.map(item=>[item.name,item]));
+ const known=new Map(blackwaterItems.map(item=>[item.id,item]));
  function paintInventory(){
-  const contents=source.textContent.trim();
-  const names=!contents||contents==='Zatím nic.'?[]:contents.split(' · ').map(name=>name.trim()).filter(Boolean);
+  const entries=JSON.parse(source.dataset.entries||'[]');
   gallery.replaceChildren();
-  if(!names.length){
+  if(!entries.length){
    const empty=document.createElement('p');empty.className='v3-dossier-empty';
    empty.textContent='Z průzkumu zatím nemáš žádné nové nálezy.';
    gallery.append(empty);return;
   }
-  for(const name of names){
-   const item=known.get(name);
+  for(const {id,name} of entries){
+   const item=known.get(id);
    const card=document.createElement('article');card.className='v3-inventory-card';
    const artwork=document.createElement('div');artwork.className='v3-inventory-art';artwork.setAttribute('aria-hidden','true');
    const image=item?blackwaterImage('items',item.id):null;
@@ -86,7 +85,7 @@ export function mountV3Investigation(){
   }
  }
  const inventoryChanges=new MutationObserver(paintInventory);
- inventoryChanges.observe(source,{subtree:true,childList:true,characterData:true});
+ inventoryChanges.observe(source,{attributes:true,attributeFilter:['data-entries']});
  paintInventory();
 
  // The scenario keeps usable equipment separate from the legacy rewards inventory.
@@ -103,28 +102,20 @@ export function mountV3Investigation(){
   const findingsTitle=document.createElement('h3');
   findingsTitle.className='v3-findings-heading';findingsTitle.textContent='Nálezy z průzkumu';
   gallery.before(equipmentHeading,caption,equipmentGrid,findingsTitle);
-  const aliases=new Map([
-   ['Obvaz','bw-bandage'],['Sůl','bw-salt'],
-   ['Laudanum','bw-laudanum'],['Revolver','bw-revolver'],
-  ]);
-  function equipmentId(label){
-   for(const [prefix,id] of aliases)if(label.startsWith(prefix))return id;
-   return null;
-  }
   function paintEquipment(){
+   const focused=document.activeElement?.closest('[data-equipment-id]')?.dataset.equipmentId;
    equipmentGrid.replaceChildren();
-   const controls=[...equipmentSource.querySelectorAll('button')];
-   const passive=[...equipmentSource.childNodes]
-    .filter(node=>node.nodeType===Node.TEXT_NODE&&node.textContent.trim())
-    .map(node=>node.textContent.trim());
-   if(!controls.length&&!passive.length){
+   const items=[...equipmentSource.querySelectorAll('[data-item-id]')];
+   if(!items.length){
     const empty=document.createElement('p');empty.className='v3-dossier-empty';
     empty.textContent='Momentálně nemáš žádnou použitelnou výbavu.';
     equipmentGrid.append(empty);return;
    }
-   for(const item of [...controls.map(button=>({label:button.textContent.trim(),button})),...passive.map(label=>({label,button:null}))]){
-    const id=equipmentId(item.label);
+   for(const node of items){
+    const item={label:node.textContent.trim(),button:node.matches('button')?node:null};
+    const id=node.dataset.itemId;
     const card=document.createElement('div');card.className='v3-equipment-card';
+    card.dataset.equipmentId=id;
     const image=document.createElement('div');image.className='v3-equipment-art';image.setAttribute('aria-hidden','true');
     const art=id?blackwaterImage('items',id):null;
     if(art)image.style.backgroundImage='url("'+new URL(art,document.baseURI).href+'")';
@@ -146,10 +137,18 @@ export function mountV3Investigation(){
     }
     card.append(image,info);equipmentGrid.append(card);
    }
+   if(focused){
+    const same=[...equipmentGrid.children].find(card=>card.dataset.equipmentId===focused)?.querySelector('button:not(:disabled)');
+    (same||equipmentGrid.querySelector('button:not(:disabled)')||close)?.focus({preventScroll:true});
+   }
   }
   new MutationObserver(paintEquipment).observe(equipmentSource,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled']});
   paintEquipment();
  }
+
+ // The actual ability node moves once, then app.js continues rendering it here.
+ const ability=document.getElementById('scenario-ability');
+ if(ability)document.getElementById('investigator').append(ability);
 
  // This information is derived only from the journal's public visible counters.
  const journal=document.getElementById('investigation-journal');

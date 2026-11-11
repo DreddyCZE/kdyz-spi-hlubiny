@@ -68,21 +68,39 @@ function render(){
   const puzzleFocus=focused?.dataset.puzzleControl;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
+  for(const [id,max] of [['hp',scene.investigator?.hp||6],['san',scene.investigator?.san||8]]){
+    $(id).dataset.max=String(max);
+    const value=$(id).parentElement;
+    if(value.lastChild?.nodeType===Node.TEXT_NODE)value.lastChild.textContent=' / '+max;
+  }
   currentAim.hidden=legacyMode;
   currentAim.textContent=scene.ending||state.ended?'Vyšetřování skončilo. Výsledek najdeš u příběhové karty.':scene.availableEndings.length?'V jeskyních se můžeš rozhodnout, jak vyšetřování uzavřeš.':state.evidence.length?'Porovnávej důkazy v deníku, prozkoumej další místa a připrav se na cestu do jeskyní.':'Začni v přístavu: dober kartu a získej první stopu po zmizelé posádce.';
   onboarding?.render(session,scene);
   investigatorSetup.hidden=legacyMode||scene.investigatorId!==null;
   investigatorSetup.replaceChildren();
-  if(!investigatorSetup.hidden){for(const hero of investigators){investigatorSetup.append(button(`${hero.name} · HP ${hero.hp} / SAN ${hero.san} · ${hero.ability}`,()=>dispatch({type:'selectInvestigator',revision:state.revision,investigatorId:hero.id}),false,'investigator-card'));}}
+  if(!investigatorSetup.hidden){for(const hero of investigators){
+    const card=button(`${hero.name} · HP ${hero.hp} / SAN ${hero.san} · ${hero.ability}`,()=>dispatch({type:'selectInvestigator',revision:state.revision,investigatorId:hero.id}),false,'investigator-card');
+    card.dataset.investigatorId=hero.id;
+    const image=blackwaterImage('investigators',hero.id);if(image)card.style.setProperty('--portrait',`url("${new URL(image,document.baseURI).href}")`);
+    investigatorSetup.append(card);
+  }}
   equipmentActions.replaceChildren();
   const equipmentNames={'bw-bandage':'Obvaz · obnovit 2 HP','bw-salt':'Sůl · snížit hrozbu','bw-laudanum':'Laudanum · obnovit 2 SAN','bw-revolver':'Revolver · +1 k útoku'};
-  for(const id of scene.equipment||[]){equipmentActions.append(id==='bw-revolver'?document.createTextNode(equipmentNames[id]):button(equipmentNames[id],()=>dispatch({type:'useEquipment',revision:state.revision,itemId:id}),!scene.canAct||!!scene.pendingTest));}
+  equipmentActions.id='scenario-equipment';
+  for(const id of scene.equipment||[]){
+    const full=id==='bw-bandage'&&state.hp>=(scene.investigator?.hp||6)||id==='bw-laudanum'&&state.san>=(scene.investigator?.san||8);
+    const item=id==='bw-revolver'?document.createElement('span'):button(equipmentNames[id],()=>dispatch({type:'useEquipment',revision:state.revision,itemId:id}),!scene.canAct||!!scene.pendingTest||full);
+    item.textContent=equipmentNames[id];item.dataset.itemId=id;equipmentActions.append(item);
+  }
+  combatActions.id='scenario-combat';
+  // Public combat projection, shared by presentation adapters without parsing narrative text.
+  combatActions.dataset.combat=JSON.stringify(scene.combat||null);
   combatActions.replaceChildren();
   if(scene.combat?.status==='active'){
     const enemy=enemies.find(e=>e.id===scene.combat.enemyId);
     const title=document.createElement('p');title.textContent='Souboj: '+enemy.name+' · HP '+scene.combat.enemyHp+'/'+enemy.hp+' · výměna '+scene.combat.exchange+'/3';combatActions.append(title);
     const cost=document.createElement('p');cost.textContent='Zahájení stálo 1 AP. Další výměny už AP nestojí. Útok i útěk mohou způsobit zranění; po třetí výměně následuje vynucený únik.';combatActions.append(cost);
-    for(const move of ['attack','escape'])combatActions.append(button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>dispatch({type:'combatTurn',revision:state.revision,move,dice:rollDice()})));
+    for(const move of ['attack','escape']){const action=button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>dispatch({type:'combatTurn',revision:state.revision,move,dice:rollDice()}),Boolean(scene.ending||state.ended));action.dataset.combatMove=move;combatActions.append(action);}
   }else{
     if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
       if(!legacyMode&&scene.canAct&&state.ap>=1){
@@ -91,6 +109,7 @@ function render(){
   }
   if(scene.combat?.roll){const last=document.createElement('p');last.setAttribute('role','status');last.textContent='Poslední výměna: '+(scene.combat.lastMove==='attack'?'útok':'útěk')+' · '+scene.combat.dice.join(' + ')+' · '+labels[scene.combat.roll.key];combatActions.append(last);}
   investigatorAbility.replaceChildren();
+  investigatorAbility.id='scenario-ability';
   if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}
   if(scene.investigator?.passive){const p=document.createElement('p');p.textContent=scene.investigator.passive.name+': '+scene.investigator.passive.text+(scene.passiveUsed?' V tomto kole využito.':'');investigatorAbility.append(p);}
   $('investigatorName').textContent=scene.investigator?.name||investigatorName;
@@ -106,6 +125,7 @@ function render(){
   $('heroStats').textContent=`HP ${state.hp}/${scene.investigator?.hp||6} · SAN ${state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
+  $('inventory').dataset.entries=JSON.stringify([...state.inventory.map(id=>({id,name:rewardNames[id]})),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>({id:e.id,name:e.name}))]);
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state,content),choice=selectedChoice(state,card);
   const result=visibleResult(state,content),deck=explorationView(state,content);
@@ -123,6 +143,7 @@ function render(){
   $('cardArt').classList.toggle('empty',!card);
   $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card), document.baseURI).href}")`;
   $('cardTag').textContent=({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum').toUpperCase()+' · '+loc.name.toUpperCase();
+  $('cardTag').dataset.cardType=card?.type||'exploration';
   $('cardTitle').textContent=card?.title||(deck.canDraw?'Neznámá karta čeká':'Žádná dostupná karta');
   $('cardStory').textContent=card?.description||(deck.canDraw?'Dobrat kartu je zdarma. AP zaplatíš až za zvolený postup.':'Zdejší balíček je vyčerpaný nebo zbývající karty zatím nesplňují podmínky. Vydej se jinam nebo pokračuj do dalšího kola.');
   const testBonus=choice?.test?(scene.testBonuses?.[choice.test.attribute]||0):0;
@@ -216,6 +237,7 @@ function render(){
             const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];puzzleDrafts.set(p.id,[...answer]);dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:[...answer]});},i===answer.length-1);
             left.setAttribute('aria-label','Posunout '+symbol+' doleva');
             right.setAttribute('aria-label','Posunout '+symbol+' doprava');
+            left.dataset.puzzleControl=p.id+'-'+symbol+'-left';right.dataset.puzzleControl=p.id+'-'+symbol+'-right';
             cell.append(left,right);return cell;
           }));
         };draw();section.append(controls);
@@ -264,8 +286,14 @@ function render(){
   $('gameStatus').textContent=scene.ending?'Konec scénáře: '+scene.ending.title+'.':state.ended?'Vyšetřovatel již nemůže pokračovat. Začni novou hru.':'';
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
-  if(mapFocus){$('cardTitle').focus({preventScroll:true});}
-  if(puzzleFocus){[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus)?.focus();}
+  if(mapFocus){(document.body.classList.contains('v3')?$('placeTitle'):$('cardTitle')).focus({preventScroll:true});}
+  if(puzzleFocus){const target=[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus);(target?.disabled?target.parentElement.querySelector('button:not(:disabled)'):target)?.focus();}
+  document.dispatchEvent(new CustomEvent('blackwater:render',{detail:{
+    canAct:scene.canAct,ended:Boolean(scene.ending||state.ended),choosing:scene.investigatorId===null,
+    round:state.round,hp:state.hp,san:state.san,ap:state.ap,threat:state.threat,
+    evidence:investigation.evidence.length,knowledge:investigation.knowledge.length,
+    ending:scene.ending?.title||null,combat:scene.combat||null,
+  }}));
 }
 const evaluatePending=(dice,test,bonus=0)=>{
   if(!test)return {key:'failure'};

@@ -1,6 +1,6 @@
 # Blackwater V3 — první souvislý playtest
 
-Stav: experimentální rozhraní v PR #23. **Nejde o novou hru ani o nový save formát.** Herní pravidla, data scénáře a ukládání vlastní původní engine. Tento dokument slouží jako praktický scénář pro předání a ruční ověření.
+Stav: rozhraní připravované k vydání v Draft PR #23. **Nejde o novou hru ani o nový save formát.** Herní pravidla, data scénáře a ukládání vlastní původní engine. Tento dokument slouží jako praktický scénář pro předání a ruční ověření. Zjištění, provedené opravy a rozsah automatického ověření shrnuje [UX audit vydání](BLACKWATER-V3-RELEASE-AUDIT.md).
 
 ## Jak otevřít V3
 
@@ -24,9 +24,9 @@ V prohlížeči můžeš použít novou hru, nebo pokračovat v kompatibilní sc
 3. Otevři **Prozkoumat · karta**, dober kartu, vyber postup, hoď kostkami a přijmi výsledek. Před vyhodnocením nesmí být čitelný skrytý následek. Sleduj změny životů, SAN, AP, důkazů a hrozby.
 4. Otevři **Důkazy a dedukce**. Vyzkoušej přepnutí Důkazy / Znalosti / Dedukce / Kronika. Karty musí zobrazovat pouze získané informace. Samotné prohlížení nesmí změnit uloženou pozici.
 5. V **Inventáři** prohlédni použitelnou výbavu, pak bezpečně vyzkoušej `Sůl · snížit hrozbu` (pokud ji máš). Předmět se má po použití odebrat a změna se musí zachovat po obnovení stránky.
-6. Vyhledej střetnutí s Mlžným psem v Knihovně. Na bojové obrazovce zkus návrat na mapu a znovu otevři aktivní souboj. Po akci se ukáže skutečný hod dvou kostek a výsledek střetu.
+6. Otevři **Schopnosti** a ověř aktivní i pasivní vlastnost postavy. Vyhledej střetnutí s Mlžným psem v Knihovně. Na bojové obrazovce zkus návrat na mapu a znovu otevři aktivní souboj. Po akci se ukáže skutečný hod dvou kostek a výsledek střetu. Spotřební výbava se podle stávajících pravidel používá mezi střetnutími.
 7. Ukonči kolo. Přechodová obrazovka musí zobrazovat skutečné hodnoty hrozby a rituálu. Po znovunačtení stránky musí kolo zůstat zachováno, ale přechodové okno se nesmí znovu samo otevřít.
-8. Zkontroluj původní ilustrovaný režim a hlavní scénář bez `?ui=v3`. V3 nesmí poškodit jejich pozice, pravidla nebo UX.
+8. Pokračuj ke zvolenému zakončení nebo prohře. Závěr se otevře automaticky, zůstane po reloadu a další herní akce jsou uzamčené. Zkontroluj původní ilustrovaný režim a hlavní scénář bez `?ui=v3`. V3 nesmí poškodit jejich pozice, pravidla nebo UX.
 
 ## Kritéria hotové V3
 
@@ -41,8 +41,8 @@ V prohlížeči můžeš použít novou hru, nebo pokračovat v kompatibilní sc
 
 ## Co ještě není hotové
 
-- Výsledné vizuální doladění všech obrazovek a typografie.
-- Podrobná dostupnost pro klávesnici a čtečky obrazovky napříč všemi modálními okny.
+- Uživatelské posouzení výsledné kompozice na skutečném telefonu a notebooku.
+- Ruční audit čtečkou obrazovky; automatické regrese pokrývají klávesnici, nativní modální okna a návrat fokusu.
 - Rozšířený balance a ruční playtest napříč celým příběhem.
 - Samostatné **veřejné** preview pro PR větev. PR testy vytvářejí lokálně hratelný ZIP a screenshoty, nikoli automatické Pages nasazení.
 

@@ -114,6 +114,7 @@ test('V3 time defeat opens the epilogue instead of a new round and remains locke
  await expect(page.locator('#v3-round-dialog')).not.toBeVisible();
  await expect(page.locator('#v3-story-dialog')).toBeVisible();
  await expect(page.locator('#gameStatus')).toContainText('Hlubiny odpoví');
+ expect((await page.locator('#storyPanel').boundingBox()).height).toBeLessThan(400);
  await page.screenshot({path:'test-results/blackwater-v3-time-defeat.png'});
  await page.reload();
  await expect(page.locator('#gameStatus')).toContainText('Hlubiny odpoví');

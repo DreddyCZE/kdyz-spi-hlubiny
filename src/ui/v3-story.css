@@ -38,6 +38,7 @@ body.v3 .v3-changes span{padding:5px 9px;background:#e0d3b9;border:1px solid #9e
 body.v3 .v3-changes span[data-change^="-"]{color:#813e35}
 body.v3 #v3-story-dialog[data-ended] .deck-summary,body.v3 #v3-story-dialog[data-ended] .choices,body.v3 #v3-story-dialog[data-ended] .actions,body.v3 #v3-story-dialog[data-ended] .scenario-feature,body.v3 #v3-story-dialog[data-ended] #outcomes{display:none}
 body.v3 #v3-story-dialog[data-ended] #cardTitle,body.v3 #v3-story-dialog[data-ended] #cardStory,body.v3 #v3-story-dialog[data-ended] #cardTag,body.v3 #v3-story-dialog[data-ended] #dicebox{display:none}
+body.v3 #v3-story-dialog[data-ended] #storyPanel{min-height:0}
 body.v3 #v3-story-dialog :focus-visible{outline:3px solid #326148;outline-offset:3px}
 @keyframes v3-result{from{opacity:.2;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media(max-width:760px){

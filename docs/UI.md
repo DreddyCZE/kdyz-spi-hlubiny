@@ -1,5 +1,15 @@
 # Digitální herní stůl – M3.0.2a
 
+## Aktuální herní stůl B/C – 2026-11-12
+
+Hlavní scénář používá dominantní ilustrovanou mapu a souvislou pergamenovou plochu pro průzkum, testy, souboj a hádanky. Desktopový poměr sloupců je 1,55 : 1; kompaktní panel u mapy ukazuje portrét, roli a skutečné HP/SAN/AP včetně limitů zvolené postavy. Výbava a schopnost jsou u mapy, mimo příběh. Spodní přehledy tvoří nízkou lištu. Na mobilu zůstává mapa s dvousloupcovým seznamem míst; přichycené odkazy Mapa / Příběh a akce / Výbava umožňují rychle přejít k ovládání bez změny save.
+
+[table.css](../src/ui/table.css) rozšiřuje společné tokeny; [table.js](../src/ui/table.js) prezentuje jen veřejný scénářový pohled a dosažené hodnoty. Lišta fází ukazuje průzkum, mýtus, souboj a dostupné hádanky. Krátké vstupní animace jsou kosmetické a `prefers-reduced-motion` je vypíná. Mýtus je přehled skutečně dokončeného kola a aktuálních hodin, nikoli nové losování události. Jeho zavření ani reload nepřepočítávají stav.
+
+První hod i přehod ukazují během animace zakryté kostky a zamknuté potvrzení. Po zastavení zůstávají kostky viditelné; následky odhalí až Přijmout výsledek. Souboj používá ilustraci nepřítele a stejný rytmus kostek. Po dobu animace se zobrazuje předchozí veřejný stav souboje a další akce jsou zamčené. Dokončená výměna je uložená atomicky před kosmetickou animací; reload ji obnoví bez dalšího hodu. Reset animaci ruší. Ukládací schéma a herní pravidla se nemění.
+
+Následující popis dokumentuje původní milník M3; aktuální potvrzovaný hod a scénářové save mají přednost před historickým popisem okamžitého odhalení.
+
 Rozhraní zachovává přechody, pravidla, veřejné projekce, ukládání v3 a migrace M1/M2.1/M2.2. Desktop má mapu a skutečnou příběhovou kartu v poměru 60:40, pod 760 px se skládají pod sebe. Mapa, pergamenová karta, žetony stavu a spodní komponenty jsou samostatné HTML/CSS prvky. Referenční obrázek slouží pouze jako vizuální směr.
 
 ## Design tokeny

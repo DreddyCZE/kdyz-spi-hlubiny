@@ -1,0 +1,94 @@
+/* B/C game table: a permanent illustrated map and one coherent action surface. */
+main { max-width: 1760px; }
+.table-shortcuts { display: none; }
+#boardMap, #cardTitle, #fieldKit, #scenario-puzzles { scroll-margin-top: 64px; }
+.top { padding: 14px 20px; margin-bottom: 16px; }
+.top h1 { font-size: clamp(1.5rem,2.2vw,2rem); }
+.top .stats { flex-wrap: nowrap; }
+.field-investigator { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--texture-leather); border-bottom: 1px solid var(--color-brass); }
+.field-portrait { width: 54px; height: 68px; flex: 0 0 54px; background: var(--color-surface) center 25%/cover; border: 1px solid var(--color-brass); }
+.field-identity { display: grid; gap: 2px; min-width: 0; }
+.field-identity strong { color: var(--color-brass-light); font-size: 1.15rem; }
+#fieldRole { color: var(--color-muted); font-size: .75rem; }
+.field-stats { display: flex; gap: 8px; margin-left: auto; }
+.field-stats .stat { padding: 0 6px; grid-template-columns: auto; text-align: center; gap: 2px; border: 0; }
+.field-stats .token-icon { display: none; }
+.field-stats .value { grid-column: 1; white-space: nowrap; }
+.field-stats .stat[data-stat='hp'] b { color: var(--color-health); }
+.field-stats .stat[data-stat='san'] b { color: var(--color-sanity); }
+.map-heading { padding-block: 10px; }
+.map-heading h2 { font-size: 1.4rem; }
+.field-kit { padding: 0 16px; }
+.field-kit .scenario-feature:not(:empty) { margin: 12px 0; padding: 8px 0; border: 0; border-top: 1px solid var(--color-frame); background: none; }
+.field-kit p { font-size: .82rem; color: var(--color-muted); margin: 6px 0; }
+.field-kit button { font-size: .8rem; margin: 4px 4px 4px 0; padding: 8px 10px; }
+.scene-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.scene-heading .eyebrow { color: var(--color-paper-muted); font-size: .6rem; }
+#scenePhase { color: var(--color-wine); font: 700 .8rem var(--font-label); }
+.scene-rail { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); border-block: 1px solid var(--color-brass); margin-bottom: 18px; font: 600 .7rem var(--font-label); }
+.scene-rail > * { min-width: 0; text-align: center; padding: 12px 2px; color: var(--color-paper-muted); text-decoration: none; }
+.scene-rail > [aria-current='step'] { color: var(--color-paper-ink); background: #b8965b35; box-shadow: inset 0 -3px var(--color-wine); }
+.card::before { display: none; }
+.deck-summary { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 12px; border: 0; border-bottom: 1px solid var(--color-brass); border-radius: 0; padding: 0 0 14px; }
+.deck-summary h3 { font-size: 1rem; }
+.deck-summary p { margin: 0; font-size: .75rem; }
+#deckDescription { grid-column: 1/-1; }
+#deckCounts { grid-column: 1; }
+#draw { grid-column: 2; grid-row: 1/4; font-size: .85rem; }
+.card-art { aspect-ratio: 1.8; border: 1px solid var(--color-frame); margin-bottom: 16px; }
+.card-art.empty { filter: none; opacity: 1; }
+.card h2 { margin: 14px 0 12px; }
+.tag { transform: none; box-shadow: none; font-size: .6rem; }
+.story { line-height: 1.65; }
+.investigator-bar { gap: 8px; padding: 12px; }
+.investigator-bar > button { min-height: 48px; border: 1px solid var(--color-brass); background: var(--texture-leather); color: var(--color-ink); box-shadow: none; font: 600 .75rem var(--font-label); }
+.investigator-bar > button:first-child { transform: none; }
+.investigator-bar .component-icon { display: inline; font-size: 1rem; margin-right: 5px; color: var(--color-brass-light); }
+.investigator-bar .actions { flex-direction: row; }
+.myth-notice { padding: 16px; margin-bottom: 20px; color: var(--color-ink); background: linear-gradient(90deg,#0c1e21f2,#0c1e21c9),var(--myth-art) center/cover; border: 1px solid var(--color-brass); }
+.myth-notice h3 { color: var(--color-brass-light); margin-bottom: 8px; }
+.myth-notice p { font-size: .9rem; }
+.combat-portrait { width: 100%; max-height: 230px; object-fit: cover; object-position: center 25%; border: 1px solid var(--color-brass); margin-bottom: 12px; }
+.combat-dice { display: flex; justify-content: center; }
+.combat-dice .die { margin-block: 8px; }
+[data-scene='combat'] .card-art, [data-scene='combat'] .deck-summary { display: none; }
+[data-scene='combat'] .story, [data-scene='combat'] .choices, [data-scene='combat'] .actions, [data-scene='combat'] .outcome-preview, [data-scene='combat'] #scenario-puzzles, [data-scene='combat'] #scenario-companions, [data-scene='combat'] .onboarding { display: none; }
+.scene-enter { animation: scene-enter .32s ease-out both; }
+@keyframes scene-enter { from { opacity: .35; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.die.rolling { animation: dice-tumble .18s ease-in-out infinite alternate; }
+.die.rolling:nth-child(2) { animation-delay: -.09s; }
+@keyframes dice-tumble { to { transform: translateY(-7px) rotate(18deg); box-shadow: 0 10px 8px #0004; } }
+@media(min-width:1101px) {
+  .layout { grid-template-columns: minmax(0,1.55fr) minmax(380px,1fr); align-items: start; }
+  .map-panel { position: sticky; top: 12px; }
+  .card { padding: 22px; }
+}
+@media(max-width:1100px) and (min-width:761px) {
+  .field-investigator { flex-wrap: wrap; }
+  .field-stats { margin-left: 0; }
+}
+@media(max-width:760px) {
+  .table-shortcuts { display: flex; position: sticky; top: 0; z-index: 5; gap: 4px; padding: 6px; margin-bottom: 12px; background: var(--color-surface); border: 1px solid var(--color-brass); }
+  .table-shortcuts a { display: grid; place-items: center; flex: 1; min-height: 44px; color: var(--color-brass-light); font: 600 .75rem var(--font-label); text-underline-offset: 4px; }
+  .top { padding: 12px; gap: 12px; }
+  .top .stats { display: flex; justify-content: space-between; width: 100%; }
+  .top .stat { flex: 1; }
+  .field-investigator { gap: 8px; padding: 10px; flex-wrap: wrap; }
+  .field-portrait { width: 40px; height: 52px; flex-basis: 40px; }
+  .field-identity { flex: 1; }
+  .field-identity strong { font-size: 1rem; }
+  .field-stats { width: 100%; justify-content: space-around; padding-top: 8px; border-top: 1px solid var(--color-frame); }
+  .field-stats .stat { font-size: .7rem; }
+  .places.mapped { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+  .places.mapped::before { grid-column: 1/-1; aspect-ratio: 1.35; }
+  .mapped .map-point { font-size: .78rem; }
+  .map-panel .hero { min-height: 110px; }
+  .card { padding: 16px; outline-offset: -7px; }
+  .investigator-bar .actions { flex-wrap: wrap; }
+  .investigator-bar .actions button { font-size: .8rem; }
+  #draw { grid-row: auto; grid-column: 1/-1; width: 100%; margin-top: 8px; }
+  .scene-rail { font-size: .65rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .scene-enter, .die.rolling { animation: none; }
+}

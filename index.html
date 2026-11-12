@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="./src/ui/styles.css">
 <link rel="stylesheet" href="./src/ui/journal.css">
 <link rel="stylesheet" href="./src/ui/save-compatibility.css">
+<link rel="stylesheet" href="./src/ui/table.css">
 </head>
 <body>
 <a class="skip" href="#cardTitle">Přejít na příběh</a>
@@ -15,20 +16,27 @@
 <div>
 <div class="eyebrow">KDYŽ SPÍ HLUBINY · KAPITOLA I</div>
 <h1>Zvony pod přílivem</h1>
-<p class="edition">Blackwater · ilustrované vyšetřování · scénářový engine</p>
+<p class="edition">Blackwater · podzim 1926 · vyšetřování pod přílivem</p>
 </div>
 <div class="stats" aria-label="Stav hry">
 <span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / <span id="roundLimit">12</span></span></span>
 <span class="stat" data-stat="threat" data-symbol="◈"><span class="token-icon" aria-hidden="true">◈</span><span>Hrozba</span><span class="value"><b id="threat"></b> / 10</span></span>
 <span class="stat" data-stat="ritual" data-symbol="✦"><span class="token-icon" aria-hidden="true">✦</span><span id="clockLabel">Rituál</span><span class="value"><b id="ritual"></b></span></span>
-<span class="stat" data-stat="hp" data-symbol="♥"><span class="token-icon" aria-hidden="true">♥</span><span>Zdraví</span><span class="value"><b id="hp"></b> / 6</span></span>
-<span class="stat" data-stat="san" data-symbol="◉"><span class="token-icon" aria-hidden="true">◉</span><span>Příčetnost</span><span class="value"><b id="san"></b> / 8</span></span>
-<span class="stat" data-stat="ap" data-symbol="◆"><span class="token-icon" aria-hidden="true">◆</span><span>AP</span><span class="value"><b id="ap"></b> / 3</span></span>
 </div>
 </header>
 <nav class="game-modes" aria-label="Herní režimy"><span class="game-modes-current" aria-current="page">● Hlavní scénář · hádanky, dedukce a společník</span><a href="./blackwater.html">Ilustrovaný původní režim ↗</a><a href="./index.html?mode=legacy">Původní karetní hra ↗</a></nav>
+<nav class="table-shortcuts" aria-label="Rychlý přístup k hernímu stolu"><a href="#boardMap">Mapa</a><a href="#cardTitle">Příběh a akce</a><a href="#fieldKit">Výbava</a></nav>
 <div class="layout">
-<section class="map-panel" aria-label="Mapa scénáře">
+<section class="map-panel" id="boardMap" aria-label="Mapa scénáře">
+<section class="field-investigator" aria-label="Vyšetřovatel v terénu">
+<div id="fieldPortrait" class="field-portrait" aria-hidden="true"></div>
+<div class="field-identity"><span class="eyebrow">VYŠETŘOVATEL</span><strong id="fieldName">Vyber vyšetřovatele</strong><span id="fieldRole"></span></div>
+<div class="field-stats" aria-label="Stav vyšetřovatele">
+<span class="stat" data-stat="hp"><span class="token-icon" aria-hidden="true">♥</span><span>Zdraví</span><span class="value"><b id="hp"></b> / <span id="hpLimit">6</span></span></span>
+<span class="stat" data-stat="san"><span class="token-icon" aria-hidden="true">◉</span><span>Příčetnost</span><span class="value"><b id="san"></b> / <span id="sanLimit">8</span></span></span>
+<span class="stat" data-stat="ap"><span class="token-icon" aria-hidden="true">◆</span><span>AP</span><span class="value"><b id="ap"></b> / 3</span></span>
+</div>
+</section>
 <div class="map-heading">
 <div class="eyebrow">ILUSTROVANÁ MAPA MĚSTA · 1926</div>
 <h2 id="mapTitle">
@@ -48,8 +56,14 @@
 <p id="placeDesc">
 </p>
 </div>
+<div class="field-kit" id="fieldKit"></div>
 </section>
 <section class="card" aria-labelledby="cardTitle" id="storyPanel">
+<div class="scene-heading"><span class="eyebrow">BLACKWATER · HERNÍ STŮL</span><strong id="scenePhase" role="status">Průzkum</strong></div>
+<nav class="scene-rail" aria-label="Fáze vyšetřování">
+<span data-phase="exploration">Průzkum</span><span data-phase="myth">Mýtus</span><span data-phase="combat">Souboj</span><a href="#scenario-puzzles" data-phase="puzzle">Hádanky</a>
+</nav>
+<section id="mythNotice" class="myth-notice" aria-label="Mýtus po konci kola" hidden></section>
 <section class="deck-summary" aria-label="Balíček lokace">
 <h3 id="deckName"></h3><p id="deckDescription"></p><p id="deckCounts" role="status"></p>
 <button class="primary" id="draw">Dobrat kartu</button>

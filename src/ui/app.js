@@ -216,6 +216,7 @@ function render(){
             const right=button('→',()=>{[answer[i],answer[i+1]]=[answer[i+1],answer[i]];puzzleDrafts.set(p.id,[...answer]);dispatch({type:'setPuzzleDraft',revision:state.revision,puzzleId:p.id,answer:[...answer]});},i===answer.length-1);
             left.setAttribute('aria-label','Posunout '+symbol+' doleva');
             right.setAttribute('aria-label','Posunout '+symbol+' doprava');
+            left.dataset.puzzleControl=p.id+'-'+symbol+'-left';right.dataset.puzzleControl=p.id+'-'+symbol+'-right';
             cell.append(left,right);return cell;
           }));
         };draw();section.append(controls);
@@ -265,7 +266,7 @@ function render(){
   $('log').replaceChildren(...(rolling?[]:state.log).map(text=>{const p=document.createElement('p');p.textContent=text;return p;}));
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
   if(mapFocus){$('cardTitle').focus({preventScroll:true});}
-  if(puzzleFocus){[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus)?.focus();}
+  if(puzzleFocus){const target=[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus);(target?.disabled?target.parentElement.querySelector('button:not(:disabled)'):target)?.focus();}
 }
 const evaluatePending=(dice,test,bonus=0)=>{
   if(!test)return {key:'failure'};

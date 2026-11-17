@@ -8,7 +8,7 @@ export const conditionTypes=Object.freeze(['hasKnowledge','hasEvidence','flagEqu
 export function validateScenario(def){
   const errors=[],err=(p,m)=>errors.push(p+': '+m);
   if(!def||typeof def!=='object'||Array.isArray(def))return ['scenario: expected object'];
-  for(const k of Object.keys(def))if(!['id','version','title','rules','modules','locations','clocks','endings','finaleLocationId'].includes(k))err(k,'unknown field');
+  for(const k of Object.keys(def))if(!['id','version','title','rules','modules','locations','clocks','endings','finaleLocationId','delayedThreats'].includes(k))err(k,'unknown field');
   if(!isId(def.id))err('id','invalid ID');
   if(!Number.isSafeInteger(def.version)||def.version<1)err('version','positive integer required');
   if(typeof def.title!=='string'||!def.title.trim())err('title','nonempty title required');
@@ -44,6 +44,12 @@ export function validateScenario(def){
       if(['clockAtLeast','clockBelow'].includes(c.type)&&(!clockIds.includes(c.id)||!Number.isSafeInteger(c.value)))err(p,'invalid clock threshold');
       if(c.type==='minKnowledgeCount'&&(!Array.isArray(c.ids)||!c.ids.length||!unique(c.ids)||c.ids.some(id=>!isId(id))||!Number.isSafeInteger(c.value)||c.value<1||c.value>c.ids.length))err(p,'invalid knowledge threshold');
       if(c.type==='flagEquals'&&!['boolean','number','string'].includes(typeof c.value))err(p,'scalar expected');
+    }
+  }
+  if(def.delayedThreats!==undefined){
+    if(!Array.isArray(def.delayedThreats)||!unique(def.delayedThreats.map(e=>e?.id)))err('delayedThreats','unique events required');
+    for(const e of Array.isArray(def.delayedThreats)?def.delayedThreats:[]){
+      if(!e||!isId(e.id)||!def.locations?.includes(e.locationId)||!Number.isSafeInteger(e.startRound)||e.startRound<2||!Number.isSafeInteger(e.dueRound)||e.dueRound<e.startRound||e.dueRound>rules.maxRounds||!['hp','san'].includes(e.effect?.stat)||!Number.isSafeInteger(e.effect?.amount)||e.effect.amount>=0||e.effect.amount< -10||['title','warningText','hitText','avoidedText'].some(k=>typeof e[k]!=='string'||!e[k].trim()))err('delayedThreats','invalid scheduled threat');
     }
   }
   return errors;

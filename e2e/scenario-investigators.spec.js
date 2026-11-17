@@ -10,7 +10,7 @@ for(const [name,hp,san,item] of [['Detektiv',6,8,'Sůl'],['Okultistka',5,9,'Laud
   await expect(page.locator('#san')).toHaveText(String(san));
   await expect(page.getByRole('region',{name:'Výbava vyšetřovatele'})).toContainText(item);
   await expect(page.locator('#draw')).toBeEnabled();
-  await page.locator('[data-panel="investigator"]').click();
+  await page.getByRole('button',{name:'Deník',exact:true}).click();
   await expect(page.getByRole('img',{name:'Portrét: '+name,exact:true})).toBeVisible();
   await expect(page.locator('#investigatorRole')).not.toHaveText('Výzkumnice · hlavní scénář');
   await page.locator('#closeDetails').click();

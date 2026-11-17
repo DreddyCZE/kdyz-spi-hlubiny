@@ -1,5 +1,13 @@
 # Koncept a hranice refaktoringu
 
+## První živý mýtus – Mlha se zvedá (2026-11-17)
+
+Po ukončení 1. kola varuje jednorázová scénářová událost před mlhou v Přístavu. Při ukončení 2. kola ztratí vyšetřovatel v Přístavu 1 SAN; mimo Přístav neztratí nic. Rozhoduje poloha v okamžiku termínu, včetně případného návratu. Odchod používá běžný přesun za 1 AP. Mlha neblokuje karty, povinné důkazy, sousedství ani pozdější návrat. Ztráta posledního SAN zůstává porážkou.
+
+Definice `delayedThreats` ve scénáři obsahuje stabilní ID, `startRound`, `dueRound`, `locationId`, explicitní záporný efekt na HP/SAN a texty varování, zásahu a vyhnutí. Obecný engine zná pouze tento kontrakt. Varování i vyhodnocení se zapisují do kroniky při přechodu konce kola; revize a uložený stav `pending` / `hit` / `avoided` brání opakování. UI a projekce událost nevyhodnocují.
+
+Save obálka zůstává v1 s volitelným polem `scenario.delayedThreats`. Validátor kontroluje známé ID, stav a vztah k termínu. Starší pozice bez pole se načítají beze změny a bez zpětných následků: událost vzniká jen při skutečném přechodu do svého počátečního kola. Pozice už za tímto okamžikem ji dodatečně nedostane. Jde o aditivní kompatibilitu, nikoli migraci provádějící herní akci. Starší audit vyvážení předchází tomuto novému pravidlu.
+
 Tento dokument popisuje původní milník M1. Aktuální pravidla M2.1 a šest výsledků jsou v [GAME_DESIGN.md](GAME_DESIGN.md), datové definice v [CARD_SCHEMA.md](CARD_SCHEMA.md).
 
 M2.2 přidává explicitní vyhodnocení důkazů bez ceny AP a bez změny kol nebo rituálu. Informace získané ze složené odměny se nově pamatují i po odebrání předmětu. Jde o vyžádané pravidlo tohoto milníku, popsané v [DEDUCTION_SCHEMA.md](DEDUCTION_SCHEMA.md); nejde o vedlejší efekt refaktoringu.

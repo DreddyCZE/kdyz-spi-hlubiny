@@ -9,8 +9,8 @@ test.beforeEach(async ({page}) => {
 });
 
 
-const openJournal = page => page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
-const tab = (page, name) => page.getByRole('tab', { name: new RegExp('^' + name + ' · ') });
+const openJournal = async page => { await page.getByRole('button', { name: 'Deník', exact: true }).click(); await tab(page, 'Důkazy a znalosti').click(); };
+const tab = (page, name) => page.getByRole('tab', { name: new RegExp('^' + name + '( · |$)') });
 const saved = page => page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
 
 async function acquireEvidence(page) {
@@ -41,12 +41,14 @@ test('empty journal, all tabs, keyboard navigation and opening leave save untouc
   expect(before).not.toBeNull();
   await openJournal(page);
   await expect(page.getByRole('heading', { name: 'Vyšetřovací deník', exact: true })).toBeVisible();
-  await expect(tab(page, 'Důkazy')).toHaveAttribute('aria-selected', 'true');
+  await expect(tab(page, 'Důkazy a znalosti')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#journal-evidence')).toContainText('Zatím nemáš');
-  await tab(page, 'Důkazy').focus();
+  await tab(page, 'Důkazy a znalosti').focus();
   await page.keyboard.press('ArrowRight');
-  await expect(tab(page, 'Znalosti')).toBeFocused();
-  await expect(tab(page, 'Znalosti')).toHaveAttribute('aria-selected', 'true');
+  await expect(tab(page, 'Dedukce')).toBeFocused();
+  await page.keyboard.press('ArrowLeft');
+  await expect(tab(page, 'Důkazy a znalosti')).toBeFocused();
+  await expect(tab(page, 'Důkazy a znalosti')).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('#journal-knowledge')).toBeVisible();
   await page.keyboard.press('End');
   await expect(tab(page, 'Kronika')).toBeFocused();
@@ -60,7 +62,7 @@ test('empty journal, all tabs, keyboard navigation and opening leave save untouc
   const html = await page.locator('#investigation-journal').innerHTML();
   for (const secret of ['Spojení s majákem', 'Kam vedou stopy', 'Najdeš deník', 'addEvidence', 'outcomes', 'unlockChoice']) expect(html).not.toContain(secret);
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('button', { name: 'Deník · důkazy', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Deník', exact: true })).toBeFocused();
   expect(await saved(page)).toBe(before);
   expect(JSON.parse(await saved(page))).toEqual(JSON.parse(before));
 });
@@ -69,13 +71,13 @@ test('acquired evidence, available/completed deduction, chronology and reload us
   await acquireEvidence(page);
   const before = await saved(page);
   await openJournal(page);
-  await expect(tab(page, 'Důkazy')).toHaveText('Důkazy · 2');
+  await expect(tab(page, 'Důkazy a znalosti')).toHaveText('Důkazy a znalosti · 3');
   await expect(page.locator('#journal-evidence')).toContainText('Deník');
   await tab(page, 'Dedukce').click();
   await expect(page.locator('#deduce')).toBeHidden(); // Scenario deductions run automatically.
   await expect(page.locator('#journal-deductions')).toContainText('Vyhodnoceno');
   await expect(tab(page, 'Dedukce')).toHaveText('Dedukce · 1');
-  await tab(page, 'Znalosti').click();
+  await tab(page, 'Důkazy a znalosti').click();
   await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
   const after = await saved(page);
   expect(after).toBe(before); // Reading the journal cannot mutate the save.
@@ -83,12 +85,11 @@ test('acquired evidence, available/completed deduction, chronology and reload us
   await expect(page.locator('#journal-chronicle li').first()).toContainText('Vyšetřování začíná');
   await expect(page.locator('#journal-chronicle')).toContainText('Ztracená loď: Úspěch');
   await page.reload();
-  await page.getByRole('button', { name: 'Znalosti', exact: true }).click();
-  await expect(page.locator('#journal-knowledge')).toBeFocused();
+  await openJournal(page);
   await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Dedukce', exact: true }).click();
-  await expect(page.locator('#journal-deductions')).toBeFocused();
+  await openJournal(page);
+  await tab(page, 'Dedukce').click();
   await expect(page.locator('#journal-deductions')).toContainText('Kam vedou stopy');
   await expect(page.locator('#deduce')).toBeDisabled();
   expect(await saved(page)).toBe(after);
@@ -118,8 +119,8 @@ for (const width of [1440, 390, 320]) {
     await acquireEvidence(page);
     await openJournal(page);
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(tab(page, 'Důkazy')).toHaveText('Důkazy · 2');
-    for (const name of ['Důkazy', 'Znalosti', 'Dedukce', 'Kronika']) {
+    await expect(tab(page, 'Důkazy a znalosti')).toHaveText('Důkazy a znalosti · 3');
+    for (const name of ['Vyšetřovatel', 'Důkazy a znalosti', 'Dedukce', 'Výbava', 'Kronika']) {
       await tab(page, name).click();
       const bounds = await tab(page, name).boundingBox();
       expect(bounds.width).toBeGreaterThanOrEqual(44);
@@ -127,16 +128,16 @@ for (const width of [1440, 390, 320]) {
       expect(await page.locator('#details').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
-    await tab(page, 'Důkazy').focus();
+    await tab(page, 'Důkazy a znalosti').focus();
     await page.keyboard.press('Enter');
-    expect(await tab(page, 'Důkazy').evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe('none');
-    expect(await tab(page, 'Důkazy').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
+    expect(await tab(page, 'Důkazy a znalosti').evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe('none');
+    expect(await tab(page, 'Důkazy a znalosti').evaluate(el => getComputedStyle(el).animationName)).toBe('none');
     const path = testInfo.outputPath(`journal-${width}.png`);
     await page.screenshot({ path });
     await testInfo.attach(`Vyšetřovací deník ${width}px`, { path, contentType: 'image/png' });
     await tab(page, 'Dedukce').click();
     await expect(page.locator('#deduce')).toBeHidden();
-    await tab(page, 'Znalosti').click();
+    await tab(page, 'Důkazy a znalosti').click();
     await page.screenshot({ path: testInfo.outputPath(`journal-knowledge-${width}.png`) });
   });
 }

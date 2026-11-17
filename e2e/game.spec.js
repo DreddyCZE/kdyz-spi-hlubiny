@@ -87,7 +87,8 @@ for (const { label, random, reward } of [
     await expect(page.locator('#roll')).toBeDisabled();
     // The active scenario performs deduction automatically when evidence is obtained.
     await expect(page.locator('#journal-evidence')).toContainText('Deník');
-    await page.getByRole('button', { name: 'Deník · důkazy', exact: true }).click();
+    await page.getByRole('button', { name: 'Deník', exact: true }).click();
+    await page.getByRole('tab', { name: /^Důkazy a znalosti/ }).click();
     await expect(page.locator('#journal-knowledge')).toContainText('Spojení s majákem');
     await expect(page.locator('#journal-deductions')).toContainText('Kam vedou stopy');
     await expect(page.locator('#deduce')).toBeDisabled();

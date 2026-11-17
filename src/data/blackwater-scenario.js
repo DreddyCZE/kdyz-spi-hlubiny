@@ -5,6 +5,13 @@ export const blackwaterScenario=createScenario({
   rules:{apPerRound:3,maxRounds:12,deductionMode:'automatic'},
   modules:['scenario-clock','conditional-events'],
   finaleLocationId:'location-6',
+  delayedThreats:[{
+    id:'bw-rising-fog',title:'Mlha se zvedá',locationId:'location-0',startRound:2,dueRound:2,
+    effect:{stat:'san',amount:-1},
+    warningText:'Mlha se zvedá: ohrožen je Přístav. Pokud v něm budeš při ukončení 2. kola, ztratíš 1 SAN. Přesun stojí běžný 1 AP; odejdi před koncem 2. kola, nebo riskuj další průzkum. Mlha neblokuje karty ani stopy.',
+    hitText:'Mlha se zvedá: na konci 2. kola tě mlha zastihla v Přístavu. Ztrácíš 1 SAN. Ohrožení skončilo.',
+    avoidedText:'Mlha se zvedá: na konci 2. kola jsi byl mimo Přístav. Mlha tě minula; žádná ztráta SAN. Ohrožení skončilo.',
+  }],
   locations:['location-0','location-1','location-2','location-3','location-4','location-5','location-6'],
   clocks:[{id:'tide-bells',label:'Údery zvonu',max:7,initial:1,milestones:[{round:3,value:2},{round:5,value:3},{round:7,value:4},{round:9,value:5},{round:11,value:6},{round:13,value:7}]}],
   endings:[

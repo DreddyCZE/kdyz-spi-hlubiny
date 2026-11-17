@@ -1,0 +1,52 @@
+import {test,expect} from '@playwright/test';
+const key='hlubiny-scenario-v1-blackwater-bells';
+const saved=page=>page.evaluate(key=>localStorage.getItem(key),key);
+for(const width of [320,1440]){
+  test(`combat dialog portraits, keyboard, dismissal and reload ${width}px`,async({page},testInfo)=>{
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.addInitScript(()=>{Math.random=()=>.99;});
+    await page.goto('./');
+    await page.getByRole('button',{name:'Přeskočit úvod a nápovědy'}).click();
+    await page.getByRole('button',{name:/^Námořník · HP/}).click();
+    await page.locator('[data-location-id="location-2"]').click();
+    await page.getByRole('button',{name:'Střetnutí: Mlžný pes · 1 AP',exact:true}).click();
+    const dialog=page.getByRole('dialog',{name:'Taktický souboj',exact:true});
+    const attack=dialog.getByRole('button',{name:'🎲 Zaútočit',exact:true});
+    await expect(attack).toBeFocused();
+    await expect(dialog.locator('.combat-investigator-portrait')).toHaveAttribute('src',/sailor/);
+    await expect(dialog.locator('.combat-portrait')).toHaveAttribute('src',/fog-hound/);
+    await expect(dialog).toContainText('HP 7/7 · SAN 7/7');
+    expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+    const before=await saved(page);
+    await page.screenshot({path:testInfo.outputPath(`combat-dialog-${width}.png`)});
+    await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();
+    const reopen=page.getByRole('button',{name:'Pokračovat v souboji',exact:true});
+    await expect(reopen).toBeFocused();expect(await saved(page)).toBe(before);
+    await page.keyboard.press('Enter');await expect(attack).toBeFocused();
+    await page.keyboard.press('Tab');await expect(dialog.getByRole('button',{name:'🎲 Pokusit se uniknout',exact:true})).toBeFocused();
+    await page.keyboard.press('Shift+Tab');await expect(attack).toBeFocused();
+    await page.keyboard.press('Shift+Tab');await expect(dialog.getByRole('button',{name:'Zpět ke stolu',exact:true})).toBeFocused();
+    await page.reload();await expect(attack).toBeFocused();expect(await saved(page)).toBe(before);
+    await page.keyboard.press('Enter');await expect(dialog).not.toBeVisible();
+    await expect(page.locator('#cardTitle')).toBeFocused();
+    await expect(page.getByRole('region',{name:'Taktický souboj'})).toContainText('Nepřítel byl poražen.');
+    expect(JSON.parse(await saved(page)).scenario.combat.exchange).toBe(1);
+  });
+}
+test('escape resolves once and returns focus to the table',async({page})=>{
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.addInitScript(()=>{Math.random=()=>.99;});
+  await page.goto('./');
+  await page.getByRole('button',{name:'Přeskočit úvod a nápovědy'}).click();
+  await page.getByRole('button',{name:/^Námořník · HP/}).click();
+  await page.locator('[data-location-id="location-2"]').click();
+  await page.getByRole('button',{name:'Střetnutí: Mlžný pes · 1 AP',exact:true}).click();
+  await page.getByRole('button',{name:'🎲 Pokusit se uniknout',exact:true}).click();
+  await expect(page.locator('#combatDialog')).not.toBeVisible();
+  await expect(page.locator('#cardTitle')).toBeFocused();
+  await expect(page.getByRole('region',{name:'Taktický souboj'})).toContainText('Podařilo se uniknout.');
+  const before=await saved(page);expect(JSON.parse(before).scenario.combat.exchange).toBe(1);
+  await page.reload();expect(await saved(page)).toBe(before);
+  await expect(page.locator('#combatDialog')).not.toBeVisible();
+});

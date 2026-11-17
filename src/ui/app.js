@@ -2,6 +2,7 @@ import {enemies} from '../engine/combat.js';
 import {renderRules} from './rules.js';
 import {createOnboarding} from './onboarding.js';
 import {createTablePresentation} from './table.js';
+import {createCombatDialog} from './combat-dialog.js';
 import {investigators} from '../engine/scenario-investigators.js';
 import { activeScenarioPack } from '../data/scenario-registry.js';
 import { reachableOutcomeKeys } from './story-card.js';
@@ -52,11 +53,13 @@ function scenarioSessionView(s,def,data){
 const puzzleDrafts=new Map();
 const equipmentActions=document.createElement('section');equipmentActions.className='scenario-feature';equipmentActions.setAttribute('aria-label','Výbava vyšetřovatele');$('fieldKit').append(equipmentActions);
 const combatActions=document.createElement('section');combatActions.className='scenario-feature';combatActions.setAttribute('aria-label','Taktický souboj');$('cardStory').before(combatActions);
+const combatDialog=createCombatDialog(combatActions);
 const investigatorSetup=document.createElement('section');investigatorSetup.className='scenario-feature';investigatorSetup.setAttribute('aria-label','Výběr vyšetřovatele');$('cardStory').before(investigatorSetup);
 const onboarding=legacyMode?null:createOnboarding(investigatorSetup,preferenceStorage,session);
 if(onboarding){const reopen=document.createElement('button');reopen.type='button';reopen.textContent='Průvodce hrou';reopen.onclick=()=>onboarding.reopen();document.querySelector('[data-panel="rules-panel"]').after(reopen);}
 const investigatorAbility=document.createElement('section');investigatorAbility.className='scenario-feature';investigatorAbility.setAttribute('aria-label','Schopnost vyšetřovatele');$('fieldKit').append(investigatorAbility);
 const currentAim=document.createElement('p');currentAim.className='current-aim';currentAim.setAttribute('aria-label','Aktuální směr pátrání');$('placeDesc').after(currentAim);
+const mapThreat=document.createElement('p');mapThreat.id='mapThreat';mapThreat.className='map-threat';mapThreat.setAttribute('role','status');$('places').before(mapThreat);
 function button(text,handler,disabled=false,className=''){
   const b=document.createElement('button');b.textContent=text;b.onclick=handler;b.disabled=disabled;b.className=className;return b;
 }
@@ -85,6 +88,7 @@ function render(){
   const choiceFocus=focused?.dataset.choiceId;
   const mapFocus=focused?.dataset.locationId;
   const puzzleFocus=focused?.dataset.puzzleControl;
+  const combatFocus=focused?.dataset.combatMove;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=combatBeforeRoll&&['hp','san'].includes(k)?combatBeforeRoll[k]:state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
   if(combatBeforeRoll)scene.combat=combatBeforeRoll.combat;
@@ -101,14 +105,21 @@ function render(){
   for(const id of scene.equipment||[]){equipmentActions.append(id==='bw-revolver'?document.createTextNode(equipmentNames[id]):button(equipmentNames[id],()=>dispatch({type:'useEquipment',revision:state.revision,itemId:id}),!scene.canAct||!!scene.pendingTest));}
   combatActions.replaceChildren();
   if(scene.combat?.status==='active'){
+    const fighters=document.createElement('div');fighters.className='combat-fighters';
+    const hero=document.createElement('figure');
+    const portrait=blackwaterImage('investigators',scene.investigator?.id||'occultist');
+    if(portrait){const image=document.createElement('img');image.className='combat-investigator-portrait';image.src=portrait;image.alt=scene.investigator?.name||'Vyšetřovatel';hero.append(image);}
+    const stats=document.createElement('figcaption');stats.textContent=(scene.investigator?.name||'Vyšetřovatel')+' · HP '+(combatBeforeRoll?.hp??state.hp)+'/'+(scene.investigator?.hp||6)+' · SAN '+(combatBeforeRoll?.san??state.san)+'/'+(scene.investigator?.san||8);hero.append(stats);fighters.append(hero);
+    const monster=document.createElement('figure');fighters.append(monster);combatActions.append(fighters);
     const art=blackwaterImage('monsters',scene.combat.enemyId);
-    if(art){const image=document.createElement('img');image.className='combat-portrait';image.src=art;image.alt=enemies.find(e=>e.id===scene.combat.enemyId).name;combatActions.append(image);}
+    if(art){const image=document.createElement('img');image.className='combat-portrait';image.src=art;image.alt=enemies.find(e=>e.id===scene.combat.enemyId).name;monster.append(image);}
+    const enemyStats=document.createElement('figcaption');enemyStats.textContent=enemies.find(e=>e.id===scene.combat.enemyId).name+' · HP '+scene.combat.enemyHp+'/'+enemies.find(e=>e.id===scene.combat.enemyId).hp;monster.append(enemyStats);
   }
   if(scene.combat?.status==='active'){
     const enemy=enemies.find(e=>e.id===scene.combat.enemyId);
     const title=document.createElement('p');title.textContent='Souboj: '+enemy.name+' · HP '+scene.combat.enemyHp+'/'+enemy.hp+' · výměna '+scene.combat.exchange+'/3';combatActions.append(title);
     const cost=document.createElement('p');cost.textContent='Zahájení stálo 1 AP. Další výměny už AP nestojí. Útok i útěk mohou způsobit zranění; po třetí výměně následuje vynucený únik.';combatActions.append(cost);
-    for(const move of ['attack','escape'])combatActions.append(button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>animateAction({type:'combatTurn',revision:state.revision,move,dice:rollDice()}),rolling));
+    for(const move of ['attack','escape']){const action=button(move==='attack'?'🎲 Zaútočit':'🎲 Pokusit se uniknout',()=>animateAction({type:'combatTurn',revision:state.revision,move,dice:rollDice()}),rolling);action.dataset.combatMove=move;combatActions.append(action);}
   }else{
     if(scene.combat){const text=document.createElement('p');text.textContent=scene.combat.status==='defeated'?'Nepřítel byl poražen.':'Podařilo se uniknout.';combatActions.append(text);}
       if(!legacyMode&&scene.canAct&&state.ap>=1){
@@ -122,6 +133,7 @@ function render(){
   }
   if(scene.combat?.roll&&!rolling){const last=document.createElement('p');last.setAttribute('role','status');last.textContent='Poslední výměna: '+(scene.combat.lastMove==='attack'?'útok':'útěk')+' · '+scene.combat.dice.join(' + ')+' · '+labels[scene.combat.roll.key];combatActions.append(last);}
   investigatorAbility.replaceChildren();
+  if(scene.investigator){const description=document.createElement('p');description.textContent='Aktivní schopnost: '+scene.investigator.ability;investigatorAbility.append(description);}
   if(scene.investigator){investigatorAbility.append(button(scene.abilityUsed?'Schopnost použita':'Použít schopnost: '+scene.investigator.ability,()=>dispatch({type:'useInvestigatorAbility',revision:state.revision}),scene.abilityUsed||!scene.canAct||!!scene.pendingTest));}
   if(scene.investigator?.passive){const p=document.createElement('p');p.textContent=scene.investigator.passive.name+': '+scene.investigator.passive.text+(scene.passiveUsed?' V tomto kole využito.':'');investigatorAbility.append(p);}
   $('investigatorName').textContent=scene.investigator?.name||investigatorName;
@@ -134,7 +146,7 @@ function render(){
   $('ritual').textContent=clock?clock.current+' / '+clock.max:'—';
   $('clockLabel').textContent=clock?.label||'Scénářové hodiny';
   $('ritual').title=clock?.label||'Scénářové hodiny';
-  $('heroStats').textContent=`HP ${state.hp}/${scene.investigator?.hp||6} · SAN ${state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
+  $('heroStats').textContent=`HP ${combatBeforeRoll?.hp??state.hp}/${scene.investigator?.hp||6} · SAN ${combatBeforeRoll?.san??state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
   journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');
@@ -151,7 +163,8 @@ function render(){
   hero.classList.toggle('has-location-art',Boolean(locationArt));
   hero.style.setProperty('--location-art',locationArt?`url("${new URL(locationArt,document.baseURI).href}")`:'none');
   $('mapTitle').textContent=scenarioMap.name;
-  renderMap($('places'),locations,scenarioMap,state,rolling||!!pending||!scene.canAct,id=>dispatch({type:'move',locationId:id}));
+  mapThreat.textContent=(scene.mythEvents||[]).filter(e=>e.status==='pending').map(e=>e.text).join(' ');mapThreat.hidden=!mapThreat.textContent;
+  renderMap($('places'),locations,scenarioMap,state,rolling||!!pending||!scene.canAct,id=>dispatch({type:'move',locationId:id}),scene.mythEvents||[]);
   $('cardArt').classList.toggle('empty',!card);
   $('cardArt').style.backgroundImage = `linear-gradient(180deg, #06141322 45%, #061413c9), url("${new URL(imageForCard(card||{locationId:loc.id}), document.baseURI).href}")`;
   $('cardTag').textContent=(scene.combat?.status==='active'?'Souboj':({encounter:'Setkání',event:'Událost',item:'Předmět',evidence:'Důkaz'}[card?.type]||'Průzkum')).toUpperCase()+' · '+loc.name.toUpperCase();
@@ -303,6 +316,8 @@ function render(){
   if(choiceFocus){const target=[...$('choices').children].find(b=>b.dataset.choiceId===choiceFocus);if(target&&!target.disabled)target.focus();}
   if(mapFocus){$('cardTitle').focus({preventScroll:true});}
   if(puzzleFocus){const target=[...puzzleActions.querySelectorAll('[data-puzzle-control]')].find(el=>el.dataset.puzzleControl===puzzleFocus);(target?.disabled?target.parentElement.querySelector('button:not(:disabled)'):target)?.focus();}
+  combatDialog.render(scene.combat?.status==='active',combatFocus);
+  if($('details').open&&focused&&!focused.isConnected)$('details').querySelector('[role="tab"][aria-selected="true"]')?.focus({preventScroll:true});
 }
 const evaluatePending=(dice,test,bonus=0)=>{
   if(!test)return {key:'failure'};
@@ -319,7 +334,12 @@ const status=document.createElement('p');status.id='gameStatus';status.setAttrib
 const companionActions=document.createElement('div');companionActions.id='scenario-companions';companionActions.className='scenario-feature';companionActions.setAttribute('aria-label','Společníci');$('cardStory').after(companionActions);
 const puzzleActions=document.createElement('div');puzzleActions.id='scenario-puzzles';puzzleActions.className='scenario-feature';puzzleActions.setAttribute('aria-label','Hádanky v lokaci');$('cardStory').after(puzzleActions);
 const finaleActions=document.createElement('div');finaleActions.id='scenario-finale-actions';finaleActions.setAttribute('aria-label','Možná zakončení scénáře');status.after(finaleActions);
-const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}));
+if(!legacyMode){
+  const openers=[...document.querySelectorAll('.investigator-bar > button[data-panel]')].filter(b=>b.dataset.panel!=='rules-panel');
+  openers[0].textContent='Deník';openers[0].id='openJournal';openers[0].dataset.panel='investigation-journal';
+  for(const opener of openers.slice(1))opener.remove();
+}
+const journal=createJournal($('history'),()=>dispatch({type:'deduce',revision:state.revision}),{unified:!legacyMode});
 const tablePresentation=createTablePresentation();
 $('roll').onclick=()=>{
   if(rolling||$('roll').disabled)return;
@@ -338,13 +358,29 @@ $('reset').onclick=()=>{
 render();
 
 const details=$('details');
-for(const opener of document.querySelectorAll('[data-panel]')){
-  opener.setAttribute('aria-haspopup','dialog');opener.setAttribute('aria-controls','details');
-  opener.onclick=()=>{
+let detailsOpener=null;
+const kitHome=equipmentActions.parentElement,abilityHome=investigatorAbility.parentElement;
+function openDetails(opener){
+    detailsOpener=opener;
     for(const panel of details.querySelectorAll('.detail-panel'))panel.hidden=panel.id!==opener.dataset.panel;
-    if(opener.dataset.panel==='investigation-journal')journal.select(({ 'journal-knowledge':'knowledge', 'journal-deductions':'deductions' })[opener.dataset.focus]||'evidence');
+    if(opener.dataset.panel==='investigation-journal'){
+      journal.select(legacyMode?(({ 'journal-knowledge':'knowledge', 'journal-deductions':'deductions' })[opener.dataset.focus]||'evidence'):'investigator');
+      if(!legacyMode){$('journal-equipment').append(equipmentActions);$('journal-investigator').append(investigatorAbility);}
+    }
     details.showModal();
     if(opener.dataset.focus){const target=$(opener.dataset.focus);target.tabIndex=-1;target.focus();}
-  };
+}
+details.addEventListener('close',()=>{
+  if(!legacyMode){kitHome.append(equipmentActions);abilityHome.append(investigatorAbility);}
+  if(detailsOpener?.isConnected)detailsOpener.focus({preventScroll:true});
+});
+for(const opener of document.querySelectorAll('[data-panel]')){
+  opener.setAttribute('aria-haspopup','dialog');opener.setAttribute('aria-controls','details');
+  opener.onclick=()=>openDetails(opener);
+}
+if(!legacyMode){
+  const combatJournal=button('Deník',()=>openDetails(combatJournal));
+  combatJournal.dataset.panel='investigation-journal';combatJournal.setAttribute('aria-haspopup','dialog');combatJournal.setAttribute('aria-controls','details');
+  $('combatDialogTitle').after(combatJournal);
 }
 $('closeDetails').onclick=()=>details.close();

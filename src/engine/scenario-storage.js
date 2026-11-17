@@ -1,4 +1,5 @@
 import {enemies} from './combat.js';
+import {validThreatState} from './delayed-threats.js';
 import {investigatorById,scenarioTestBonuses} from './scenario-investigators.js';
 import {newScenarioSession} from './scenario-session.js';
 import {validState} from './storage.js';
@@ -10,6 +11,7 @@ export const scenarioSaveKey=def=>SCENARIO_SAVE_KEY+'-'+def.id;
 export function validScenarioSession(s,def,data){
  if(!s||s.schemaVersion!==1||!s.game||!s.scenario)return false;
  const g=s.game,c=s.scenario;
+ if(!validThreatState(c,g,def))return false;
  const hero=Object.hasOwn(investigatorById,s.investigatorId)?investigatorById[s.investigatorId]:null;
  if(s.investigatorId!==undefined&&s.investigatorId!==null&&!hero)return false;
  if(s.abilityUsed!==undefined&&typeof s.abilityUsed!=='boolean')return false;

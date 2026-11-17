@@ -16,6 +16,8 @@ Aktivní schopnost okultistky snižuje aktuální ukazatel zvonu; pevný limit d
 
 ## Kolo a karta
 
+Po 1. kole přichází mýtus **Mlha se zvedá**: pokud budeš v Přístavu při ukončení 2. kola, ztratíš 1 SAN. Včasný přesun ven stojí běžný 1 AP. Mlha nebrání průzkumu ani získávání stop; varování je na mapě a v Kronice. Ohrožení se vyhodnotí pouze jednou. Starší pozice, které již přešly do 2. kola před zavedením mýtu, událost zpětně nedostávají.
+
 Scénář má 12 kol po 3 AP. Přesun po mapě stojí 1 AP a respektuje sousední dostupné lokace. Dobrat kartu je zdarma. Nesplněné podmíněné karty se odkládají, vyřešené jednorázové karty se neobnovují. Cena postupu je vidět předem; platí se společně s následkem až při vyhodnocení. Pokud nemáš na postup AP, můžeš změnit kolo nebo zvolit jiný dostupný postup.
 
 Při testu přičti k 2k6 atribut, uvedený modifikátor a případný bonus postavy. Dvě šestky jsou kritický úspěch, dvě jedničky kritické selhání. Jinak rozdíl proti obtížnosti alespoň 3 znamená velký úspěch, 0 až 2 úspěch, −2 až −1 částečný úspěch, menší rozdíl neúspěch. Šest úrovní neznamená, že každá je u každého testu dosažitelná.

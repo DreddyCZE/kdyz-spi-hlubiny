@@ -20,7 +20,11 @@ export function journalModel(view, log = []) {
   };
 }
 
-export function createJournal(anchor, onDeduce) {
+export function createJournal(anchor, onDeduce, {unified=false} = {}) {
+  const tabSections=unified?[
+    ['investigator','Vyšetřovatel'],['evidence','Důkazy a znalosti'],
+    sections[2],['equipment','Výbava'],sections[3],
+  ]:sections;
   const doc = anchor.ownerDocument;
   const make = (tag, className, content) => {
     const node = doc.createElement(tag);
@@ -46,15 +50,16 @@ export function createJournal(anchor, onDeduce) {
       tab.setAttribute('aria-selected', String(id === key)); tab.tabIndex = id === key ? 0 : -1;
     }
     if (focus) buttons.get(key).focus();
+    if(unified)footer.hidden=!['evidence','deductions'].includes(key);
   }
-  for (const [key, label] of sections) {
-    const tab = make('button', 'journal-tab'); tab.type = 'button'; tab.id = 'journal-tab-' + key;
+  for (const [key, label] of tabSections) {
+    const tab = make('button', 'journal-tab', label); tab.type = 'button'; tab.id = 'journal-tab-' + key;
     tab.setAttribute('role', 'tab'); tab.setAttribute('aria-controls', 'journal-panel-' + key);
     tab.onclick = () => select(key);
     tab.onkeydown = event => {
-      const index = sections.findIndex(([id]) => id === key);
-      const next = { ArrowRight: (index + 1) % sections.length, ArrowLeft: (index + sections.length - 1) % sections.length, Home: 0, End: sections.length - 1 }[event.key];
-      if (next !== undefined) { event.preventDefault(); select(sections[next][0], true); }
+      const index = tabSections.findIndex(([id]) => id === key);
+      const next = { ArrowRight: (index + 1) % tabSections.length, ArrowLeft: (index + tabSections.length - 1) % tabSections.length, Home: 0, End: tabSections.length - 1 }[event.key];
+      if (next !== undefined) { event.preventDefault(); select(tabSections[next][0], true); }
     };
     buttons.set(key, tab); tabs.append(tab);
     const panel = make('div', 'journal-panel'); panel.id = 'journal-panel-' + key; panel.tabIndex = 0;
@@ -62,6 +67,15 @@ export function createJournal(anchor, onDeduce) {
     panel.append(make('h3', '', label));
     const list = make('div', 'journal-list'); list.id = 'journal-' + key; list.tabIndex = -1;
     panel.append(list); panels.set(key, panel);
+  }
+  if(unified){
+    const knowledge=make('div','journal-list');knowledge.id='journal-knowledge';
+    panels.get('evidence').append(make('h4','','Znalosti'),knowledge);
+    for(const [key,id] of [['investigator','investigator'],['equipment','inventory-panel']]){
+      const existing=doc.getElementById(id);existing.hidden=false;existing.classList.remove('detail-panel');
+      existing.querySelector('h2').hidden=true;
+      panels.get(key).querySelector('.journal-list').append(existing);
+    }
   }
   const availableHeading = make('h4', '', 'Připravená propojení');
   const available = make('div', 'journal-list'); available.id = 'journal-available';
@@ -90,8 +104,8 @@ export function createJournal(anchor, onDeduce) {
     render(view, disabled, log = [], automatic = false) {
       const model = journalModel(view, log);
       for (const [key, label, empty] of sections) {
-        const target = panels.get(key).querySelector('#journal-' + key);
-        buttons.get(key).textContent = label + ' · ' + model[key].length;
+        const target = section.querySelector('#journal-' + key);
+        if(buttons.has(key))buttons.get(key).textContent = (unified&&key==='evidence'?'Důkazy a znalosti':label) + ' · ' + (unified&&key==='evidence'?model.evidence.length+model.knowledge.length:model[key].length);
         if (key === 'chronicle') {
           target.replaceChildren();
           if (!model.chronicle.length) target.append(make('p', 'journal-empty', empty));

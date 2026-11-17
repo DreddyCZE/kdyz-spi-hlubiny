@@ -1,5 +1,5 @@
 /** Render scenario locations without owning any movement rules. Missing coordinates use a list. */
-export function renderMap(anchor, locations, map, state, busy, onMove) {
+export function renderMap(anchor, locations, map, state, busy, onMove, threats=[]) {
   const mapped = Boolean(map?.image) && locations.every(l => {
     const p = map.points?.[l.id];
     return p && [p.x,p.y].every(n => Number.isFinite(n) && n >= 0 && n <= 100);
@@ -14,6 +14,11 @@ export function renderMap(anchor, locations, map, state, busy, onMove) {
     b.textContent = `${current ? '◉' : locked ? '▣' : '◇'} ${location.name}${current ? ' · zde' : locked ? ' · zamčeno' : ''}`;
     b.className = `map-point${current ? ' active' : ''}${locked ? ' locked' : ''}`;
     b.dataset.locationId = location.id;
+    const threat=threats.find(e=>e.locationId===location.id&&e.status==='pending');
+    if(threat){
+      b.classList.add('threatened');b.setAttribute('aria-describedby','mapThreat');b.title=threat.text;
+      const mark=document.createElement('span');mark.textContent=' ⚠';mark.setAttribute('aria-hidden','true');b.append(mark);
+    }
     if(current) b.setAttribute('aria-current','location');
     b.disabled = busy || state.ended || state.ap < 1 || current || locked;
     if(mapped) { b.style.left = `${map.points[location.id].x}%`; b.style.top = `${map.points[location.id].y}%`; }

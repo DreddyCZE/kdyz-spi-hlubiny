@@ -1,5 +1,29 @@
 # Digitální herní stůl – M3.0.2a
 
+## Živý mýtus – Mlha se zvedá (2026-11-17)
+
+Existující fáze Mýtus po 1. kole ukáže ilustrovanou kartu Mlha se zvedá. Přístav dostane výstražný obrys a značku; text u mapy i karta výslovně uvádějí termín při ukončení 2. kola, ztrátu 1 SAN a možnost odejít běžným přesunem za 1 AP. Varování u mapy přetrvá zavření karty a reload. Po reloadu pending události se znovu otevře informační karta bez herního přechodu. Po vyhodnocení značka zmizí; varování i výsledek jsou v Kronice Deníku.
+
+Pravidlo a kompatibilita starších pozic jsou popsány v [design.md](design.md). Testy [delayed-threats.test.js](../tests/delayed-threats.test.js) ověřují setrvání, odchod, návrat, smrtelnou ztrátu SAN, revize, validaci, starší save a skutečné získání přístavních důkazů bez blokace mlhou. [live-myth.spec.js](../e2e/live-myth.spec.js) pokrývá setrvání i odchod, reload před i po vyhodnocení, starší save a kroniku na 320/1440 px.
+
+Finální ověření: **262/262 unit testů, 19/19 souvisejících Chromium testů** (1,1 minuty), build a `git diff --check`. Zahrnuty jsou všechny tři vítězné příběhové průchody i mobilní průchody na 320/390 px. Ilustrovaná karta a značka ohrožení byly vizuálně zkontrolovány na 320 a 1440 px. Dřívější simulace vyvážení se s novou ztrátou SAN znovu nespouštěly; nejde o nové potvrzení celkového balansu. Commit ani publikace tohoto kroku neproběhly.
+
+## Sjednocený deník B/C – 2026-11-17
+
+Spodní přehledy hlavního Blackwateru sjednocuje jediné tlačítko **Deník**. Dialog má záložky **Vyšetřovatel**, **Důkazy a znalosti**, **Dedukce**, **Výbava** a **Kronika**. Vyšetřovatel ukazuje stávající portrét, HP/SAN s limity, atributy, popis aktivní schopnosti, její použitelnost a pasivní schopnost. Důkazy a znalosti sdílejí záložku, ale zachovávají oddělené seznamy získaných informací. Dedukce a kronika používají dosavadní veřejné projekce.
+
+Schopnosti a vybavení zůstávají stejnými komponentami se stejnými akcemi: při otevření se přesunou do deníku a při zavření zpět ke stolu. Nevznikají duplicitní akce ani další uložený stav. Původní režim si zachovává své přehledy. Šipky, Home a End přepínají záložky; Escape i Zavřít přehled vracejí fokus na konkrétní otevírací tlačítko. Po použití schopnosti se fokus zachová na záložce vyšetřovatele.
+
+Aktivní souboj nabízí vlastní tlačítko Deník. Deník se otevře nad soubojem, ponechá herní akce zablokované podle současného veřejného stavu a po zavření vrátí fokus do souboje. Prohlížení, přepínání záložek ani zavření nemění save. Během animace zůstávají HP/SAN u předchozího veřejného stavu.
+
+Ověření: **256/256 unit testů, 32/32 souvisejících Chromium testů** (deník, herní stůl, postavy, karetní výsledky a dialog souboje). Po závěrečné úpravě nadpisu a fokusu znovu prošly **4/4 nové regrese deníku**. Mobilní šířky 320/390 px a desktop 1440 px ověřují záložky, rozměry, schopnost, nezměněný save při čtení, reload, klávesnici i návrat fokusu v souboji. Snímky 320 a 1440 px byly vizuálně zkontrolovány. `npm run build` a `git diff --check` procházejí. Engine, pravidla, formát save a referenční prototypy se nemění.
+
+## Dialog souboje – 2026-11-17
+
+Aktivní souboj hlavního scénáře se otevírá v nativním dialogu s portréty vyšetřovatele a protivníka, jejich HP a vyšetřovatelovým SAN. Útok a únik používají původní atomický přechod i zakryté kostky během animace. Po dokončení souboje se dosažený výsledek vrací na stůl a fokus na nadpis příběhu. Reload aktivní souboj znovu otevře bez další platby nebo hodu.
+
+Escape a tlačítko **Zpět ke stolu** pouze skryjí dialog a vrátí fokus na **Pokračovat v souboji**. Tento přehledový krok nemění save ani nenahrazuje herní únik. Dialog lze znovu otevřít klávesnicí; ovládání útoku a úniku zůstává dostupné na 320 px. Životní cyklus prezentace spravuje [combat-dialog.js](../src/ui/combat-dialog.js), bez změny enginu a formátu save. Regrese jsou v [combat-dialog.spec.js](../e2e/combat-dialog.spec.js).
+
 ## Aktuální herní stůl B/C – 2026-11-12
 
 Hlavní scénář používá dominantní ilustrovanou mapu a souvislou pergamenovou plochu pro průzkum, testy, souboj a hádanky. Desktopový poměr sloupců je 1,55 : 1; kompaktní panel u mapy ukazuje portrét, roli a skutečné HP/SAN/AP včetně limitů zvolené postavy. Výbava a schopnost jsou u mapy, mimo příběh. Spodní přehledy tvoří nízkou lištu. Na mobilu zůstává mapa s dvousloupcovým seznamem míst; přichycené odkazy Mapa / Příběh a akce / Výbava umožňují rychle přejít k ovládání bez změny save.

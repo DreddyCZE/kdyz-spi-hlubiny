@@ -48,9 +48,20 @@ main { max-width: 1760px; }
 .myth-notice { padding: 16px; margin-bottom: 20px; color: var(--color-ink); background: linear-gradient(90deg,#0c1e21f2,#0c1e21c9),var(--myth-art) center/cover; border: 1px solid var(--color-brass); }
 .myth-notice h3 { color: var(--color-brass-light); margin-bottom: 8px; }
 .myth-notice p { font-size: .9rem; }
+.myth-card-art { display: block; width: 100%; max-height: 220px; object-fit: cover; margin-bottom: 12px; }
+.map-threat { padding: 12px; border: 2px solid var(--color-brass); color: var(--color-ink); background: var(--color-surface); font-size: .9rem; }
+.map-point.threatened { outline: 3px dashed var(--color-brass-light); outline-offset: 2px; }
 .combat-portrait { width: 100%; max-height: 230px; object-fit: cover; object-position: center 25%; border: 1px solid var(--color-brass); margin-bottom: 12px; }
 .combat-dice { display: flex; justify-content: center; }
 .combat-dice .die { margin-block: 8px; }
+.combat-dialog { box-sizing: border-box; width: min(680px,calc(100% - 24px)); padding: 20px; }
+.combat-dialog h2 { margin: 0 0 12px; }
+.combat-dialog button { min-height: 44px; margin: 4px; }
+.combat-view-hint { font-size: .85rem; }
+.combat-fighters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-block: 16px; }
+.combat-fighters figure { min-width: 0; margin: 0; }
+.combat-fighters img { display: block; width: 100%; height: clamp(110px,24vw,210px); object-fit: cover; object-position: center 25%; border: 1px solid var(--color-brass); box-sizing: border-box; margin-bottom: 8px; }
+.combat-fighters figcaption { font: 600 .85rem/1.5 var(--font-label); overflow-wrap: anywhere; }
 [data-scene='combat'] .card-art, [data-scene='combat'] .deck-summary { display: none; }
 [data-scene='combat'] .story, [data-scene='combat'] .choices, [data-scene='combat'] .actions, [data-scene='combat'] .outcome-preview, [data-scene='combat'] #scenario-puzzles, [data-scene='combat'] #scenario-companions, [data-scene='combat'] .onboarding { display: none; }
 .scene-enter { animation: scene-enter .32s ease-out both; }

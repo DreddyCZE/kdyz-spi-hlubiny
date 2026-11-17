@@ -42,7 +42,8 @@ test('myth summary presents reached clocks without replaying the end of round',a
   await page.getByRole('button',{name:'Zpět k průzkumu'}).click();
   await expect(page.locator('#mythNotice')).toBeHidden();expect(await saved(page)).toBe(before);
   await page.reload();await expect(page.locator('#round')).toHaveText('2');
-  await expect(page.locator('#mythNotice')).toBeHidden();expect(await saved(page)).toBe(before);
+  // A pending live threat is re-presented after reload, without another transition.
+  await expect(page.locator('#mythNotice')).toContainText('Mlha se zvedá');expect(await saved(page)).toBe(before);
 });
 
 test('first roll and reroll hide faces during animation and resolve only on acceptance',async({page})=>{

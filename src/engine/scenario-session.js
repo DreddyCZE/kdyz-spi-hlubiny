@@ -1,4 +1,5 @@
 import {startCombat,combatTurn,enemies} from './combat.js';
+import {advanceThreats,threatView} from './delayed-threats.js';
 import {selectScenarioInvestigator,activateScenarioAbility,investigatorById,scenarioTestBonuses,scenarioRerollCost,scenarioDamageReduction} from './scenario-investigators.js';
 // Opt-in P1 adapter. Legacy engine and its save format remain unchanged.
 import {newState,transition as legacyTransition,currentCard,selectedChoice,evaluate,attributes,meetsConditions} from './game.js';
@@ -148,7 +149,7 @@ export function scenarioSessionTransition(session,action,def,data){
   if(action.type==='endRound'){
     if(action.revision!==game.revision||game.ended||game.round>def.rules.maxRounds)return session;
     const nextRound=game.round+1;
-    const nextGame=game.round===def.rules.maxRounds
+    let nextGame=game.round===def.rules.maxRounds
       ? {...game,round:nextRound,ap:0,revision:game.revision+1,log:['Čas vypršel.',...game.log].slice(0,100)}
       : legacyTransition(game,action,data,scenarioRules);
     if(nextGame===game)return session;
@@ -160,6 +161,7 @@ export function scenarioSessionTransition(session,action,def,data){
         nextSc=advanceClock(def,nextSc,clock.id,milestone.value-nextSc.clocks[clock.id],'scheduled-'+clock.id+'-'+nextRound);
       }
     }
+    const threats=advanceThreats(nextGame,nextSc,def);nextGame=threats.game;nextSc=threats.scenario;
     const defeat=availableEndings(def,nextGame,nextSc).find(e=>e.kind==='defeat');
     if(defeat)nextSc=chooseEnding(def,nextGame,nextSc,defeat.id);
     return {...session,game:nextGame,scenario:nextSc};
@@ -179,6 +181,7 @@ export function scenarioSessionView(session,def,data={}){
   const epilogue=endingId&&data.epilogues?.[endingId];
   const paragraphs=epilogue?[epilogue.text,...(session.game.ended||def.endings.find(e=>e.id===endingId)?.kind==='defeat'?[]:[...(epilogue.variants||[]),...(data.epilogueThreads||[])].filter(v=>meetsConditions(session.game,v.conditions,data)).map(v=>v.text))]:[];
   return {scenarioId:def.id,title:def.title,round:session.game.round,ap:session.game.ap,investigatorId:needsInvestigator?null:session.investigatorId??'legacy',investigator:investigatorById[session.investigatorId]||null,abilityUsed:session.abilityUsed===true,epilogue:paragraphs,
+    mythEvents:threatView(session.scenario,def),
     clocks:def.clocks.map(c=>({id:c.id,label:c.label,current:session.scenario.clocks[c.id],max:c.max})),
     ending:session.scenario.endingId?def.endings.find(e=>e.id===session.scenario.endingId):null,
     pendingTest:session.scenario.pendingTest||null,testBonuses:scenarioTestBonuses(session),rerollCost:scenarioRerollCost(session),passiveUsed:session.passiveRound===session.game.round,

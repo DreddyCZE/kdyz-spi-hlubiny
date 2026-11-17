@@ -3,8 +3,8 @@
 .journal-eyebrow { color: var(--color-frame); font: 700 .65rem/1.5 var(--font-label); letter-spacing: .14em; margin-bottom: var(--space-2); }
 .journal h2 { font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: var(--space-2); }
 .journal-intro { color: var(--color-paper-muted); font-size: .9rem; }
-.journal-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); border-bottom: 2px solid var(--color-frame); padding-bottom: var(--space-3); margin-block: var(--space-5); }
-.journal-tab { font: 600 .85rem/1.4 var(--font-label); padding: var(--space-2); color: var(--color-paper-ink); background: var(--color-paper); border-color: var(--color-frame); }
+.journal-tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--space-2); border-bottom: 2px solid var(--color-frame); padding-bottom: var(--space-3); margin-block: var(--space-5); }
+.journal-tab { min-height: 44px; min-width: 0; font: 600 .85rem/1.4 var(--font-label); padding: var(--space-2); color: var(--color-paper-ink); background: var(--color-paper); border-color: var(--color-frame); }
 .journal-tab[aria-selected='true'] { background: var(--color-surface); color: var(--color-paper-light); box-shadow: inset 0 -3px var(--color-brass); }
 .journal-panel { min-height: 180px; }
 .journal-panel h3 { margin-bottom: var(--space-4); font-size: 1.3rem; }

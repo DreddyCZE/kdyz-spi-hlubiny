@@ -1,5 +1,29 @@
 # Stav Blackwater – 2026-11-10
 
+## Navázání 2026-11-17 – kontrola aktuálního herního stolu
+
+Pracovní HEAD je `a8350d0` na větvi `feature/d5-d7-story-completion`. Opakované lokální ověření prošlo: **256/256 unit testů, 102/102 Chromium E2E** (4,2 minuty), build a `git diff --check`. Prohlížečové regrese pokrývají všechny tři vítězné konce, 320/390/1440 px, klávesnici, reduced motion, ochranu oddělených save, reload hádanek a soubojů i animace herního stolu B/C.
+
+Zachovány čtyři rozpracované dokumentační soubory; implementace ani pravidla se při tomto navázání neměnily. Simulace vyvážení ani živé nasazení se znovu neověřovaly. Commit, push ani publikace neproběhly. Další otevřená práce zůstává lidský playtest, samostatné rozhodnutí o časové schopnosti okultistky a širší redakce příběhu.
+
+## Navázání 2026-11-12 – publikace fokusu a herní stůl B/C
+
+Oprava fokusu je v commitu `af2d610edb484a9647c3a77cbe2d3d8fee8084bd`, pushnutá do pracovní větve `feature/d5-d7-story-completion` i do existující publikační větve `feature/m4-blackwater-scenario-design`. [CI a deploy](https://github.com/DreddyCZE/kdyz-spi-hlubiny/actions/runs/43176068497) jsou úspěšné. Živý manifest potvrdil root `932c920e8f5c386f5d45f79a269588f3caf2377b` (sloučený PR #22) a preview `af2d610`. Ostatní rozpracované dokumentační změny byly zachovány.
+
+Implementace schváleného směru B/C je v commitu `a8350d0`: dominantní mapa, kompaktní postava se správnými limity HP/SAN, výbava mimo příběh, ilustrované karty a souboj, společná lišta fází a animace prvního hodu/přehodu i boje. Přehled mýtu zobrazuje skutečně dosažené hodiny po konci kola. Mobil má rychlé odkazy mezi mapou, příběhem a výbavou. Engine, pravidla, schéma save i public prototypy zůstávají beze změny.
+
+Finální lokální ověření UI: **256/256 unit testů, 102/102 Chromium E2E** (4,6 minuty), build a diff check. Sedm nových regresí ověřuje poměr mapy, limity postavy, mobilní navigaci bez změny save, přehled mýtu bez opakování přechodu, zakrytí kostek při prvním hodu a přehodu, blokaci duplicitní bojové výměny a reload i reduced motion. Screenshoty 320/390/1440 px jsou v lokálním Playwright reportu; desktop a 320 px byly také vizuálně prohlédnuty. Původní audit a omezení schopnosti okultistky jsou zachované v dokumentaci. Lidský playtest, rozhodnutí o časové schopnosti, širší redakce příběhu a volitelné audio zůstávají otevřené.
+
+## Navázání 2026-11-12 – opětovné ověření rozpracovaných změn
+
+Oprava fokusu hádanky i doplněná dokumentace auditu zůstávají připravené v pracovní větvi. Znovu prošlo **256/256 unit testů, 95/95 Chromium E2E** (3,1 minuty), `npm run build` a `git diff --check`. Chromium ověřilo zachování fokusu po přesunu symbolu, přechod na opačný směr na kraji řady, dokončení hádanky a reload i všechny tři vítězné konce. Simulace vyvážení se při tomto navázání znovu nespouštěly; jejich poslední ověření je zaznamenáno níže. Commit, push ani nasazení neproběhly.
+
+## Navázání 2026-11-11 – klávesnice a ověření auditu
+
+Dokončena kontrola rozpracované opravy fokusu hádanky Tři znamení zvonu. Po přesunu symbolu se fokus obnoví na jeho tlačítku; pokud se zvolený směr na kraji deaktivuje, přejde na dostupný opačný směr. Regresní Chromium test ověřuje obě situace i dokončení a reload hádanky. Pravidla a formát save se nemění.
+
+Aktuální lokální ověření: **256/256 unit testů, 95/95 Chromium E2E** (3,3 minuty), úspěšný build a `git diff --check`. Znovu proběhlo všech **4 200 simulací** pro seedy 42 a 1000; součty aktivací vybavení, schopností, přehodů, bojových výměn a alternativ hádanek přesně odpovídají doplněné tabulce auditu. Omezení časové schopnosti okultistky je popsáno v pravidlech i otevřených problémech. Commit ani push tohoto navázání neproběhl.
+
 ## Vydávaná obsahová verze a ověření
 
 GitHub znovu ověřen 10. 11. 2026. Integrační PR #19 sloučen do main jako `6a2efdf3729fdab98e4b978b341f0658e71c388a`; obsahuje celý PR #21 (9462585). Před sloučením přesný integrační HEAD prošel `npm ci`, 232/232 unit testy, buildem, 85/85 Chromium E2E a diff checkem. Oba původní workflow PR #19 byly zelené. Draft #20 byl po porovnání všech pěti souborů uzavřen jako redundantní s vysvětlením; větev ani historii nemažeme.
@@ -17,6 +41,7 @@ Aktuální [pravidla bez spoilerů](PLAYING-BLACKWATER.md), [pravidlová rozhodn
 ### Otevřené problémy
 
 - **P2 – lidský playtest:** změřit délku partie, porozumění cílům a hospodaření se SAN. Cíl 60–90 minut zatím není ověřen lidským hraním. Zejména námořník má v soubojových strategiích vyšší riziko konce na SAN.
+- **P2 – aktivní časová schopnost okultistky:** snížení ukazatele funguje a ukládá se, ale pevný limit dvanácti kol ani plánované milníky se tím neprodlužují. Její strategický přínos je proto v tomto scénáři omezený. Změna termínu porážky nebo nahrazení schopnosti vyžaduje samostatné pravidlové rozhodnutí; bezplatný pasivní přehod zůstává užitečný nezávisle na této otázce.
 - **P2 – redakce obsahu:** dále rozšířit smyslové detaily a rozmanitost následků; současná implementace není dokončením všech dlouhodobých příběhových návrhů.
 - **P3 – animace/audio:** PR #16 zůstává oddělený draft se starým zapojením hodu. Audio větev neobsahuje vlastní implementaci. Nepřebírat starší app přes aktuální potvrzovaný hod.
 - **Záměrné hranice:** žádný online multiplayer, více plnohodnotných současných postav ani návrat při 0 HP/SAN. Rozhodnutí o vyřazení je v designu. Známá blokující chyba veřejného průchodu nebyla nalezena.

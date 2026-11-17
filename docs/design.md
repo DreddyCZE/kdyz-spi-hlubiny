@@ -77,6 +77,8 @@ Save zůstává ve scénářové obálce verze 1 s aditivními volitelnými poli
 
 ## Vyřazení a návrat – rozhodnutí auditu 2026-11-10
 
+Časová aktivní schopnost okultistky zachovává existující snížení scénářového ukazatele. Audit upozorňuje, že nastavení milníků a pevný maxRounds=12 tím neodsouvá konečnou porážku. Automatické prodloužení by změnilo závěr scénáře i validaci uložených kol; nahrazení schopnosti jiným efektem by změnilo její dosavadní pravidlo. Tato integrace proto pouze přesně popisuje omezení a nechává rozhodnutí pro samostatné vyvážení; pasivní bezplatný přehod je implementovaný bez závislosti na hodinách.
+
 Nula HP nebo SAN zůstává konečnou porážkou. Scénář má jediného aktivního vyšetřovatele a nepovinného pomocníka bez vlastní tahové ekonomiky. Automatické oživení by změnilo význam posledního zranění, spotřebních předmětů i námořníkovy ochrany; nynější pravidla žádný zdroj návratu ani cenu nedefinují. Návrat proto v této integraci nepřidáváme. Případný budoucí návrh musí určit jednorázový zdroj záchrany, cenu v čase a následky, ověřit oba druhy vyřazení a řešit save. Současný epilog porážky a nová hra umožňují uzavřít neúspěšný příběh bez neřešitelného stavu.
 
 ## Audit atmosférických větví

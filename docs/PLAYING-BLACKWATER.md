@@ -12,6 +12,8 @@ Jeden hráč vede jednoho vyšetřovatele Blackwaterem. Hra používá příběh
 
 Základní atributy jsou společné: SÍ 1, OB 2, VĚ 3, VŮ 2, VN 2. Žádná postava není podmínkou dokončení. Pasivní vlastnosti působí automaticky a jejich využití přetrvá obnovení stránky.
 
+Aktivní schopnost okultistky snižuje aktuální ukazatel zvonu; pevný limit dvanácti kol a naplánované milníky tím neprodlužuje. Její strategický přínos v současné verzi je omezený a čeká na samostatné vyvážení.
+
 ## Kolo a karta
 
 Scénář má 12 kol po 3 AP. Přesun po mapě stojí 1 AP a respektuje sousední dostupné lokace. Dobrat kartu je zdarma. Nesplněné podmíněné karty se odkládají, vyřešené jednorázové karty se neobnovují. Cena postupu je vidět předem; platí se společně s následkem až při vyhodnocení. Pokud nemáš na postup AP, můžeš změnit kolo nebo zvolit jiný dostupný postup.

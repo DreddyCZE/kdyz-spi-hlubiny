@@ -31,5 +31,5 @@ test('unavailable storage leaves prologue controls usable',async({page})=>{
  await guide.getByRole('button',{name:'Vstoupit do Blackwateru',exact:true}).click();
  await expect(guide).toContainText('Koho vyšleš do mlhy?');
  await page.getByRole('button',{name:/^Detektiv · HP/}).click();
- await expect(page.getByRole('button',{name:'Dobrat kartu',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'Prozkoumat lokaci',exact:true})).toBeEnabled();
 });

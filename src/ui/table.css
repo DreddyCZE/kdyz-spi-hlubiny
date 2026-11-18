@@ -32,6 +32,16 @@ main { max-width: 1760px; }
 .deck-summary { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 4px 12px; border: 0; border-bottom: 1px solid var(--color-brass); border-radius: 0; padding: 0 0 14px; }
 .deck-summary h3 { font-size: 1rem; }
 .deck-summary p { margin: 0; font-size: .75rem; }
+.deck-summary.deck-stack { position: relative; isolation: isolate; padding: 16px; margin: 8px 4px 24px; border: 1px solid var(--color-brass); background: var(--texture-paper); box-shadow: 3px 4px 0 var(--color-paper),4px 5px 0 var(--color-frame),6px 8px 0 var(--color-paper),7px 9px 0 var(--color-frame); }
+.deck-stack #draw { white-space: normal; max-width: 180px; }
+.result-changes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin-top: 14px; }
+.result-changes li { padding: 8px 12px; border: 1px solid var(--color-frame); background: var(--color-paper); color: var(--color-paper-ink); font: 700 .9rem var(--font-label); }
+.reveal.show { border: 2px solid var(--color-brass); padding: 16px; }
+.reveal.result-accepted { animation: result-accept .4s ease-out; }
+@keyframes result-accept { from { box-shadow: 0 0 0 5px var(--color-brass); } to { box-shadow: 0 0 0 0 transparent; } }
+.myth-event-card { border: 2px solid var(--color-brass); box-shadow: var(--shadow-piece); }
+.myth-impact { padding-block: 10px; border-block: 1px solid var(--color-brass); font-weight: bold; }
+@media(prefers-reduced-motion:reduce) { .reveal.result-accepted { animation: none; } }
 #deckDescription { grid-column: 1/-1; }
 #deckCounts { grid-column: 1; }
 #draw { grid-column: 2; grid-row: 1/4; font-size: .85rem; }

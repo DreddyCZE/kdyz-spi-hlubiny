@@ -37,6 +37,7 @@ export function createTablePresentation() {
       const puzzleLink=document.querySelector('[data-phase="puzzle"]');
       puzzleLink.hidden=!scene.puzzles.length;
       mythNotice.hidden=!myth;
+      mythNotice.classList.toggle('myth-event-card',Boolean(fog));
       mythNotice.replaceChildren();
       if(myth){
         mythNotice.style.setProperty('--myth-art',`url("${new URL(blackwaterImage('myths',fog?'myth-fog':'myth-bell'),document.baseURI).href}")`);
@@ -49,7 +50,8 @@ export function createTablePresentation() {
           const art=document.createElement('img');art.src=blackwaterImage('myths','myth-fog');art.alt='Mlha nad opuštěnými moly';art.className='myth-card-art';
           const eventTitle=document.createElement('h3');eventTitle.textContent=fog.title;
           const warning=document.createElement('p');warning.textContent=fog.text;
-          mythNotice.prepend(art,eventTitle,warning);
+          const impact=document.createElement('p');impact.className='myth-impact';impact.textContent=`Místo dopadu: ${fog.locationName||fog.locationId} · Termín: konec ${fog.dueRound}. kola`;
+          mythNotice.prepend(art,eventTitle,impact,warning);
         }
       }
       const key=[phase,locationId,cardId,scene.combat?.exchange,Boolean(scene.pendingTest),Boolean(scene.ending)].join(':');

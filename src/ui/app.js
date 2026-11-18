@@ -2,6 +2,7 @@ import {enemies} from '../engine/combat.js';
 import {renderRules} from './rules.js';
 import {createOnboarding} from './onboarding.js';
 import {createTablePresentation} from './table.js';
+import {createResultReceipt} from './result-changes.js';
 import {createCombatDialog} from './combat-dialog.js';
 import {investigators} from '../engine/scenario-investigators.js';
 import { scenarioRegistry } from '../data/scenario-registry.js';
@@ -44,6 +45,9 @@ document.getElementById('roundLimit').textContent=legacyMode?'7':String(activeSc
 storage=protectedSaveStorage(storage,legacyMode?SAVE_KEY:scenarioSaveKey(activeScenario));
 const freshSession=()=>legacyMode?{game:newState(content),scenario:{}}:newScenarioSession(activeScenario,content);
 let session=legacyMode?{game:loadLegacy(storage,content),scenario:{}}:loadScenarioSession(storage,activeScenario,content),state=session.game,rolling=false,timer;
+let receiptStorage;try{receiptStorage=window.sessionStorage;}catch{/* Optional UI cache. */}
+const resultReceipt=createResultReceipt(receiptStorage,'hlubiny-result-view-'+(legacyMode?'legacy':activeScenario.id));
+let receipt=resultReceipt.read(state),freshResult=false;
 function scenarioSessionTransition(s,action,def,data){
  if(!legacyMode)return scenarioTransition(s,action,def,data);
  const next=legacyTransition(s.game,{...action,type:action.type==='startTest'?'resolve':action.type},data);
@@ -75,6 +79,7 @@ function dispatch(action){
   if(rolling)return;
   const next=scenarioSessionTransition(session,action,activeScenario,content);
   if(next===session)return;
+  if(['acceptTest','resolve'].includes(action.type)&&next.game.result){receipt=resultReceipt.record(state,next.game);freshResult=true;}
   tablePresentation.clear();session=next;state=session.game;
   if(action.type==='endRound'&&!legacyMode&&!state.ended&&!session.scenario.endingId){
     const scene=scenarioSessionView(session,activeScenario,content);tablePresentation.showMyth(state.round,scene.clocks);
@@ -101,6 +106,7 @@ function render(){
   const combatFocus=focused?.dataset.combatMove;
   for(const k of ['round','threat','ap','hp','san'])$(k).textContent=combatBeforeRoll&&['hp','san'].includes(k)?combatBeforeRoll[k]:state[k];
   const scene=scenarioSessionView(session,activeScenario,content);
+  if(scene.mythEvents)scene.mythEvents=scene.mythEvents.map(e=>({...e,locationName:locations.find(l=>l.id===e.locationId)?.name||e.locationId}));
   if(combatBeforeRoll)scene.combat=combatBeforeRoll.combat;
   if(rolling)scene.canAct=false;
   for(const id of ['die1','die2'])$(id).classList.toggle('rolling',rolling);
@@ -163,13 +169,16 @@ function render(){
   $('heroStats').textContent=`HP ${combatBeforeRoll?.hp??state.hp}/${scene.investigator?.hp||6} · SAN ${combatBeforeRoll?.san??state.san}/${scene.investigator?.san||8} · ${Object.entries(attributes).map(([k,v])=>`${k} ${v}`).join(' · ')}`;
   const investigation=investigationView(state,content);
   $('inventory').textContent=[...state.inventory.map(id=>rewardNames[id]),...investigation.evidence.filter(e=>!e.carriedBy.length).map(e=>e.name)].join(' · ')||'Zatím nic.';
-  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic');
+  journal.render(investigation,rolling||!scene.canAct,rolling?[]:state.log,!legacyMode&&activeScenario.rules.deductionMode==='automatic',scene.mythEvents||[]);
   const loc=locations.find(l=>l.id===state.locationId),card=currentCard(state,content),choice=selectedChoice(state,card);
   const result=visibleResult(state,content),deck=explorationView(state,content);
   tablePresentation.render({scene,cardId:card?.id,locationId:state.locationId,legacy:legacyMode,rolling});
   $('deckName').textContent=deck.name;
   $('deckDescription').textContent=deck.description;
   $('deckCounts').textContent=`Dostupné: ${deck.available} · Odložené: ${deck.deferred} · Vyřešené: ${deck.consumed}`;
+  $('draw').textContent=legacyMode?'Dobrat kartu':'Prozkoumat lokaci';
+  document.querySelector('.deck-summary').classList.toggle('deck-stack',!legacyMode&&!card);
+  if(!legacyMode)$('deckDescription').textContent=`${locations.find(l=>l.id===state.locationId).name} · ${card?'Prozkoumaná karta je otevřená.':deck.canDraw?'Lokace nabízí další průzkum. Dobrat kartu je zdarma.':'Nyní zde není dostupná karta. Zkus jiné místo nebo další kolo.'}`;
   $('draw').hidden=Boolean(card);$('draw').disabled=rolling||!!pending||!scene.canAct||!deck.canDraw;
   $('placeTitle').textContent=loc.name;$('placeDesc').textContent=loc.description;
   const locationArt=blackwaterImage('locations',loc.id);
@@ -199,7 +208,15 @@ function render(){
     const grade=document.createElement('strong');grade.textContent=labels[result.key];
     const consequence=document.createElement('p');consequence.textContent=result.text;
     $('reveal').append(grade,document.createTextNode(' — '),consequence);
+    const matching=receipt?.identity===JSON.stringify([state.revision,state.result])?receipt:resultReceipt.read(state);
+    if(matching){
+      const summary=document.createElement('ul');summary.className='result-changes';summary.setAttribute('aria-label','Skutečné změny');
+      for(const change of matching.changes){const item=document.createElement('li');item.textContent=change;summary.append(item);}
+      if(!matching.changes.length){const item=document.createElement('li');item.textContent='Bez změny ukazatelů a získaných stop.';summary.append(item);}
+      $('reveal').append(summary);
+    }
   }
+  $('reveal').classList.toggle('result-accepted',freshResult);freshResult=false;
   if(result&&!rolling)$('reveal').dataset.outcome=result.key;else delete $('reveal').dataset.outcome;
   if(rolling){$('die1').textContent='?';$('die2').textContent='?';$('sum').textContent='Kostky se kutálejí…';}
   else if(pending){
@@ -400,7 +417,7 @@ $('endRound').onclick=()=>dispatch({type:'endRound',revision:state.revision});
 $('reset').onclick=()=>{
   if(!confirm('Opravdu začít novou hru?'))return;
   clearTimeout(timer);rolling=false;combatBeforeRoll=null;tablePresentation.clear();for(const id of ['die1','die2'])$(id).classList.remove('rolling');
-  session=freshSession();state=session.game;puzzleDrafts.clear();onboarding?.restart();persist();render();
+  resultReceipt.clear();receipt=null;session=freshSession();state=session.game;puzzleDrafts.clear();onboarding?.restart();persist();render();
 };
 render();
 

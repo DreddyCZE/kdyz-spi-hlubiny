@@ -81,6 +81,8 @@ export function createJournal(anchor, onDeduce, {unified=false} = {}) {
   const available = make('div', 'journal-list'); available.id = 'journal-available';
   panels.get('deductions').append(availableHeading, available);
   const footer = make('div', 'journal-footer');
+  const myths=make('section','journal-myths');myths.id='journal-myths';
+  panels.get('chronicle').append(myths);
   const button = make('button', 'primary', 'Vyhodnotit důkazy'); button.id = 'deduce'; button.type = 'button'; button.onclick = onDeduce;
   const message = make('p', 'journal-status'); message.id = 'journal-status'; message.setAttribute('role', 'status');
   footer.append(button, message);
@@ -101,7 +103,11 @@ export function createJournal(anchor, onDeduce, {unified=false} = {}) {
   }
   return {
     select,
-    render(view, disabled, log = [], automatic = false) {
+    render(view, disabled, log = [], automatic = false, mythEvents = []) {
+      myths.replaceChildren(make('h4','','Vyhodnocené mýty'));
+      const completed=mythEvents.filter(e=>['hit','avoided'].includes(e.status));
+      if(!completed.length)myths.append(make('p','journal-empty','Zatím nebyl vyhodnocen žádný mýtus.'));
+      for(const event of completed){const item=make('article','journal-entry');item.append(make('strong','',event.title),make('p','',event.text));myths.append(item);}
       const model = journalModel(view, log);
       for (const [key, label, empty] of sections) {
         const target = section.querySelector('#journal-' + key);

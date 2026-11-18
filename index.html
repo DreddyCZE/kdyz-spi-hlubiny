@@ -15,7 +15,7 @@
 <main>
 <section id="caseSetup" class="case-setup" hidden aria-labelledby="caseTitle">
 <header class="case-heading"><h1 id="caseTitle">Když spí hlubiny</h1><p id="caseTitleNote">Blackwater · listopad 1926</p></header>
-<div class="case-brief"><label for="caseScenario">Scénář</label><select id="caseScenario"></select><div id="caseSynopsis"></div><div id="caseGuide"></div></div>
+<div class="case-brief"><label for="caseScenario">Scénář</label><select id="caseScenario"></select><div id="caseSynopsis"></div><div id="caseGuide"></div><button type="button" data-panel="rules-panel">Jak se hraje</button></div>
 <section class="case-roster" aria-labelledby="rosterTitle"><h2 id="rosterTitle">Vyber vyšetřovatele</h2><div id="caseRoster"></div></section>
 </section>
 <div id="gameTable">
@@ -119,6 +119,7 @@
 </footer>
 <p id="saveStatus" role="status">
 </p>
+</div>
 <dialog id="details" aria-label="Přehled vyšetřování">
 <button id="closeDetails" class="close">Zavřít přehled</button>
 <section id="investigator" class="detail-panel" hidden>
@@ -140,7 +141,6 @@
 </section>
 <section id="rules-panel" class="detail-panel" hidden></section>
 </dialog>
-</div>
 </main>
 <script type="module" src="./src/ui/app.js">
 </script>

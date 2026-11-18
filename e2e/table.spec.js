@@ -97,6 +97,8 @@ test('reset během hodu zruší animaci a zachová nový save',async({page})=>{
   await page.clock.install();
   await page.locator('#roll').click();
   await expect(page.locator('#reveal')).toBeEmpty();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.roll-dialog')).toBeHidden();
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#reset').click();
   await page.clock.fastForward(1100);

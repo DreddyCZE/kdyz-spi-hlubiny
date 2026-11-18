@@ -63,7 +63,7 @@ if(!legacyMode)createCasebook(scenarioRegistry,activeScenarioPack,investigators,
  dispatch({type:'selectInvestigator',revision:state.revision,investigatorId});
  $('cardTitle').focus({preventScroll:true});window.scrollTo(0,0);
 });
-if(onboarding){const reopen=document.createElement('button');reopen.type='button';reopen.textContent='Průvodce hrou';reopen.onclick=()=>onboarding.reopen();document.querySelector('[data-panel="rules-panel"]').after(reopen);}
+if(onboarding){const reopen=document.createElement('button');reopen.type='button';reopen.textContent='Průvodce hrou';reopen.onclick=()=>onboarding.reopen();document.querySelector('.investigator-bar [data-panel="rules-panel"]').after(reopen);}
 const investigatorAbility=document.createElement('section');investigatorAbility.className='scenario-feature';investigatorAbility.setAttribute('aria-label','Schopnost vyšetřovatele');$('fieldKit').append(investigatorAbility);
 const currentAim=document.createElement('p');currentAim.className='current-aim';currentAim.setAttribute('aria-label','Aktuální směr pátrání');$('placeDesc').after(currentAim);
 const mapThreat=document.createElement('p');mapThreat.id='mapThreat';mapThreat.className='map-threat';mapThreat.setAttribute('role','status');$('places').before(mapThreat);

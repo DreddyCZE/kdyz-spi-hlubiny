@@ -163,7 +163,7 @@ test('reload během animace obnoví nepotvrzený hod bez předčasného odhalen�
   await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
   expect(await page.evaluate(key=>localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
   await page.getByRole('button',{name:'Přijmout výsledek'}).click();
-  await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
+  await expect(page.locator('#reveal')).toContainText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#roll')).toBeDisabled();

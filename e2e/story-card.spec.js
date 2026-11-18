@@ -52,7 +52,7 @@ test('story art and outcome placeholders never disclose consequence text before 
   await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeVisible();
   await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   await expect(page.locator('#outcomes')).toBeHidden();
-  await expect(page.locator('#reveal')).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
+  await expect(page.locator('#reveal')).toContainText('Úspěch — Najdeš deník zmizelého rybáře.');
   for (const text of hiddenTexts.filter(t => t !== 'Najdeš deník zmizelého rybáře.')) {
     expect(await page.locator('body').innerHTML()).not.toContain(text);
   }

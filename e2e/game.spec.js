@@ -35,12 +35,12 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await page.getByRole('button',{name:'Přijmout výsledek'}).click();
   const reveal = page.locator('#reveal');
   await expect(reveal).toBeVisible();
-  await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
+  await expect(reveal).toContainText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#sum')).toHaveText('4 + 4 + 2 + 0 = 10 proti obtížnosti 8');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   const saved = await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario));
   await page.reload();
-  await expect(reveal).toHaveText('Úspěch — Najdeš deník zmizelého rybáře.');
+  await expect(reveal).toContainText('Úspěch — Najdeš deník zmizelého rybáře.');
   await expect(page.locator('#ap')).toHaveText('2');
   await expect(page.locator('#inventory')).toHaveText('Deník');
   await expect(page.locator('#roll')).toBeDisabled();
@@ -80,7 +80,7 @@ for (const { label, random, reward } of [
     await expect(copy).toBeEnabled();
     await copy.click();
     await page.getByRole('button', { name: 'Provést rozhodnutí', exact: true }).click();
-    await expect(page.locator('#reveal')).toHaveText('Úspěch — Porovnáním s deníkem získáš čitelný opis poznámky.');
+    await expect(page.locator('#reveal')).toContainText('Úspěch — Porovnáním s deníkem získáš čitelný opis poznámky.');
     await expect(page.locator('#inventory')).toContainText('Opis poznámky');
     await expect(page.locator('#ap')).toHaveText('0');
     await expect(page.locator('#roll')).toBeDisabled();

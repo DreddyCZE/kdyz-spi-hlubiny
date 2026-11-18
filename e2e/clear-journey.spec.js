@@ -1,0 +1,43 @@
+import {test,expect} from '@playwright/test';
+const key='hlubiny-scenario-v1-blackwater-bells';
+const saved=page=>page.evaluate(k=>localStorage.getItem(k),key);
+for(const width of [320,390,1440]){
+ test(`clear exploration, committed result and myth journey ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  await page.addInitScript(()=>{Math.random=()=>.5;});await page.goto('./');
+  await page.getByRole('button',{name:/^Detektiv · HP/}).click();
+  await expect(page.locator('.deck-stack')).toBeVisible();
+  await expect(page.locator('#deckDescription')).toContainText('Přístav');
+  const explore=page.getByRole('button',{name:'Prozkoumat lokaci',exact:true});
+  await page.screenshot({path:testInfo.outputPath(`deck-${width}.png`),fullPage:true});
+  await explore.focus();await page.keyboard.press('Enter');
+  await expect(page.locator('#choices button').first()).toContainText('AP');
+  await page.clock.install();await page.clock.pauseAt(new Date());
+  await page.locator('#roll').click();await expect(page.locator('#die1')).toHaveText('?');
+  const pending=await saved(page);await page.reload();expect(await saved(page)).toBe(pending);
+  await expect(page.getByRole('button',{name:'Přijmout výsledek'})).toBeEnabled();
+  await expect(page.locator('#reveal')).toBeEmpty();
+  await page.getByRole('button',{name:'Přijmout výsledek'}).focus();await page.keyboard.press('Enter');
+  await expect(page.locator('.result-changes')).toContainText('−1 AP');
+  await expect(page.locator('.result-changes')).toContainText('Nová stopa');
+  const result=await saved(page);await page.reload();expect(await saved(page)).toBe(result);
+  await expect(page.locator('.result-changes')).toContainText('−1 AP');
+  await expect(page.locator('#reveal')).not.toHaveClass(/result-accepted/);
+  await page.screenshot({path:testInfo.outputPath(`result-${width}.png`),fullPage:true});
+  await page.locator('#next').click();await page.locator('[data-location-id="location-1"]').click();
+  await expect(page.locator('#deckDescription')).toContainText('Staré město');
+  await expect(explore).toBeEnabled();
+  await page.locator('#endRound').click();
+  await expect(page.locator('.myth-impact')).toContainText('Přístav');
+  await expect(page.locator('.myth-impact')).toContainText('konec 2. kola');
+  await page.getByRole('button',{name:'Zpět k průzkumu',exact:true}).focus();await page.keyboard.press('Enter');
+  await expect(page.locator('#mythNotice')).toBeHidden();
+  await expect(page.locator('[data-location-id="location-0"]')).toHaveClass(/threatened/);
+  await expect(page.locator('#mapThreat')).toContainText('ztratíš 1 SAN');
+  await page.locator('#endRound').click();
+  await page.locator('#openJournal').click();await page.getByRole('tab',{name:/^Kronika/}).click();
+  await expect(page.locator('#journal-myths')).toContainText('Mlha tě minula');
+  await page.keyboard.press('Escape');await expect(page.locator('#openJournal')).toBeFocused();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ });
+}

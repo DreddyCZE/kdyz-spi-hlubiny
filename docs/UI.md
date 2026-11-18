@@ -1,5 +1,13 @@
 # Digitální herní stůl – M3.0.2a
 
+## Čitelný průchod B/C – 2026-11-18
+
+Základ je nasazený commit `1ac4a02`. Balíček neotevřené lokace má podobu malého stohu a akci **Prozkoumat lokaci**. Přehled uvádí skutečnou aktuální lokaci a dostupnost další karty; dobraná karta zůstává vedle mapy a ceny voleb jsou přímo v tlačítkách.
+
+Po potvrzení hodu se pod dosaženým výsledkem zobrazí rozdíl skutečného stavu před a po přechodu: HP/SAN/AP/hrozba a nově získané stopy, znalosti či výbava. [result-changes.js](../src/ui/result-changes.js) neodvozuje efekty z textu ani obsahových definic. Volitelná pomocná cache v `sessionStorage`, oddělená od herního save, uchová souhrn pouze pro odpovídající revizi a výsledek. Její chyba neovlivní hru. Reload neprovádí akci ani neopakuje zvýrazňovací animaci; starší výsledek bez pomocného souhrnu zůstane čitelný bez domýšlení změn. Formát herního ukládání ani pravidla se nemění.
+
+Mlha se zvedá má vlastní ilustrovanou kartu s výslovným místem dopadu a termínem. Zavření nezmění uložené ohrožení ani značku a text u mapy. Kronika obsahuje samostatný přehled již vyhodnocených mýtů včetně dosaženého následku. Nový [clear-journey.spec.js](../e2e/clear-journey.spec.js) ověřuje celý průchod na 320/390/1440 px, klávesnici, reload během hodu i po potvrzení a zachované varování po zavření mýtu.
+
 ## Živý mýtus – Mlha se zvedá (2026-11-17)
 
 Existující fáze Mýtus po 1. kole ukáže ilustrovanou kartu Mlha se zvedá. Přístav dostane výstražný obrys a značku; text u mapy i karta výslovně uvádějí termín při ukončení 2. kola, ztrátu 1 SAN a možnost odejít běžným přesunem za 1 AP. Varování u mapy přetrvá zavření karty a reload. Po reloadu pending události se znovu otevře informační karta bez herního přechodu. Po vyhodnocení značka zmizí; varování i výsledek jsou v Kronice Deníku.

@@ -10,11 +10,16 @@ const old=blackwaterTransition(newBlackwaterGame(),{type:'selectInvestigator',in
 const initial=newScenarioSession(pack.scenario,pack.content);
 const scenario=scenarioSessionTransition(initial,{type:'endRound',revision:initial.game.revision},pack.scenario,pack.content);
 const values=[legacy,old,scenario].map(v=>JSON.stringify(v));
+async function showSaveNotice(page){
+ const summary=page.locator('.case-archive > summary');
+ if(await summary.isVisible())await summary.click();
+}
 async function seed(page,entries){await page.addInitScript(entries=>{if(!sessionStorage.getItem('save-fixture')){for(const [key,value] of entries)localStorage.setItem(key,value);sessionStorage.setItem('save-fixture','yes');}},entries);}
 const chooseScenario=async page=>{const b=page.getByRole('button',{name:/^Detektiv · HP 6 \/ SAN 8/});if(await b.isVisible())await b.click();};
 const saved=page=>page.evaluate(keys=>keys.map(k=>localStorage.getItem(k)),keys);
 for(const selected of [[],[0],[1],[2],[0,1,2]])test('release entry safely handles save formats '+JSON.stringify(selected),async({page})=>{
  await seed(page,selected.map(i=>[keys[i],values[i]]));await page.goto('/site/index.html');
+ await showSaveNotice(page);
  const before=await saved(page),panel=page.locator('#save-compatibility');await expect(panel).toBeVisible();
  for(const i of selected)await expect(panel).toContainText(['Původní hra: nalezena','Ilustrovaný Blackwater: nalezena','Nový scénář: nalezena'][i]);
  await chooseScenario(page);await page.locator('#endRound').click();const after=await saved(page);
@@ -23,13 +28,13 @@ for(const selected of [[],[0],[1],[2],[0,1,2]])test('release entry safely handle
  await page.goto('/site/preview/index.html');expect(await saved(page)).toEqual(after);await expect(page.locator('#round')).toHaveText(String(JSON.parse(after[2]).game.round));
 });
 test('legacy continuation preserves original rules and other two saves',async({page})=>{
- await seed(page,keys.map((k,i)=>[k,values[i]]));await page.goto('/site/index.html');await page.getByRole('link',{name:'Pokračovat: Původní hra',exact:true}).click();
+ await seed(page,keys.map((k,i)=>[k,values[i]]));await page.goto('/site/index.html');await showSaveNotice(page);await page.getByRole('link',{name:'Pokračovat: Původní hra',exact:true}).click();
  await expect(page.locator('#round')).toHaveText('2');await expect(page.locator('#roundLimit')).toHaveText('7');await expect(page.locator('#scenario-companions')).toBeEmpty();
  await page.locator('#endRound').click();const after=await saved(page);expect(JSON.parse(after[0]).round).toBe(3);expect(JSON.parse(after[0]).ritual).toBe(3);expect(after.slice(1)).toEqual(values.slice(1));
  await page.reload();expect(await saved(page)).toEqual(after);await expect(page.locator('#round')).toHaveText('3');
 });
 test('old illustrated game continues without migrating or overwriting other saves',async({page})=>{
- await seed(page,keys.map((k,i)=>[k,values[i]]));await page.goto('/site/preview/index.html');await page.getByRole('link',{name:'Pokračovat: Ilustrovaný Blackwater',exact:true}).click();await expect(page.locator('#game')).toBeVisible();
+ await seed(page,keys.map((k,i)=>[k,values[i]]));await page.goto('/site/preview/index.html');await showSaveNotice(page);await page.getByRole('link',{name:'Pokračovat: Ilustrovaný Blackwater',exact:true}).click();await expect(page.locator('#game')).toBeVisible();
  await page.locator('#endRound').click();await expect(page.locator('#mythDialog')).toBeVisible();const after=await saved(page);expect(JSON.parse(after[1]).game.round).toBe(2);expect(after[0]).toBe(values[0]);expect(after[2]).toBe(values[2]);
  await page.reload();expect(await saved(page)).toEqual(after);
 });
@@ -44,7 +49,7 @@ for(const mode of ['scenario','legacy','blackwater'])test('corrupt '+mode+' data
 });
 for(const path of ['/site/index.html','/site/preview/index.html','/site/preview/blackwater.html'])test('combined Pages artifact serves '+path,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
- await page.goto(path);await expect(page.locator('#save-compatibility')).toBeVisible();
+ await page.goto(path);await showSaveNotice(page);await expect(page.locator('#save-compatibility')).toBeVisible();
  if(path.endsWith('blackwater.html')){await page.getByRole('button',{name:/^Detektiv /}).click();await expect(page.locator('#game')).toBeVisible();}else{await chooseScenario(page);await page.locator('#draw').click();await expect(page.locator('#choices button').first()).toBeVisible();}
  const imagePaths=await page.evaluate(()=>[...document.styleSheets].length);expect(imagePaths).toBeGreaterThan(0);expect(errors).toEqual([]);
  const manifest=await page.request.get('/site/pages-build.json');expect(manifest.ok()).toBe(true);expect((await manifest.json()).rootSha).toMatch(/^[0-9a-f]{40}$/);

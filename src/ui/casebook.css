@@ -1,0 +1,83 @@
+/* Opening dossier and compact play surfaces for the existing Blackwater table. */
+.case-setup { max-width: 1250px; margin: 0 auto 24px; }
+.case-heading { min-height: 230px; display: grid; align-content: end; padding: clamp(20px,5vw,56px); background: linear-gradient(90deg,#091815f5,#09181544),url('../assets/blackwater/harbor.webp') center 55%/cover; border: var(--frame); color: var(--color-brass-light); }
+.case-heading h1 { font-size: clamp(2.2rem,6vw,5rem); margin: 0; }
+.case-heading p { color: var(--color-ink); margin: .4rem 0 0; }
+.case-brief { margin: 16px 0; padding: clamp(16px,3vw,32px); background: var(--texture-leather); border: var(--frame); }
+.case-brief label { display: block; color: var(--color-brass-light); margin-bottom: .4rem; }
+.case-brief select { width: min(100%,28rem); color: var(--color-ink); background: var(--color-surface); border: 1px solid var(--color-brass); padding: .7rem; }
+.case-brief:has(.onboarding:not([hidden]) h2) #caseSynopsis { display: none; }
+#caseRoster { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit,minmax(min(100%,280px),1fr)); }
+.case-file { display: flex; flex-direction: column; gap: 12px; min-width: 0; background: var(--texture-paper); color: var(--color-paper-ink); padding: clamp(16px,2.5vw,26px); border: 1px solid var(--color-brass); box-shadow: inset 0 0 0 5px #79532b22,var(--shadow-piece); }
+.case-file header { display: grid; align-content: center; grid-template-columns: 84px 1fr; gap: 3px 14px; border-bottom: 1px solid #7a593d70; padding-bottom: 12px; }
+.case-file h3,.case-file p { margin: 0; }
+.case-file h3 { align-self: start; font-size: clamp(1.35rem,2.5vw,1.9rem); }
+.case-photo { width: 84px; height: 103px; object-fit: cover; object-position: center 25%; grid-row: span 2; border: 4px solid #faf0d6; box-shadow: 0 2px 5px #43302073; transform: rotate(-2deg); }
+.case-role { align-self: end; color: var(--color-wine); font: 700 .8rem var(--font-label); }
+.case-vitals,.case-attributes { display: flex; flex-wrap: wrap; gap: .4rem; }
+.case-stat { display: inline-flex; gap: .3rem; align-items: center; padding: .25rem .45rem; border: 1px solid #7a593d65; font: .75rem var(--font-label); }
+.case-icon { font-style: normal; color: var(--color-wine); }
+.case-flavor { font-style: italic; line-height: 1.5; }
+.case-notes { margin: 0 0 auto; }
+.case-notes dt { font-weight: bold; margin: .45rem 0 .15rem; }
+.case-notes dd { margin: 0; }
+.case-select { align-self: start; }
+.case-archive { margin-top: 16px; color: var(--color-muted); }
+.case-archive summary { cursor: pointer; }
+#gameTable .top { padding: 8px 14px; background: none; box-shadow: none; border: 0; }
+#gameTable .top h1 { font-size: 1.15rem; margin: 0; }
+#gameTable .top .stat { padding-block: 0; }
+#gameTable .top .stat b { font-size: 1rem; }
+.scene-rail { display: none; }
+.scene-heading { margin-bottom: .7rem; }
+.scene-heading .eyebrow { display: none; }
+.field-stats .token-icon { display: inline-grid; place-items: center; width: 26px; height: 26px; grid-row: 1/3; border-radius: 50%; background: #121a18; border: 1px solid var(--color-brass); color: var(--color-brass-light); font-size: 16px; }
+.field-stats .stat { grid-template-columns: 26px auto; column-gap: 5px; text-align: left; }
+.field-stats .value { grid-column: 2; }
+.field-stats [data-stat='hp'] .token-icon { color: var(--color-health); }
+.field-stats [data-stat='san'] .token-icon { color: var(--color-sanity); }
+.map-connections { position: absolute; inset: 0; pointer-events: none; }
+.map-connections svg { display: block; width: 100%; height: 100%; }
+.map-connections line { stroke: #fff1b9; stroke-width: 2.5px; stroke-dasharray: 5 5; filter: drop-shadow(0 1px 1px #23190e); }
+.map-investigator-token { position: absolute; z-index: 1; width: clamp(27px,3vw,42px); aspect-ratio: 1; object-fit: cover; object-position: center 25%; transform: translate(-50%,calc(-100% - 20px)); border: 2px solid #f4d28b; border-radius: 50%; box-shadow: 0 3px 9px #000c; }
+.puzzle-sequence { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: .75rem 0; }
+.puzzle-symbol { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 5px; text-align: center; background: #443326; color: #ffe8af; border: 2px solid #9b7643; border-radius: .4rem; box-shadow: inset 0 0 12px #120c08; }
+.puzzle-glyph,.puzzle-name { grid-column: 1/-1; }
+.puzzle-glyph { font-size: clamp(1.5rem,4vw,2.5rem); line-height: 1; }
+.puzzle-name { font-size: .8rem; }
+.puzzle-symbol button { min-height: 44px; padding: 4px; }
+.roll-dialog { width: min(92vw,520px); max-height: 90dvh; padding: clamp(14px,3vw,26px); color: var(--color-ink); background: var(--texture-leather); border: var(--frame); }
+.roll-dialog::backdrop { background: #031110ba; }
+.roll-dialog:modal { animation: roll-arrival .24s ease-out both; }
+.roll-back { font-size: .8rem; }
+.roll-actions button { margin: .2rem .3rem .2rem 0; }
+.roll-dialog .dicebox { margin-block: .8rem; }
+#diceCaption { color: var(--color-brass-light); font-weight: 700; }
+.die[data-face] { font-size: 0; }
+.die[data-face]::after { content: attr(data-face) / ''; font-size: 43px; line-height: 1; }
+.die.rolling { font-size: 0; animation: die-tumble .4s ease-in-out infinite; }
+.die.rolling::after { content: '⚄' / ''; font-size: 43px; }
+.die.rolling:nth-child(2)::after { content: '⚁' / ''; }
+.die.rolling:nth-child(2) { animation-delay: -.16s; animation-direction: reverse; }
+@keyframes die-tumble { 0%,100% { transform: translate(-4px,0) rotate(-12deg); } 40% { transform: translate(3px,-10px) rotate(21deg); } 73% { transform: translate(4px,0) rotate(4deg); } }
+@keyframes roll-arrival { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+.reveal p { display: inline; margin: 0; }
+.reveal.show { animation: roll-arrival .25s ease-out both; }
+@media(max-width:1100px) {
+ .places.mapped::before { display: none; }
+ .map-connections { position: relative; grid-column: 1/-1; aspect-ratio: 1.65; background: var(--map-art) center/100% 100%; border: 1px solid var(--color-brass); }
+ .map-connections svg { position: absolute; inset: 0; }
+ .map-investigator-token { transform: translate(-50%,-70%); }
+}
+@media(prefers-reduced-motion:reduce) {
+ .roll-dialog:modal,.reveal.show,.die.rolling { animation: none; }
+ .die.rolling::after { content: '?' / ''; }
+}
+
+@media(min-width:1000px) {
+ .case-setup:not([hidden]) { display: grid; grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr); align-items: stretch; gap: 18px; }
+ .case-brief { margin: 0; }
+ .case-heading { padding: 32px; }
+ .case-heading h1 { font-size: clamp(2.2rem,4.2vw,4rem); }
+ .case-roster { grid-column: 1/-1; }
+}

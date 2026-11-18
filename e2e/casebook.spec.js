@@ -1,0 +1,38 @@
+import {test,expect} from '@playwright/test';
+
+test('opening dossier leads to map and a dismissible dice check without leaking outcomes',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await page.addInitScript(()=>{Math.random=()=>0.5;});
+ await page.goto('./');
+ await expect(page.locator('#caseScenario option:checked')).toHaveText('Zvony pod přílivem');
+ await expect(page.locator('#caseRoster article')).toHaveCount(3);
+ await expect(page.locator('#caseRoster article').first()).toContainText('Počáteční výbava');
+ await expect(page.locator('#boardMap')).toBeHidden();
+ const selected=page.getByRole('button',{name:/^Detektiv · HP/});
+ await selected.click();
+ await expect(page.locator('#caseSetup')).toBeHidden();
+ await expect(page.locator('.map-investigator-token')).toBeVisible();
+ await expect(page.locator('.map-connections line')).not.toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ await page.locator('#draw').click();
+ await expect(page.locator('#outcomes')).toHaveCount(0);
+ await page.locator('#roll').click();
+ const dialog=page.locator('.roll-dialog');
+ await expect(dialog).toBeVisible();
+ const accept=page.getByRole('button',{name:'Přijmout výsledek'});
+ await expect(accept).toBeEnabled();
+ await expect(page.locator('#reveal')).toBeEmpty();
+ await dialog.getByRole('button',{name:/přehodit za 1 SAN/}).click();
+ await expect(accept).toBeEnabled();
+ await expect(dialog.locator('#diceCaption')).toHaveText('Přehod');
+ await expect(page.locator('#reveal')).toBeEmpty();
+ await page.keyboard.press('Escape');
+ await expect(dialog).toBeHidden();
+ await expect(accept).toBeFocused();
+ await accept.click();
+ await expect(page.locator('#reveal')).toContainText('Najdeš deník');
+ await page.reload();
+ await expect(page.locator('#caseSetup')).toBeHidden();
+ await expect(page.locator('#reveal')).toContainText('Najdeš deník');
+});

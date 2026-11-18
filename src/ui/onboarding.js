@@ -1,6 +1,6 @@
 import {blackwaterPrologue,blackwaterHints} from '../data/blackwater-onboarding.js';
 export const ONBOARDING_KEY='hlubiny-onboarding-v1';
-export function createOnboarding(anchor,storage,initial){
+export function createOnboarding(anchor,storage,initial,prologue=blackwaterPrologue){
  let prefs;try{prefs=JSON.parse(storage?.getItem(ONBOARDING_KEY)||'null');}catch{}
  const valid=prefs&&prefs.version===1&&typeof prefs.enabled==='boolean'&&typeof prefs.introSeen==='boolean'&&Array.isArray(prefs.seen)&&prefs.seen.every(id=>Object.hasOwn(blackwaterHints,id));
  if(!valid)prefs={version:1,enabled:initial.game.revision===0,introSeen:initial.game.revision!==0,seen:[]};
@@ -15,7 +15,7 @@ export function createOnboarding(anchor,storage,initial){
   const g=session.game;
   if(showIntro||!prefs.introSeen&&g.revision===0){
    const h=document.createElement('h2');h.textContent='Příjezd do Blackwateru';section.append(h);
-   for(const text of blackwaterPrologue){const p=document.createElement('p');p.textContent=text;section.append(p);}
+   for(const text of prologue){const p=document.createElement('p');p.textContent=text;section.append(p);}
    section.append(b('Vstoupit do Blackwateru',()=>{showIntro=false;prefs.introSeen=true;save();render();}),b('Přeskočit úvod a nápovědy',()=>{showIntro=false;prefs.enabled=false;prefs.introSeen=true;save();render();}));return;
   }
   if(scene.ending||g.ended){section.hidden=true;return;}
@@ -25,5 +25,5 @@ export function createOnboarding(anchor,storage,initial){
   const hint=blackwaterHints[id],h=document.createElement('h3'),p=document.createElement('p');h.textContent=hint.title;p.textContent=hint.text;
   section.append(h,p,b('Rozumím',()=>{prefs.introSeen=true;prefs.seen.push(id);save();render();}),b('Vypnout nápovědy',()=>{prefs.enabled=false;prefs.introSeen=true;save();render();}));
  };
- return {render,restart(){showIntro=false;prefs={version:1,enabled:true,introSeen:false,seen:[]};save();render();},reopen(){showIntro=true;prefs={version:1,enabled:true,introSeen:false,seen:[]};save();render();section.scrollIntoView({block:'nearest'});section.querySelector('button')?.focus({preventScroll:true});}};
+ return {render,placeBefore(target){if(section.parentElement!==target.parentElement)target.before(section);},restart(){showIntro=false;prefs={version:1,enabled:true,introSeen:false,seen:[]};save();render();},reopen(){showIntro=true;prefs={version:1,enabled:true,introSeen:false,seen:[]};save();render();section.scrollIntoView({block:'nearest'});section.querySelector('button')?.focus({preventScroll:true});}};
 }

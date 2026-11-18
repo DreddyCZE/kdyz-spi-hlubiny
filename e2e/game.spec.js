@@ -20,8 +20,7 @@ test('rozhodnutí → hod → jediný následek → reload bez opakované odměn
   await expect(page.locator('#cardTitle')).toHaveText('Ztracená loď');
   await expect(page.locator('#ap')).toHaveText('3');
   await expect(page.locator('#reveal')).toBeEmpty();
-  await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(6);
-  await expect(page.locator('#outcomes')).not.toContainText('Najdeš deník');
+  await expect(page.locator('#outcomes')).toHaveCount(0);
   const decision = page.getByRole('button', { name: /^Vstoupit bez váhání/ });
   await decision.click();
   await expect(decision).toHaveAttribute('aria-pressed', 'true');

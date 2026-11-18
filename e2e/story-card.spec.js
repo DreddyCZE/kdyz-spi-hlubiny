@@ -35,9 +35,7 @@ test('story art and outcome placeholders never disclose consequence text before 
   await expect(page.locator('#cardArt')).toBeVisible();
   const first = page.locator('#choices button:not([disabled])').first();
   await first.click();
-  await expect(page.locator('#outcomes')).toBeVisible();
-  await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(6);
-  await expect(page.locator('#outcomes')).not.toContainText('Najdeš deník');
+  await expect(page.locator('#outcomes')).toHaveCount(0);
   const hiddenTexts = [...new Set(cards.find(c => c.id === '0-0').choices.flatMap(c => Object.values(c.outcomes).map(o => o.text)))];
   const assertConcealed = async () => {
     const html = await page.locator('body').innerHTML();
@@ -73,7 +71,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.locator('#choices button:not([disabled])').first().click();
-    await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(6);
+    await expect(page.locator('#challenge')).not.toBeEmpty();
     await page.screenshot({ path: testInfo.outputPath(`story-card-${viewport.width}.png`), fullPage: true });
   });
 }
@@ -117,13 +115,13 @@ test('reduced motion, keyboard focus and immediate persisted result', async ({ p
   expect(await page.evaluate(key => localStorage.getItem(key),scenarioSaveKey(blackwaterScenario))).toBe(saved);
 });
 
-test('actual Old Town choice has five reachable tiers rather than six', async ({ page }) => {
+test('Old Town reveals the selected test parameters without outcome placeholders', async ({ page }) => {
   await page.goto('./');
     await page.locator('#draw').click();
   await page.locator('[data-location-id="location-1"]').click();
   await page.locator('#draw').click();
   await expect(page.locator('#cardTitle')).toHaveText('Obálka pod prahem');
-  await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(5);
+  await expect(page.locator('#outcomes')).toHaveCount(0);
   await page.locator('#choices button').nth(1).click();
-  await expect(page.locator('#outcomes .outcome-slot')).toHaveCount(6);
+  await expect(page.locator('#challenge')).not.toBeEmpty();
 });

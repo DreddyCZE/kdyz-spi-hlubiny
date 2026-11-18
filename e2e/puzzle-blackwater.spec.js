@@ -31,12 +31,12 @@ test('Blackwater bell puzzle reveals earned clues, solves by keyboard and persis
  await expect(panel).not.toContainText('První patří mrtvým');
  await panel.getByRole('button',{name:'Zobrazit nápovědu'}).click();
  await expect(panel).toContainText('První patří mrtvým');
- await panel.getByRole('button',{name:'Posunout eye doleva'}).focus();
+ await panel.getByRole('button',{name:'Posunout Oko doleva'}).focus();
  await page.keyboard.press('Enter');
- await expect(panel.getByRole('button',{name:'Posunout eye doprava'})).toBeFocused();
- await panel.getByRole('button',{name:'Posunout anchor doleva'}).focus();
+ await expect(panel.getByRole('button',{name:'Posunout Oko doprava'})).toBeFocused();
+ await panel.getByRole('button',{name:'Posunout Kotva doleva'}).focus();
  await page.keyboard.press('Enter');
- await expect(panel.getByRole('button',{name:'Posunout anchor doleva'})).toBeFocused();
+ await expect(panel.getByRole('button',{name:'Posunout Kotva doleva'})).toBeFocused();
  await panel.getByRole('button',{name:'Ověřit řešení'}).click();
  await expect(panel).toContainText('Vyřešeno');
  const key=await page.evaluate(()=>Object.keys(localStorage).find(k=>k.startsWith('hlubiny-scenario-v1-')));

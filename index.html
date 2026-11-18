@@ -8,15 +8,20 @@
 <link rel="stylesheet" href="./src/ui/journal.css">
 <link rel="stylesheet" href="./src/ui/save-compatibility.css">
 <link rel="stylesheet" href="./src/ui/table.css">
+<link rel="stylesheet" href="./src/ui/casebook.css">
 </head>
 <body>
 <a class="skip" href="#cardTitle">Přejít na příběh</a>
 <main>
+<section id="caseSetup" class="case-setup" hidden aria-labelledby="caseTitle">
+<header class="case-heading"><h1 id="caseTitle">Když spí hlubiny</h1><p id="caseTitleNote">Blackwater · listopad 1926</p></header>
+<div class="case-brief"><label for="caseScenario">Scénář</label><select id="caseScenario"></select><div id="caseSynopsis"></div><div id="caseGuide"></div></div>
+<section class="case-roster" aria-labelledby="rosterTitle"><h2 id="rosterTitle">Vyber vyšetřovatele</h2><div id="caseRoster"></div></section>
+</section>
+<div id="gameTable">
 <header class="top">
 <div>
-<div class="eyebrow">KDYŽ SPÍ HLUBINY · KAPITOLA I</div>
 <h1>Zvony pod přílivem</h1>
-<p class="edition">Blackwater · podzim 1926 · vyšetřování pod přílivem</p>
 </div>
 <div class="stats" aria-label="Stav hry">
 <span class="stat" data-stat="round" data-symbol="◷"><span class="token-icon" aria-hidden="true">◷</span><span>Kolo</span><span class="value"><b id="round"></b> / <span id="roundLimit">12</span></span></span>
@@ -24,7 +29,7 @@
 <span class="stat" data-stat="ritual" data-symbol="✦"><span class="token-icon" aria-hidden="true">✦</span><span id="clockLabel">Rituál</span><span class="value"><b id="ritual"></b></span></span>
 </div>
 </header>
-<nav class="game-modes" aria-label="Herní režimy"><span class="game-modes-current" aria-current="page">● Hlavní scénář · hádanky, dedukce a společník</span><a href="./blackwater.html">Ilustrovaný původní režim ↗</a><a href="./index.html?mode=legacy">Původní karetní hra ↗</a></nav>
+
 <nav class="table-shortcuts" aria-label="Rychlý přístup k hernímu stolu"><a href="#boardMap">Mapa</a><a href="#cardTitle">Příběh a akce</a><a href="#fieldKit">Výbava</a></nav>
 <div class="layout">
 <section class="map-panel" id="boardMap" aria-label="Mapa scénáře">
@@ -82,14 +87,12 @@
 <div id="choices">
 </div>
 </div>
-<div id="outcomes" class="outcome-preview" aria-label="Možné výsledky zkoušky" hidden>
-</div>
 <div class="actions">
 <button class="primary" id="roll">🎲 Hodit kostkami</button>
 <button id="next">Pokračovat</button>
 </div>
 <div class="dicebox" id="dicebox">
-<div>HOD KOSTKAMI</div>
+<div id="diceCaption">Hod kostkami</div>
 <div>
 <span class="die" id="die1">?</span>
 <span class="die" id="die2">?</span>
@@ -121,6 +124,7 @@
 <section id="investigator" class="detail-panel" hidden>
 <h2>Vyšetřovatel</h2>
 <div class="investigator-profile"><div id="investigatorPortrait" class="investigator-portrait" role="img" aria-label="Atmosférická ilustrace vyšetřovatelky"></div><div><strong id="investigatorName"></strong><p id="investigatorRole">Výzkumnice · hlavní scénář</p></div></div>
+<p id="investigatorFlavor" class="case-flavor" hidden></p>
 <div id="heroStats">
 </div>
 </section>
@@ -136,6 +140,7 @@
 </section>
 <section id="rules-panel" class="detail-panel" hidden></section>
 </dialog>
+</div>
 </main>
 <script type="module" src="./src/ui/app.js">
 </script>
